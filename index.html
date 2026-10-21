@@ -314,6 +314,8 @@ function artistLogin() {
       } else {
         errorDiv.style.color = "#ff4f4f";
         errorDiv.innerHTML = "⚠️ Email not verified. Please check your inbox.";
+        // FOR TESTING: If you want to bypass verification, uncomment the next line
+        // errorDiv.innerHTML = "✅ Login Successful (Testing Mode)";
         signOut(auth);
       }
     })
