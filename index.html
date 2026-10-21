@@ -106,7 +106,7 @@ let currentTrack = null;
 let currentTrackIndex = 0;
 let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; 
 
-// Updated with your EXACT new file names
+// Updated with your exact file names
 const tracks = [
   {id: '1', title:'Come', artist:'Ogunba Alex', emoji:'🌙', genre:'Afrobeats', src:'assets/Come [8a409715].mp3'},
   {id: '2', title:'Your brother', artist:'Ogunba Alex', emoji:'☁️', genre:'Hip-Hop', src:'assets/Your brother [bf867660].mp3'},
@@ -143,7 +143,7 @@ audioPlayer.src = track.src;
 audioPlayer.play().then(() => {
   document.getElementById('playPauseBtn').textContent = "⏸";
 }).catch(error => {
-  alert("Playback error: " + error.message + "\nThe browser might be blocking the brackets [] in the file name.");
+  alert("Playback error: " + error.message);
 });
 }
 
@@ -237,12 +237,37 @@ renderExplore();
 document.querySelectorAll('#exploreGrid .music-card').forEach((c,i)=>c.style.display=tracks[i].genre===g?'':'none');
 }
 
-function follow(btn){
-btn.textContent=btn.textContent.includes('Follow')?'✓ Following':'+ Follow';
+// --- NEW FOLLOW FUNCTIONS ---
+function follow(btn) {
+  const artistName = btn.parentElement.querySelector('strong').textContent;
+  let followedArtists = JSON.parse(localStorage.getItem('vyro_followed')) || [];
+  
+  if (followedArtists.includes(artistName)) {
+    followedArtists = followedArtists.filter(name => name !== artistName);
+    btn.textContent = '+ Follow';
+  } else {
+    followedArtists.push(artistName);
+    btn.textContent = '✓ Following';
+  }
+  localStorage.setItem('vyro_followed', JSON.stringify(followedArtists));
+}
+
+function checkFollowedArtists() {
+  let followedArtists = JSON.parse(localStorage.getItem('vyro_followed')) || [];
+  document.querySelectorAll('.artist-row').forEach(row => {
+    const artistNameElement = row.querySelector('strong');
+    const btn = row.querySelector('.follow');
+    
+    if (btn && artistNameElement && followedArtists.includes(artistNameElement.textContent)) {
+      btn.textContent = '✓ Following';
+    }
+  });
 }
 
 // Initialize app
 renderExplore();
 renderSaved();
+checkFollowedArtists(); // Added to check on load
 </script>
-</body></html>
+</body>
+</html>
