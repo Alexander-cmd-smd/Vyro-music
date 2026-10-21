@@ -69,3 +69,27 @@ function follow(btn){btn.textContent=btn.textContent.includes('Follow')?'✓ Fol
 renderExplore();
 </script>
 </body></html>
+<script>
+  // 1. Define your playlist
+  const playlist = [
+    { title: "Feel the Sound", src: "assets/feel-the-sound.mp3" },
+    { title: "Another Track", src: "assets/another-track.mp3" }
+    // Add more tracks here
+  ];
+
+  let currentTrack = 0;
+  const audioPlayer = document.getElementById("vyro-player");
+
+  // 2. Function to play a specific track
+  function playTrack(index) {
+    currentTrack = index;
+    audioPlayer.src = playlist[currentTrack].src;
+    audioPlayer.play();
+    // Optional: Update a title display on the page
+    // document.getElementById("now-playing-title").innerText = playlist[currentTrack].title;
+  }
+</script>
+<ul>
+  <li onclick="playTrack(0)">Feel the Sound</li>
+  <li onclick="playTrack(1)">Another Track</li>
+</ul>
