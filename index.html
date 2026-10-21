@@ -21,11 +21,8 @@
     measurementId: "G-H7FV5PDW3T"
   };
 
-  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-
-  // Expose functions to window
   window.firebaseDB = { db, collection, addDoc, getDocs };
 </script>
 
@@ -152,7 +149,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
   <div class="dash-box">
     <h2 style="margin-top:0;">Welcome back, <br><span id="dashArtistName" style="color:var(--pink);">Artist</span></h2>
     <p style="color:#aaa; font-size:13px;">This is your official artist dashboard.</p>
-    
     <div style="display: flex; gap: 10px; margin-top: 20px;">
       <div style="flex:1; background:#090711; padding:10px; border-radius:10px; text-align:center;">
         <h3 style="margin:0; font-size:24px; color:var(--purple);" id="dashPlays">0</h3>
@@ -168,7 +164,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
   <div class="dash-box">
     <h2 style="font-size:18px; margin-top:0;">Upload New Track</h2>
     <p style="color:#aaa; font-size:12px; margin-bottom:10px;">Select an MP3. It will instantly upload to the cloud and go live!</p>
-    
     <input type="text" id="uploadTitle" class="dash-input" placeholder="Song Title">
     <select id="uploadGenre" class="dash-input">
       <option value="Afrobeats">Afrobeats</option>
@@ -176,31 +171,21 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
       <option value="R&B">R&B</option>
       <option value="Gospel">Gospel</option>
     </select>
-
     <input type="file" id="audioUpload" accept="audio/*" style="display:none;" onchange="handleCloudUpload(event)">
     <button class="dash-btn" onclick="document.getElementById('audioUpload').click()">+ Select Audio File</button>
     <div id="uploadStatus" style="color:#4b8dff; font-size:13px; margin-top:10px;"></div>
   </div>
-
   <button class="dash-btn dash-logout" onclick="artistLogout()">Log Out</button>
 </div>
 </div>
-
 <footer>VYRO — CLOUD PROTOTYPE</footer>
 </main>
 
 <!-- ARTIST PROFILE PANEL -->
 <div id="artistPanel">
   <div class="ap-header"><button onclick="closeArtist()">✕</button></div>
-  <div class="ap-profile">
-    <div class="ap-art" id="apEmoji">🎤</div>
-    <h2 class="ap-name" id="apName">Artist Name</h2>
-    <p class="ap-bio" id="apBio">Artist Bio</p>
-  </div>
-  <div class="ap-songs">
-    <h3 style="font-size: 16px; margin-bottom: 10px; color: var(--muted);">Popular Tracks</h3>
-    <div id="apSongList"></div>
-  </div>
+  <div class="ap-profile"><div class="ap-art" id="apEmoji">🎤</div><h2 class="ap-name" id="apName">Artist Name</h2><p class="ap-bio" id="apBio">Artist Bio</p></div>
+  <div class="ap-songs"><h3 style="font-size: 16px; margin-bottom: 10px; color: var(--muted);">Popular Tracks</h3><div id="apSongList"></div></div>
 </div>
 
 <!-- MINI PLAYER -->
@@ -213,28 +198,12 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 
 <!-- FULL SCREEN PLAYER -->
 <div id="fullPlayer">
-  <div class="fp-header">
-    <button onclick="closeFullPlayer()">⌄</button>
-    <span style="font-size: 12px; font-weight: 800; letter-spacing: 2px; color: var(--muted);">NOW PLAYING</span>
-    <button onclick="toggleLike()" id="fpLikeBtn">♡</button>
-  </div>
-  <div class="fp-vinyl-container">
-    <div class="fp-vinyl" id="fpVinyl"><div class="fp-art" id="fpEmoji">♫</div></div>
-  </div>
+  <div class="fp-header"><button onclick="closeFullPlayer()">⌄</button><span style="font-size: 12px; font-weight: 800; letter-spacing: 2px; color: var(--muted);">NOW PLAYING</span><button onclick="toggleLike()" id="fpLikeBtn">♡</button></div>
+  <div class="fp-vinyl-container"><div class="fp-vinyl" id="fpVinyl"><div class="fp-art" id="fpEmoji">♫</div></div></div>
   <div class="fp-details"><h2 id="fpTitle">Select a track</h2><p id="fpArtist">Artist Name</p></div>
-  <div class="fp-progress">
-    <input type="range" id="seekBar" value="0" min="0" max="100" oninput="seekAudio()">
-    <div class="fp-time"><span id="currentTime">0:00</span><span id="totalTime">0:00</span></div>
-  </div>
-  <div class="fp-controls">
-    <button onclick="seek(-10)">⏪</button>
-    <button class="play-btn" onclick="togglePlay()" id="fpPlayPauseBtn">▶</button>
-    <button onclick="seek(10)">⏩</button>
-  </div>
-  <div class="fp-controls" style="gap: 60px; margin-bottom: 20px;">
-    <button onclick="prevTrack()" style="font-size: 30px;">⏮</button>
-    <button onclick="nextTrack()" style="font-size: 30px;">⏭</button>
-  </div>
+  <div class="fp-progress"><input type="range" id="seekBar" value="0" min="0" max="100" oninput="seekAudio()"><div class="fp-time"><span id="currentTime">0:00</span><span id="totalTime">0:00</span></div></div>
+  <div class="fp-controls"><button onclick="seek(-10)">⏪</button><button class="play-btn" onclick="togglePlay()" id="fpPlayPauseBtn">▶</button><button onclick="seek(10)">⏩</button></div>
+  <div class="fp-controls" style="gap: 60px; margin-bottom: 20px;"><button onclick="prevTrack()" style="font-size: 30px;">⏮</button><button onclick="nextTrack()" style="font-size: 30px;">⏭</button></div>
 </div>
 
 <!-- BOTTOM NAVIGATION -->
@@ -253,28 +222,39 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 const CLOUDINARY_CLOUD_NAME = "ixay5wda"; 
 const CLOUDINARY_UPLOAD_PRESET = "qvk4xtky"; 
 
+// YOUR ORIGINAL SONGS RESTORED
+const baseTracks = [
+  {id: '1', title:'Come', artist:'Ogunba Alex', emoji:'🌙', genre:'Afrobeats', src:'assets/Come [8a409715].mp3'},
+  {id: '2', title:'Your brother', artist:'Ogunba Alex', emoji:'☁️', genre:'Hip-Hop', src:'assets/Your brother [bf867660].mp3'},
+  {id: '3', title:'Loving', artist:'Alex_skiddo', emoji:'💫', genre:'R&B', src:'assets/Loving [947f2a25].mp3'},
+  {id: '4', title:'Tell Yur Mummy', artist:'Alex_skiddo', emoji:'✨', genre:'Gospel', src:'assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3'}
+];
+
 let currentTrack = null; 
 let currentTrackIndex = 0;
 let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; 
-let allTracks = []; 
+let allTracks = [...baseTracks]; // Start with your base tracks
 
 const audio = document.getElementById("vyro-player");
 
-setTimeout(() => { loadTracksFromCloud(); }, 1500);
+setTimeout(() => { loadTracksFromCloud(); }, 1000);
 
 async function loadTracksFromCloud() {
   const { db, collection, getDocs } = window.firebaseDB;
   try {
     const querySnapshot = await getDocs(collection(db, "tracks"));
-    allTracks = [];
-    querySnapshot.forEach((doc) => { allTracks.push(doc.data()); });
+    let cloudTracks = [];
+    querySnapshot.forEach((doc) => { cloudTracks.push(doc.data()); });
 
-    if(allTracks.length === 0) {
-      document.getElementById('trackGrid').innerHTML = '<p style="color:#aaa; grid-column: span 2;">No tracks in the cloud yet. Log in as an artist to upload the first one!</p>';
-    } else { renderApp(); }
+    // Combine your original songs with cloud uploads
+    allTracks = [...baseTracks, ...cloudTracks];
+    renderApp();
+    
   } catch(e) {
     console.error(e);
-    document.getElementById('trackGrid').innerHTML = '<p style="color:#ff4f4f; grid-column: span 2;">Error connecting to Firebase.</p>';
+    // If cloud fails, still show the original 4 songs
+    allTracks = [...baseTracks];
+    renderApp();
   }
 }
 
@@ -308,10 +288,12 @@ async function handleCloudUpload(event) {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-  formData.append('resource_type', 'auto'); // CHANGED TO AUTO FOR AUDIO SUPPORT
+  
+  // BULLETPROOF UPLOAD URL FOR AUDIO
+  const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
 
   try {
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`, { // CHANGED TO AUTO HERE TOO
+    const response = await fetch(uploadUrl, {
       method: 'POST',
       body: formData
     });
@@ -537,4 +519,4 @@ function artistLogout() {
 }
 </script>
 </body>
-  </html>
+</html>
