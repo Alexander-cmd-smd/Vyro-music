@@ -44,9 +44,9 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 <div class="music-card" data-genre="Gospel" data-title="Higher Ground" data-artist="Eli Ray"><div class="cover c4">✨</div><div class="track-title">Higher Ground <button class="play-small" onclick="playTrack('Higher Ground','Eli Ray','✨')">▶</button></div><div class="artist">Eli Ray · Gospel</div></div>
 </div>
 </div>
-  <audio id="vyro-player" controls preload="metadata">
-  <source src="assets/feel-the-sound.mp3" type="audio/mpeg" />
-  Your browser supports audio playback. 
+<audio id="vyro-player" controls preload="metadata">
+  <source src="assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3" type="audio/mpeg" />
+  Your browser does not support audio playback.
 </audio>
 <div class="view" id="explore"><div class="eyebrow">Open your ears</div><h1>Explore <span>sounds.</span></h1><p style="color:var(--muted);font-size:13px;line-height:1.6">A world of independent voices, new releases and unexpected favourites.</p><div class="section-head"><h3>Popular genres</h3></div><div class="genres" style="flex-wrap:wrap"><button class="genre" onclick="filterGenre('Afrobeats')">Afrobeats</button><button class="genre" onclick="filterGenre('Hip-Hop')">Hip-Hop</button><button class="genre" onclick="filterGenre('R&B')">R&B</button><button class="genre" onclick="filterGenre('Gospel')">Gospel</button></div><div class="section-head"><h3>Featured artists</h3></div><div class="artist-row"><div class="artist-art">🎤</div><div><strong>Alex_skiddo</strong><small>Independent artist · Nigeria</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div><div class="artist-row"><div class="artist-art">🌙</div><div><strong>Nova Lane</strong><small>Hip-Hop · Demo profile</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div><div class="artist-row"><div class="artist-art">💜</div><div><strong>Mira Sol</strong><small>R&B · Demo profile</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div><div class="section-head"><h3>All demo tracks</h3></div><div class="cards" id="exploreGrid"></div></div>
 <div class="view" id="search"><div class="eyebrow">Find your next favourite</div><h1>Search <span>VYRO.</span></h1><div class="search">⌕ <input placeholder="Type a song or artist..." oninput="searchTracks(this.value)"></div><div id="searchMessage" class="empty">Try searching “Midnight”, “Nova”, or “Afrobeats”.</div></div>
@@ -71,26 +71,13 @@ renderExplore();
 </script>
 </body></html>
 <script>
-  // 1. Define your playlist
   const playlist = [
-    { title: "Feel the Sound", src: "assets/feel-the-sound.mp3" },
-    { title: "Another Track", src: "assets/another-track.mp3" }
-    // Add more tracks here
+    { title: "Tell Yur Mummy", src: "assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3" }
   ];
 
-  let currentTrack = 0;
-  const audioPlayer = document.getElementById("vyro-player");
-
-  // 2. Function to play a specific track
   function playTrack(index) {
-    currentTrack = index;
-    audioPlayer.src = playlist[currentTrack].src;
-    audioPlayer.play();
-    // Optional: Update a title display on the page
-    // document.getElementById("now-playing-title").innerText = playlist[currentTrack].title;
+    const audioPlayer = document.getElementById("vyro-player");
+    audioPlayer.src = playlist[index].src;
+    audioPlayer.play(); 
   }
 </script>
-<ul>
-  <li onclick="playTrack(0)">Feel the Sound</li>
-  <li onclick="playTrack(1)">Another Track</li>
-</ul>
