@@ -24,7 +24,6 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
   
-  // Expose to global window so our main script can use them
   window.firebaseDB = { db, collection, addDoc, getDocs };
   window.firebaseAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail };
 </script>
@@ -121,9 +120,17 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
   <div class="dash-box" style="margin-top: 20px;">
     <h2 style="font-size: 20px; margin-top:0;">Artist Portal</h2>
     <p style="color:#aaa; font-size:12px;">Create a real cloud account to upload music.</p>
-    <div class="dash-input-group"><input type="email" id="artistEmailInput" class="dash-input" placeholder="Email Address"></div>
-    <div class="dash-input-group"><input type="password" id="artistPassInput" class="dash-input" placeholder="Password"><button type="button" class="eye-icon" onclick="togglePasswordVisibility()">👁️</button></div>
-    <button class="dash-btn" onclick="artistSignup()" style="background: linear-gradient(90deg, #4b8dff, #9b5cff);">Sign Up</button>
+    
+    <input type="text" id="signupArtistName" class="dash-input" placeholder="Artist Name / Stage Name" style="margin-bottom: 15px;">
+    
+    <input type="email" id="artistEmailInput" class="dash-input" placeholder="Email Address" style="margin-bottom: 15px;">
+    
+    <div class="dash-input-group">
+      <input type="password" id="artistPassInput" class="dash-input" placeholder="Password">
+      <button type="button" class="eye-icon" onclick="togglePasswordVisibility()">👁️</button>
+    </div>
+    
+    <button class="dash-btn" onclick="artistSignup()" style="background: linear-gradient(90deg, #4b8dff, #9b5cff); margin-top: 10px;">Sign Up</button>
     <button class="dash-btn" onclick="artistLogin()">Log In</button>
     <a class="forgot-link" onclick="forgotPassword()">Forgot Password?</a>
   </div>
@@ -136,7 +143,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
   <div class="dash-box">
     <h2 style="font-size:18px; margin-top:0;">Upload New Track</h2>
     <input type="text" id="uploadTitle" class="dash-input" placeholder="Song Title" style="margin-bottom: 15px;">
-    <input type="text" id="uploadArtistName" class="dash-input" placeholder="Artist Name (Stage Name)" style="margin-bottom: 15px;">
     <select id="uploadGenre" class="dash-input" style="margin-bottom: 15px;"><option value="Afrobeats">Afrobeats</option><option value="Hip-Hop">Hip-Hop</option><option value="R&B">R&B</option><option value="Gospel">Gospel</option></select>
     
     <input type="file" id="audioUpload" accept="audio/*" style="display:none;" onchange="document.getElementById('audioLabel').innerText = event.target.files[0].name;">
@@ -248,9 +254,13 @@ onAuthStateChanged(auth, (user) => {
     currentUser = user;
     document.getElementById('artistLoggedOut').style.display = 'none';
     document.getElementById('artistDashboard').style.display = 'block';
-    const displayName = user.email.split('@')[0];
-    document.getElementById('dashArtistName').textContent = displayName;
-    document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
+    
+    // Check if we saved their Artist Name earlier, otherwise use email
+    let savedArtistName = localStorage.getItem('vyro_artist_name_' + user.email);
+    if(!savedArtistName) savedArtistName = user.email.split('@')[0];
+    
+    document.getElementById('dashArtistName').textContent = savedArtistName;
+    document.getElementById('userAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
   } else {
     currentUser = null;
     document.getElementById('artistLoggedOut').style.display = 'block';
@@ -260,12 +270,20 @@ onAuthStateChanged(auth, (user) => {
 });
 
 function artistSignup() {
+  const name = document.getElementById('signupArtistName').value.trim();
   const email = document.getElementById('artistEmailInput').value.trim();
   const pass = document.getElementById('artistPassInput').value.trim();
-  if(!email || !pass) { alert("Enter email and password."); return; }
+  
+  if(!name || !email || !pass) { alert("Please fill in your Artist Name, Email, and Password."); return; }
   
   createUserWithEmailAndPassword(auth, email, pass)
-    .then(() => alert("Account created successfully! Welcome to VYRO."))
+    .then((userCredential) => {
+      // Save their custom Artist Name to memory so it shows on the dashboard
+      localStorage.setItem('vyro_artist_name_' + email, name);
+      document.getElementById('dashArtistName').textContent = name;
+      document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+      alert("Account created successfully! Welcome to VYRO.");
+    })
     .catch(err => alert("Error: " + err.message));
 }
 
@@ -283,6 +301,7 @@ function artistLogout() {
   signOut(auth).then(() => {
     document.getElementById('artistEmailInput').value = '';
     document.getElementById('artistPassInput').value = '';
+    document.getElementById('signupArtistName').value = '';
     alert("Logged out successfully.");
   });
 }
@@ -343,10 +362,13 @@ async function handleCloudUpload() {
   const audioFile = document.getElementById('audioUpload').files[0];
   const imageFile = document.getElementById('imageUpload').files[0];
   const title = document.getElementById('uploadTitle').value.trim();
-  const artistName = document.getElementById('uploadArtistName').value.trim();
   const genre = document.getElementById('uploadGenre').value;
   
-  if(!title || !artistName) { alert("Please enter song title and artist name."); return; }
+  // Get the actual artist name from memory
+  const currentArtistEmail = currentUser.email;
+  const artistName = localStorage.getItem('vyro_artist_name_' + currentArtistEmail) || currentArtistEmail.split('@')[0];
+  
+  if(!title) { alert("Please enter song title."); return; }
   if(!audioFile) { alert("Please select an MP3 audio file."); return; }
   
   const status = document.getElementById('uploadStatus');
@@ -576,4 +598,4 @@ function genrePick(btn,g){
 }
 </script>
 </body>
-      </html>
+</html>
