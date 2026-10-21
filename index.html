@@ -48,7 +48,11 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 </div>
 
 <!-- EXPLORE TAB -->
-<div class="view" id="explore"><div class="eyebrow">Open your ears</div><h1>Explore <span>sounds.</span></h1><p style="color:var(--muted);font-size:13px;line-height:1.6">A world of independent voices, new releases and unexpected favourites.</p><div class="section-head"><h3>Popular genres</h3></div><div class="genres" style="flex-wrap:wrap"><button class="genre" onclick="filterGenre('Afrobeats')">Afrobeats</button><button class="genre" onclick="filterGenre('Hip-Hop')">Hip-Hop</button><button class="genre" onclick="filterGenre('R&B')">R&B</button><button class="genre" onclick="filterGenre('Gospel')">Gospel</button></div><div class="section-head"><h3>Featured artists</h3></div><div class="artist-row"><div class="artist-art">🎤</div><div><strong>Alex_skiddo</strong><small>Independent artist · Nigeria</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div><div class="artist-row"><div class="artist-art">🌙</div><div><strong>Ogunba Alex</strong><small>Hip-Hop · Demo profile</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div><div class="artist-row"><div class="artist-art">💜</div><div><strong>Mira Sol</strong><small>R&B · Demo profile</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div><div class="section-head"><h3>All demo tracks</h3></div><div class="cards" id="exploreGrid"></div></div>
+<div class="view" id="explore"><div class="eyebrow">Open your ears</div><h1>Explore <span>sounds.</span></h1><p style="color:var(--muted);font-size:13px;line-height:1.6">A world of independent voices, new releases and unexpected favourites.</p><div class="section-head"><h3>Popular genres</h3></div><div class="genres" style="flex-wrap:wrap"><button class="genre" onclick="filterGenre('Afrobeats')">Afrobeats</button><button class="genre" onclick="filterGenre('Hip-Hop')">Hip-Hop</button><button class="genre" onclick="filterGenre('R&B')">R&B</button><button class="genre" onclick="filterGenre('Gospel')">Gospel</button></div><div class="section-head"><h3>Featured artists</h3></div>
+<div class="artist-row"><div class="artist-art">🎤</div><div><strong>Alex_skiddo</strong><small>Independent artist · Nigeria</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div>
+<div class="artist-row"><div class="artist-art">🌙</div><div><strong>Ogunba Alex</strong><small>Hip-Hop · Demo profile</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div>
+<div class="artist-row"><div class="artist-art">💜</div><div><strong>Mira Sol</strong><small>R&B · Demo profile</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div>
+<div class="section-head"><h3>All demo tracks</h3></div><div class="cards" id="exploreGrid"></div></div>
 
 <!-- SEARCH TAB -->
 <div class="view" id="search"><div class="eyebrow">Find your next favourite</div><h1>Search <span>VYRO.</span></h1><div class="search">⌕ <input placeholder="Type a song or artist..." oninput="searchTracks(this.value)"></div><div id="searchMessage" class="empty">Try searching “Come”, “Loving”, or “Ogunba”.</div></div>
@@ -237,9 +241,10 @@ renderExplore();
 document.querySelectorAll('#exploreGrid .music-card').forEach((c,i)=>c.style.display=tracks[i].genre===g?'':'none');
 }
 
-// --- NEW FOLLOW FUNCTIONS ---
+// --- FIXED FOLLOW FUNCTIONS ---
 function follow(btn) {
-  const artistName = btn.parentElement.querySelector('strong').textContent;
+  // This looks for the <strong> tag INSIDE the div that holds the text
+  const artistName = btn.parentElement.querySelector('div > strong').textContent;
   let followedArtists = JSON.parse(localStorage.getItem('vyro_followed')) || [];
   
   if (followedArtists.includes(artistName)) {
@@ -255,7 +260,7 @@ function follow(btn) {
 function checkFollowedArtists() {
   let followedArtists = JSON.parse(localStorage.getItem('vyro_followed')) || [];
   document.querySelectorAll('.artist-row').forEach(row => {
-    const artistNameElement = row.querySelector('strong');
+    const artistNameElement = row.querySelector('div > strong');
     const btn = row.querySelector('.follow');
     
     if (btn && artistNameElement && followedArtists.includes(artistNameElement.textContent)) {
@@ -267,7 +272,7 @@ function checkFollowedArtists() {
 // Initialize app
 renderExplore();
 renderSaved();
-checkFollowedArtists(); // Added to check on load
+checkFollowedArtists(); 
 </script>
 </body>
 </html>
