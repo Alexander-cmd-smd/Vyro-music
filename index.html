@@ -40,9 +40,9 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 <div class="genres"><button class="genre active" onclick="genrePick(this,'All')">For you</button><button class="genre" onclick="genrePick(this,'Afrobeats')">Afrobeats</button><button class="genre" onclick="genrePick(this,'Hip-Hop')">Hip-Hop</button><button class="genre" onclick="genrePick(this,'R&B')">R&B</button><button class="genre" onclick="genrePick(this,'Gospel')">Gospel</button></div>
 <div class="section-head"><h3>Discover picks</h3><button onclick="showView('explore')">More music</button></div>
 <div class="cards" id="trackGrid">
-<div class="music-card" data-genre="Afrobeats" data-title="Ayomide" data-artist="Ogunba Alex"><div class="cover c1">🌙</div><div class="track-title">Ayomide <button class="play-small" onclick="playTrack('Ayomide','Ogunba Alex','🌙')">▶</button></div><div class="artist">Ogunba Alex · Afrobeats</div></div>
-<div class="music-card" data-genre="Hip-Hop" data-title="Pain On Me" data-artist="Ogunba Alex"><div class="cover c2">☁️</div><div class="track-title">Pain On Me <button class="play-small" onclick="playTrack('Pain On Me','Ogunba Alex','☁️')">▶</button></div><div class="artist">Ogunba Alex · Hip-Hop</div></div>
-<div class="music-card" data-genre="R&B" data-title="Zaluba" data-artist="Alex_skiddo"><div class="cover c3">💫</div><div class="track-title">Zaluba <button class="play-small" onclick="playTrack('Zaluba','Alex_skiddo','💫')">▶</button></div><div class="artist">Alex_skiddo · R&B</div></div>
+<div class="music-card" data-genre="Afrobeats" data-title="Come" data-artist="Ogunba Alex"><div class="cover c1">🌙</div><div class="track-title">Come <button class="play-small" onclick="playTrack('Come','Ogunba Alex','🌙')">▶</button></div><div class="artist">Ogunba Alex · Afrobeats</div></div>
+<div class="music-card" data-genre="Hip-Hop" data-title="Your brother" data-artist="Ogunba Alex"><div class="cover c2">☁️</div><div class="track-title">Your brother <button class="play-small" onclick="playTrack('Your brother','Ogunba Alex','☁️')">▶</button></div><div class="artist">Ogunba Alex · Hip-Hop</div></div>
+<div class="music-card" data-genre="R&B" data-title="Loving" data-artist="Alex_skiddo"><div class="cover c3">💫</div><div class="track-title">Loving <button class="play-small" onclick="playTrack('Loving','Alex_skiddo','💫')">▶</button></div><div class="artist">Alex_skiddo · R&B</div></div>
 <div class="music-card" data-genre="Gospel" data-title="Tell Yur Mummy" data-artist="Alex_skiddo"><div class="cover c4">✨</div><div class="track-title">Tell Yur Mummy <button class="play-small" onclick="playTrack('Tell Yur Mummy','Alex_skiddo','✨')">▶</button></div><div class="artist">Alex_skiddo · Gospel</div></div>
 </div>
 </div>
@@ -51,7 +51,7 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 <div class="view" id="explore"><div class="eyebrow">Open your ears</div><h1>Explore <span>sounds.</span></h1><p style="color:var(--muted);font-size:13px;line-height:1.6">A world of independent voices, new releases and unexpected favourites.</p><div class="section-head"><h3>Popular genres</h3></div><div class="genres" style="flex-wrap:wrap"><button class="genre" onclick="filterGenre('Afrobeats')">Afrobeats</button><button class="genre" onclick="filterGenre('Hip-Hop')">Hip-Hop</button><button class="genre" onclick="filterGenre('R&B')">R&B</button><button class="genre" onclick="filterGenre('Gospel')">Gospel</button></div><div class="section-head"><h3>Featured artists</h3></div><div class="artist-row"><div class="artist-art">🎤</div><div><strong>Alex_skiddo</strong><small>Independent artist · Nigeria</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div><div class="artist-row"><div class="artist-art">🌙</div><div><strong>Ogunba Alex</strong><small>Hip-Hop · Demo profile</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div><div class="artist-row"><div class="artist-art">💜</div><div><strong>Mira Sol</strong><small>R&B · Demo profile</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div><div class="section-head"><h3>All demo tracks</h3></div><div class="cards" id="exploreGrid"></div></div>
 
 <!-- SEARCH TAB -->
-<div class="view" id="search"><div class="eyebrow">Find your next favourite</div><h1>Search <span>VYRO.</span></h1><div class="search">⌕ <input placeholder="Type a song or artist..." oninput="searchTracks(this.value)"></div><div id="searchMessage" class="empty">Try searching “Ayomide”, “Alex”, or “Afrobeats”.</div></div>
+<div class="view" id="search"><div class="eyebrow">Find your next favourite</div><h1>Search <span>VYRO.</span></h1><div class="search">⌕ <input placeholder="Type a song or artist..." oninput="searchTracks(this.value)"></div><div id="searchMessage" class="empty">Try searching “Come”, “Loving”, or “Ogunba”.</div></div>
 
 <!-- LIBRARY TAB -->
 <div class="view" id="library"><div class="eyebrow">Your personal space</div><h1>Your <span>Library.</span></h1><p style="color:var(--muted);font-size:13px">Your saved tracks will appear here on this device.</p><div id="savedTracks" class="empty">No saved tracks yet.<br>Tap ♡ on a track to add it to your library.</div></div>
@@ -83,6 +83,7 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 <small id="playerArtist">VYRO player</small>
 </div>
 <button onclick="toggleLike()" id="likeBtn" aria-label="Save track">♡</button>
+<button onclick="nextTrack()" style="font-size: 16px; margin-right: 5px;">⏭</button>
 <button onclick="togglePlay()" id="playPauseBtn">▶</button>
 </div>
 
@@ -102,13 +103,14 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 
 <script>
 let currentTrack = null; 
+let currentTrackIndex = 0;
 let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; 
 
-// Tracks mapped to your exact file names
+// Updated with your EXACT new file names
 const tracks = [
-  {id: '1', title:'Ayomide', artist:'Ogunba Alex', emoji:'🌙', genre:'Afrobeats', src:'assets/Ogunba Alex - Ayomide - 1792054497422 2026-10-15 09_54.m4a'},
-  {id: '2', title:'Pain On Me', artist:'Ogunba Alex', emoji:'☁️', genre:'Hip-Hop', src:'assets/Ogunba Alex - pain on me - 1788704276529 2026-09-06 15_17.m4a'},
-  {id: '3', title:'Zaluba', artist:'Alex_skiddo', emoji:'💫', genre:'R&B', src:'assets/ZALUBA Ayomaff X BNXN X Muyeez Type Afro DRILL Afrobeat Afro instrumental 2026 [TubeRipper.click].mp3'},
+  {id: '1', title:'Come', artist:'Ogunba Alex', emoji:'🌙', genre:'Afrobeats', src:'assets/Come [8a409715].mp3'},
+  {id: '2', title:'Your brother', artist:'Ogunba Alex', emoji:'☁️', genre:'Hip-Hop', src:'assets/Your brother [bf867660].mp3'},
+  {id: '3', title:'Loving', artist:'Alex_skiddo', emoji:'💫', genre:'R&B', src:'assets/Loving [947f2a25].mp3'},
   {id: '4', title:'Tell Yur Mummy', artist:'Alex_skiddo', emoji:'✨', genre:'Gospel', src:'assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3'}
 ];
 
@@ -122,23 +124,26 @@ if(id==='library') renderSaved();
 }
 
 function playTrack(title,artist,emoji){
-const trackData = tracks.find(t => t.title === title);
-if(!trackData) return;
+const trackData = tracks.findIndex(t => t.title === title);
+if(trackData === -1) return;
 
-currentTrack = {title, artist, emoji, src: trackData.src};
+currentTrackIndex = trackData;
+const track = tracks[currentTrackIndex];
+currentTrack = track;
+
 document.getElementById('player').classList.add('show');
-document.getElementById('playerTitle').textContent = title;
-document.getElementById('playerArtist').textContent = artist;
-document.getElementById('playerEmoji').textContent = emoji;
-document.getElementById('likeBtn').textContent = saved.some(t=>t.title===title) ? '♥' : '♡';
+document.getElementById('playerTitle').textContent = track.title;
+document.getElementById('playerArtist').textContent = track.artist;
+document.getElementById('playerEmoji').textContent = track.emoji;
+document.getElementById('likeBtn').textContent = saved.some(t=>t.title===track.title) ? '♥' : '♡';
 
 const audioPlayer = document.getElementById("vyro-player");
-audioPlayer.src = currentTrack.src; 
+audioPlayer.src = track.src; 
 
 audioPlayer.play().then(() => {
   document.getElementById('playPauseBtn').textContent = "⏸";
 }).catch(error => {
-  alert("Playback error: " + error.message + "\nThe browser cannot play this file format or the link is wrong.");
+  alert("Playback error: " + error.message + "\nThe browser might be blocking the brackets [] in the file name.");
 });
 }
 
@@ -155,6 +160,15 @@ if (audioPlayer.paused) {
   audioPlayer.pause();
   btn.textContent = "▶";
 }
+}
+
+function nextTrack() {
+  currentTrackIndex++;
+  if (currentTrackIndex >= tracks.length) {
+    currentTrackIndex = 0; 
+  }
+  const next = tracks[currentTrackIndex];
+  playTrack(next.title, next.artist, next.emoji);
 }
 
 function toggleLike() {
@@ -204,7 +218,7 @@ const term=q.toLowerCase().trim();
 const matches=tracks.filter(t=>(t.title+' '+t.artist+' '+t.genre).toLowerCase().includes(term));
 const msg=document.getElementById('searchMessage');
 if(msg){
-  msg.innerHTML=term?(matches.length?matches.map(t=>`<div class="artist-row"><div class="artist-art">${t.emoji}</div><div><strong>${t.title}</strong><small>${t.artist} · ${t.genre}</small></div><button class="follow" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶ Play</button></div>`).join(''):'No demo results found. Try another search.'): 'Try searching “Ayomide”, “Alex”, or “Afrobeats”.';
+  msg.innerHTML=term?(matches.length?matches.map(t=>`<div class="artist-row"><div class="artist-art">${t.emoji}</div><div><strong>${t.title}</strong><small>${t.artist} · ${t.genre}</small></div><button class="follow" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶ Play</button></div>`).join(''):'No demo results found. Try another search.'): 'Try searching “Come”, “Loving”, or “Ogunba”.';
 }
 document.querySelectorAll('#trackGrid .music-card').forEach(c=>{
   c.style.display=!term||c.dataset.title.toLowerCase().includes(term)||c.dataset.artist.toLowerCase().includes(term)||c.dataset.genre.toLowerCase().includes(term)?'':'none';
@@ -231,5 +245,4 @@ btn.textContent=btn.textContent.includes('Follow')?'✓ Following':'+ Follow';
 renderExplore();
 renderSaved();
 </script>
-</body>
-</html>
+</body></html>
