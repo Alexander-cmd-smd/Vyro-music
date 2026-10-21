@@ -250,6 +250,10 @@ async function handleCloudUpload(event) {
     if(!response.ok) throw new Error(data.error.message || "Upload failed");
 
     const downloadURL = data.secure_url;
+    
+    // THE TEST ALERT
+    alert("Cloudinary Success! Link: " + downloadURL); 
+
     const newTrack = { title: title, artist: currentArtist, genre: genre, src: downloadURL, createdAt: Date.now() };
     
     allTracks.push(newTrack);
@@ -481,4 +485,4 @@ function genrePick(btn,g){
 }
 </script>
 </body>
-</html>
+    </html>
