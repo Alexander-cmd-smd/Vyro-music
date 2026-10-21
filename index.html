@@ -24,7 +24,7 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
   
-  // Expose everything globally so there are no initialization errors
+  // Expose globally to prevent ANY initialization errors
   window.fb = {
     db, auth, collection, addDoc, getDocs,
     createUserWithEmailAndPassword, signInWithEmailAndPassword, 
@@ -321,7 +321,7 @@ if (lastPlayed) {
 renderApp(); 
 setTimeout(() => { loadTracksFromCloud(); }, 1000);
 
-// Unpack global Firebase variables
+// Unpack global Firebase variables to fix initialization errors
 const { auth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateProfile } = window.fb;
 
 onAuthStateChanged(auth, (user) => {
@@ -379,6 +379,9 @@ async function createArtistAccount() {
   errorDiv.innerHTML = "Creating account... Please wait.";
 
   try {
+    // 1.5-second safety delay to ensure Firebase is fully loaded
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
     let profilePicURL = '';
     
     if (imageFile) {
