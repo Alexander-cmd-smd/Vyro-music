@@ -133,6 +133,9 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
     <button class="dash-btn" onclick="artistSignup()" style="background: linear-gradient(90deg, #4b8dff, #9b5cff); margin-top: 10px;">Sign Up</button>
     <button class="dash-btn" onclick="artistLogin()">Log In</button>
     <a class="forgot-link" onclick="forgotPassword()">Forgot Password?</a>
+    
+    <!-- NEW ERROR MESSAGE DISPLAY -->
+    <div id="authError" style="font-size: 13px; margin-top: 15px; text-align: center; font-weight: bold; line-height: 1.5;"></div>
   </div>
 </div>
 <div id="artistDashboard" style="display: none;">
@@ -270,43 +273,54 @@ function artistSignup() {
   const name = document.getElementById('signupArtistName').value.trim();
   const email = document.getElementById('artistEmailInput').value.trim();
   const pass = document.getElementById('artistPassInput').value.trim();
+  const errorDiv = document.getElementById('authError');
+  errorDiv.innerHTML = "";
   
-  if(!name || !email || !pass) { alert("Please fill in your Artist Name, Email, and Password."); return; }
-  if(pass.length < 6) { alert("Password must be at least 6 characters long."); return; }
+  if(!name || !email || !pass) { errorDiv.style.color = "#ff4f4f"; errorDiv.innerHTML = "Please fill in all fields."; return; }
+  if(pass.length < 6) { errorDiv.style.color = "#ff4f4f"; errorDiv.innerHTML = "Password must be at least 6 characters."; return; }
   
   createUserWithEmailAndPassword(auth, email, pass)
     .then((userCredential) => {
       localStorage.setItem('vyro_artist_name_' + email, name);
-      
       sendEmailVerification(userCredential.user)
         .then(() => {
-          alert("✅ Account created! Please check your email inbox to verify your account before logging in.");
+          errorDiv.style.color = "#4b8dff";
+          errorDiv.innerHTML = "✅ Account created! Check your email for the verification link.";
           signOut(auth);
         })
         .catch((error) => {
-          alert("Account created, but error sending email: " + error.message);
+          errorDiv.style.color = "#ff4f4f";
+          errorDiv.innerHTML = "Verification Error: " + error.message;
         });
     })
-    .catch(err => alert("Signup Error: " + err.message));
+    .catch(err => {
+      errorDiv.style.color = "#ff4f4f";
+      errorDiv.innerHTML = "Signup Failed: " + err.message;
+    });
 }
 
 function artistLogin() {
   const email = document.getElementById('artistEmailInput').value.trim();
   const pass = document.getElementById('artistPassInput').value.trim();
+  const errorDiv = document.getElementById('authError');
+  errorDiv.innerHTML = "";
   
-  if(!email || !pass) { alert("Please enter your email and password."); return; }
+  if(!email || !pass) { errorDiv.style.color = "#ff4f4f"; errorDiv.innerHTML = "Please enter email and password."; return; }
   
   signInWithEmailAndPassword(auth, email, pass)
     .then((userCredential) => {
       if (userCredential.user.emailVerified) {
-        alert("Welcome back!");
+        errorDiv.style.color = "#4b8dff";
+        errorDiv.innerHTML = "✅ Login Successful! Loading...";
       } else {
-        alert("⚠️ Your email is not verified yet. Please check your inbox for the verification link.");
+        errorDiv.style.color = "#ff4f4f";
+        errorDiv.innerHTML = "⚠️ Email not verified. Please check your inbox.";
         signOut(auth);
       }
     })
     .catch(err => {
-      alert("Login Error: " + err.code + "\n" + err.message);
+      errorDiv.style.color = "#ff4f4f";
+      errorDiv.innerHTML = "Login Failed: " + err.message;
     });
 }
 
@@ -321,11 +335,18 @@ function artistLogout() {
 
 function forgotPassword() {
   const email = document.getElementById('artistEmailInput').value.trim();
-  if(!email) { alert("Please type your email address in the box first."); return; }
+  const errorDiv = document.getElementById('authError');
+  if(!email) { errorDiv.style.color = "#ff4f4f"; errorDiv.innerHTML = "Type your email first."; return; }
   
   sendPasswordResetEmail(auth, email)
-    .then(() => alert("✅ Password reset email sent! Check your inbox."))
-    .catch(err => alert("Error: " + err.message));
+    .then(() => {
+      errorDiv.style.color = "#4b8dff";
+      errorDiv.innerHTML = "✅ Password reset email sent!";
+    })
+    .catch(err => {
+      errorDiv.style.color = "#ff4f4f";
+      errorDiv.innerHTML = "Error: " + err.message;
+    });
 }
 
 function togglePasswordVisibility() {
@@ -608,4 +629,4 @@ function genrePick(btn,g){
 }
 </script>
 </body>
-  </html>
+        </html>
