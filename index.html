@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -95,8 +95,8 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 <button onclick="showView('artist',this)"><span>♫</span>Artist Hub</button>
 </nav>
 
-<!-- HIDDEN AUDIO TAG -->
-<audio id="vyro-player" style="display:none;" controls preload="metadata">
+<!-- HIDDEN AUDIO TAG (Mobile browser compatible) -->
+<audio id="vyro-player" style="width: 0; height: 0; opacity: 0; position: absolute;" controls preload="metadata">
   <source src="assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3" type="audio/mpeg" />
 </audio>
 
@@ -128,18 +128,24 @@ document.getElementById('playerArtist').textContent=artist;
 document.getElementById('playerEmoji').textContent=emoji;
 document.getElementById('likeBtn').textContent=saved.some(t=>t.title===title)?'♥':'♡';
 
-// Play the real audio
+// Play the real audio with error catching
 const audioPlayer = document.getElementById("vyro-player");
-audioPlayer.play();
-document.getElementById('playPauseBtn').textContent = "⏸";
+audioPlayer.play().then(() => {
+  document.getElementById('playPauseBtn').textContent = "⏸";
+}).catch(error => {
+  alert("Playback error: " + error.message);
+});
 }
 
 function togglePlay() {
 const audioPlayer = document.getElementById("vyro-player");
 const btn = document.getElementById('playPauseBtn');
 if (audioPlayer.paused) {
-  audioPlayer.play();
-  btn.textContent = "⏸";
+  audioPlayer.play().then(() => {
+    btn.textContent = "⏸";
+  }).catch(error => {
+    alert("Playback error: " + error.message);
+  });
 } else {
   audioPlayer.pause();
   btn.textContent = "▶";
