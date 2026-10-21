@@ -29,32 +29,8 @@
 </script>
 
 <style>
-:root{--bg:#090711;--panel:#151122;--panel2:#211634;--purple:#9b5cff;--pink:#ff4fd8;--blue:#4b8dff;--muted:#aaa3bb;--white:#f8f5ff}
+:root{--bg:#090711;--panel:#151122;--panel2:#211634;--purple:#9b5cff;--pink:#ff4fd8;--blue:#4b8dff;--muted:#aaa3bb;--white:#f8f5ff;--green:#00ff88;}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0%,#35145a 0,transparent 30%),var(--bg);color:var(--white);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding-bottom:100px;}
-
-/* --- AI RUN MASTER (SPLASH SCREEN) --- */
-#splashScreen {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: #090711; z-index: 9999;
-  display: flex; flex-direction: column; justify-content: center; align-items: center;
-  transition: opacity 0.5s ease;
-}
-.splash-logo {
-  font-weight: 950; letter-spacing: 5px; font-size: 45px;
-  background: linear-gradient(90deg, #fff, #bd8aff, #ff68d9);
-  -webkit-background-clip: text; color: transparent; margin-bottom: 20px;
-  animation: pulse 2s infinite;
-}
-@keyframes pulse { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
-.splash-loader {
-  width: 200px; height: 4px; background: #302541; border-radius: 10px; overflow: hidden;
-}
-.splash-bar {
-  height: 100%; width: 0%; background: linear-gradient(90deg, var(--purple), var(--pink));
-  animation: loadBar 5s linear forwards;
-}
-@keyframes loadBar { 0% { width: 0%; } 100% { width: 100%; } }
-.splash-text { margin-top: 20px; font-size: 12px; color: var(--muted); letter-spacing: 2px; }
 
 header{display:flex;align-items:center;justify-content:space-between;padding:20px 18px 10px;position:sticky;top:0;background:#090711df;backdrop-filter:blur(15px);z-index:5}
 .logo{font-weight:950;letter-spacing:3px;font-size:25px;background:linear-gradient(90deg,#fff,#bd8aff,#ff68d9);-webkit-background-clip:text;color:transparent}.avatar{border:1px solid #6e4a98;border-radius:50%;width:38px;height:38px;display:grid;place-items:center;background:linear-gradient(135deg,#4d227a,#e247bd);font-weight:800;overflow:hidden;}
@@ -117,13 +93,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 </style>
 </head>
 <body>
-
-<!-- AI RUN MASTER (SPLASH SCREEN) -->
-<div id="splashScreen">
-  <div class="splash-logo">VYRO</div>
-  <div class="splash-loader"><div class="splash-bar"></div></div>
-  <p class="splash-text">AI RUN MASTER INITIALIZING...</p>
-</div>
 
 <header><div class="logo">VYRO</div><div class="avatar" id="userAvatar" style="cursor:pointer;" onclick="showView('artist', document.querySelector('.nav button:last-child'))">V</div></header>
 <main>
@@ -210,10 +179,37 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 
   <!-- DASHBOARD -->
   <div id="artistDashboard" style="display: none;">
+    
+    <!-- Stats -->
     <div class="dash-box">
       <h2 style="margin-top:0;">Welcome back, <br><span id="dashArtistName" style="color:var(--pink);">Artist</span></h2>
       <p style="color:#aaa; font-size:13px;">This is your official cloud dashboard.</p>
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <div style="flex:1; background:#090711; padding:15px; border-radius:12px; text-align:center;">
+          <h3 style="margin:0; font-size:28px; color:var(--purple);" id="statPlays">106</h3>
+          <small style="color:#aaa; font-size:12px;">Plays</small>
+        </div>
+        <div style="flex:1; background:#090711; padding:15px; border-radius:12px; text-align:center;">
+          <h3 style="margin:0; font-size:28px; color:var(--purple);" id="statFollowers">13</h3>
+          <small style="color:#aaa; font-size:12px;">Followers</small>
+        </div>
+      </div>
     </div>
+
+    <!-- Earnings & Withdraw -->
+    <div class="dash-box" style="border-color: var(--green);">
+      <h2 style="font-size:18px; margin-top:0;">Earnings & Payment</h2>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <div>
+          <h3 style="margin:0; font-size:24px; color:var(--green);" id="statEarnings">₦0.00</h3>
+          <small style="color:#aaa; font-size:12px;">Available Balance</small>
+        </div>
+        <button class="dash-btn" style="width: auto; padding: 10px 20px; background: var(--green); color: #000; margin-bottom: 0;" onclick="requestWithdraw()">Withdraw</button>
+      </div>
+      <p style="color:#aaa; font-size:11px; margin:0;">Minimum withdrawal is ₦5,000.</p>
+    </div>
+
+    <!-- Upload -->
     <div class="dash-box">
       <h2 style="font-size:18px; margin-top:0;">Upload New Track</h2>
       <input type="text" id="uploadTitle" class="dash-input" placeholder="Song Title" style="margin-bottom: 15px;">
@@ -267,13 +263,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <audio id="vyro-player" style="width: 0; height: 0; opacity: 0; position: absolute;" controls preload="metadata"></audio>
 
 <script>
-// AI RUN MASTER (SPLASH SCREEN) - 5 SECONDS
-setTimeout(() => {
-  const splash = document.getElementById('splashScreen');
-  splash.style.opacity = '0';
-  setTimeout(() => { splash.style.display = 'none'; }, 500);
-}, 5000); 
-
 const CLOUDINARY_CLOUD_NAME = "ixay5wda"; 
 const CLOUDINARY_UPLOAD_PRESET = "qvk4xtky"; 
 
@@ -327,6 +316,7 @@ if (lastPlayed) {
 renderApp(); 
 setTimeout(() => { loadTracksFromCloud(); }, 1000);
 
+// Delay Firebase Auth to prevent the "Cannot access auth" error
 const { auth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateProfile } = window.firebaseAuth;
 
 onAuthStateChanged(auth, (user) => {
@@ -384,8 +374,8 @@ async function createArtistAccount() {
   errorDiv.innerHTML = "Creating account... Please wait.";
 
   try {
-    // 1-second safety delay to ensure Firebase is fully loaded
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // 1.5-second safety delay to ensure Firebase is fully loaded
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
     let profilePicURL = '';
     
@@ -400,7 +390,6 @@ async function createArtistAccount() {
       if(imgRes.ok) profilePicURL = imgJson.secure_url;
     }
 
-    const { createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut } = window.firebaseAuth;
     const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
     
     await updateProfile(userCredential.user, {
@@ -477,6 +466,10 @@ function togglePasswordVisibility(inputId) {
   const passInput = document.getElementById(inputId);
   if (passInput.type === "password") { passInput.type = "text"; } 
   else { passInput.type = "password"; }
+}
+
+function requestWithdraw() {
+  alert("Withdrawal request submitted! You will receive your funds in 3-5 business days (Simulation).");
 }
 
 async function loadTracksFromCloud() {
@@ -753,4 +746,4 @@ function genrePick(btn,g){
 }
 </script>
 </body>
-        </html>
+                                                    </html>
