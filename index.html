@@ -21,10 +21,58 @@ button{cursor:pointer;border:0;color:white;font-weight:800}.primary{border-radiu
 .genres{display:flex;gap:8px;overflow:auto;padding-bottom:3px}.genre{white-space:nowrap;border-radius:22px;padding:10px 14px;background:#1a1527;border:1px solid #302440;font-size:12px;color:#d8cde8}.genre.active{background:linear-gradient(90deg,#793de2,#c53bb8);border:0;color:#fff}
 .artist-row{display:flex;gap:12px;align-items:center;background:#151122;border-radius:15px;padding:11px;margin-bottom:10px}.artist-art{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#6131bb,#f14cae);font-size:21px}.artist-row strong{font-size:14px}.artist-row small{display:block;color:var(--muted);margin-top:4px}.follow{margin-left:auto;background:#2b2040;border:1px solid #60438a;border-radius:20px;padding:8px 12px;font-size:11px}
 .nav{position:fixed;bottom:0;left:0;right:0;background:#100c1beF;border-top:1px solid #30243c;display:flex;justify-content:space-around;padding:12px 6px max(12px,env(safe-area-inset-bottom));backdrop-filter:blur(18px);z-index:8}.nav button{background:none;color:#9389a7;font-size:10px;display:flex;flex-direction:column;gap:5px;align-items:center;min-width:55px}.nav span{font-size:20px}.nav button.active{color:#d4a5ff}
-.player{position:fixed;bottom:69px;left:10px;right:10px;max-width:740px;margin:auto;background:linear-gradient(90deg,#24113c,#21142f);border:1px solid #59357c;border-radius:15px;padding:10px 12px;display:none;align-items:center;gap:10px;z-index:7;box-shadow:0 8px 30px #0008}.player.show{display:flex}.player-art{width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,#8d48e8,#f14fbe);display:grid;place-items:center}.player-info{min-width:0;flex:1}.player-info strong{font-size:12px;display:block}.player-info small{color:#bdb0cf;font-size:10px}.player button{background:none;font-size:20px}
+.player{position:fixed;bottom:69px;left:10px;right:10px;max-width:740px;margin:auto;background:linear-gradient(90deg,#24113c,#21142f);border:1px solid #59357c;border-radius:15px;padding:10px 12px;display:none;align-items:center;gap:10px;z-index:7;box-shadow:0 8px 30px #0008;cursor:pointer;transition:0.3s}.player.show{display:flex}.player-art{width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,#8d48e8,#f14fbe);display:grid;place-items:center}.player-info{min-width:0;flex:1}.player-info strong{font-size:12px;display:block}.player-info small{color:#bdb0cf;font-size:10px}.player button{background:none;font-size:20px}
 .view{display:none}.view.active{display:block}.empty{padding:25px;border:1px dashed #554169;border-radius:16px;color:#b8adc9;text-align:center;font-size:13px;line-height:1.6}
 footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 @media(min-width:600px){.cards{grid-template-columns:repeat(4,minmax(0,1fr))}.hero{padding:30px}.hero h2{font-size:34px}}
+
+/* --- FULL SCREEN PLAYER STYLES --- */
+#fullPlayer {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(180deg, #1a0b2e, #090711);
+  z-index: 100; display: flex; flex-direction: column;
+  padding: 20px; transform: translateY(100%); transition: transform 0.4s ease;
+}
+#fullPlayer.show { transform: translateY(0); }
+.fp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.fp-header button { background: none; font-size: 30px; color: white; }
+.fp-vinyl-container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; }
+.fp-vinyl {
+  width: 250px; height: 250px; border-radius: 50%;
+  background: repeating-radial-gradient(#111, #111 4px, #222 5px, #222 6px);
+  display: flex; justify-content: center; align-items: center;
+  box-shadow: 0 0 40px rgba(155, 92, 255, 0.3); position: relative;
+  animation: spin 4s linear infinite; animation-play-state: paused;
+}
+.fp-vinyl.playing { animation-play-state: running; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.fp-art {
+  width: 150px; height: 150px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--purple), var(--pink));
+  display: flex; justify-content: center; align-items: center; font-size: 60px;
+  border: 4px solid #000;
+}
+.fp-art::after {
+  content: ""; position: absolute; width: 15px; height: 15px; background: #000; border-radius: 50%;
+}
+.fp-details { text-align: center; margin: 30px 0 20px; width: 100%; }
+.fp-details h2 { margin: 0; font-size: 26px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fp-details p { margin: 5px 0 0; color: var(--muted); font-size: 16px; }
+.fp-progress { width: 100%; margin-bottom: 30px; }
+input[type=range] {
+  -webkit-appearance: none; width: 100%; background: transparent; margin: 10px 0;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%; height: 6px; cursor: pointer; background: #333; border-radius: 5px;
+}
+input[type=range]::-webkit-slider-thumb {
+  height: 16px; width: 16px; border-radius: 50%; background: var(--pink);
+  cursor: pointer; -webkit-appearance: none; margin-top: -5px; box-shadow: 0 0 10px var(--pink);
+}
+.fp-time { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: -5px; }
+.fp-controls { display: flex; justify-content: center; align-items: center; gap: 40px; margin-bottom: 40px; }
+.fp-controls button { background: none; font-size: 40px; color: white; }
+.fp-controls .play-btn { font-size: 60px; background: white; color: black; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
 </style>
 </head>
 <body>
@@ -48,11 +96,21 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 </div>
 
 <!-- EXPLORE TAB -->
-<div class="view" id="explore"><div class="eyebrow">Open your ears</div><h1>Explore <span>sounds.</span></h1><p style="color:var(--muted);font-size:13px;line-height:1.6">A world of independent voices, new releases and unexpected favourites.</p><div class="section-head"><h3>Popular genres</h3></div><div class="genres" style="flex-wrap:wrap"><button class="genre" onclick="filterGenre('Afrobeats')">Afrobeats</button><button class="genre" onclick="filterGenre('Hip-Hop')">Hip-Hop</button><button class="genre" onclick="filterGenre('R&B')">R&B</button><button class="genre" onclick="filterGenre('Gospel')">Gospel</button></div><div class="section-head"><h3>Featured artists</h3></div>
+<div class="view" id="explore"><div class="eyebrow">Open your ears</div><h1>Explore <span>sounds.</span></h1><p style="color:var(--muted);font-size:13px;line-height:1.6">A world of independent voices, new releases and unexpected favourites.</p>
+<div class="section-head"><h3>Popular genres</h3></div>
+<div class="genres" style="flex-wrap:wrap">
+  <button class="genre" onclick="filterGenre(this,'Afrobeats')">Afrobeats</button>
+  <button class="genre" onclick="filterGenre(this,'Hip-Hop')">Hip-Hop</button>
+  <button class="genre" onclick="filterGenre(this,'R&B')">R&B</button>
+  <button class="genre" onclick="filterGenre(this,'Gospel')">Gospel</button>
+</div>
+<div class="section-head"><h3>Featured artists</h3></div>
 <div class="artist-row"><div class="artist-art">🎤</div><div><strong>Alex_skiddo</strong><small>Independent artist · Nigeria</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div>
 <div class="artist-row"><div class="artist-art">🌙</div><div><strong>Ogunba Alex</strong><small>Hip-Hop · Demo profile</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div>
 <div class="artist-row"><div class="artist-art">💜</div><div><strong>Mira Sol</strong><small>R&B · Demo profile</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div>
-<div class="section-head"><h3>All demo tracks</h3></div><div class="cards" id="exploreGrid"></div></div>
+<div class="section-head"><h3>All tracks</h3></div>
+<div class="cards" id="exploreGrid"></div>
+</div>
 
 <!-- SEARCH TAB -->
 <div class="view" id="search"><div class="eyebrow">Find your next favourite</div><h1>Search <span>VYRO.</span></h1><div class="search">⌕ <input placeholder="Type a song or artist..." oninput="searchTracks(this.value)"></div><div id="searchMessage" class="empty">Try searching “Come”, “Loving”, or “Ogunba”.</div></div>
@@ -66,7 +124,6 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 <section class="hero"><span class="pill">INDEPENDENT ARTISTS</span><h2>Your sound deserves a stage.</h2><p>Build your profile, introduce your music and connect with listeners around the world.</p></section>
 <div class="section-head"><h3>What artists can do</h3></div><div class="artist-row"><div class="artist-art">🎶</div><div><strong>Showcase your sound</strong><small>Artist profile, bio and releases</small></div></div><div class="artist-row"><div class="artist-art">📣</div><div><strong>Reach new listeners</strong><small>Discovery and promotional features</small></div></div><div class="artist-row"><div class="artist-art">📊</div><div><strong>Grow with insights</strong><small>Future listening and audience stats</small></div></div>
 
-<!-- GOOGLE FORM -->
 <div style="padding: 20px 0;">
 <h2 style="color: #ffffff; font-size: 24px; margin-bottom: 8px;">Join VYRO as an Artist</h2>
 <p style="color: #aaaaaa; font-size: 14px; margin-bottom: 20px;">Submit your music and get discovered.</p>
@@ -79,16 +136,49 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 <footer>VYRO — FEEL THE SOUND · Prototype preview</footer>
 </main>
 
-<!-- CUSTOM PLAYER -->
-<div class="player" id="player">
+<!-- MINI PLAYER -->
+<div class="player" id="player" onclick="openFullPlayer()">
 <div class="player-art" id="playerEmoji">♫</div>
 <div class="player-info">
 <strong id="playerTitle">Select a track</strong>
 <small id="playerArtist">VYRO player</small>
 </div>
-<button onclick="toggleLike()" id="likeBtn" aria-label="Save track">♡</button>
-<button onclick="nextTrack()" style="font-size: 16px; margin-right: 5px;">⏭</button>
-<button onclick="togglePlay()" id="playPauseBtn">▶</button>
+<button onclick="event.stopPropagation(); toggleLike()" id="likeBtn" aria-label="Save track">♡</button>
+<button onclick="event.stopPropagation(); togglePlay()" id="playPauseBtn">▶</button>
+</div>
+
+<!-- FULL SCREEN PLAYER -->
+<div id="fullPlayer">
+  <div class="fp-header">
+    <button onclick="closeFullPlayer()">⌄</button>
+    <span style="font-size: 12px; font-weight: 800; letter-spacing: 2px; color: var(--muted);">NOW PLAYING</span>
+    <button onclick="toggleLike()" id="fpLikeBtn">♡</button>
+  </div>
+  
+  <div class="fp-vinyl-container">
+    <div class="fp-vinyl" id="fpVinyl">
+      <div class="fp-art" id="fpEmoji">♫</div>
+    </div>
+  </div>
+
+  <div class="fp-details">
+    <h2 id="fpTitle">Select a track</h2>
+    <p id="fpArtist">Artist Name</p>
+  </div>
+
+  <div class="fp-progress">
+    <input type="range" id="seekBar" value="0" min="0" max="100" oninput="seekAudio()">
+    <div class="fp-time">
+      <span id="currentTime">0:00</span>
+      <span id="totalTime">0:00</span>
+    </div>
+  </div>
+
+  <div class="fp-controls">
+    <button onclick="seek(-10)">⏪</button>
+    <button class="play-btn" onclick="togglePlay()" id="fpPlayPauseBtn">▶</button>
+    <button onclick="nextTrack()">⏩</button>
+  </div>
 </div>
 
 <!-- BOTTOM NAVIGATION -->
@@ -110,7 +200,6 @@ let currentTrack = null;
 let currentTrackIndex = 0;
 let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; 
 
-// Updated with your exact file names
 const tracks = [
   {id: '1', title:'Come', artist:'Ogunba Alex', emoji:'🌙', genre:'Afrobeats', src:'assets/Come [8a409715].mp3'},
   {id: '2', title:'Your brother', artist:'Ogunba Alex', emoji:'☁️', genre:'Hip-Hop', src:'assets/Your brother [bf867660].mp3'},
@@ -118,132 +207,200 @@ const tracks = [
   {id: '4', title:'Tell Yur Mummy', artist:'Alex_skiddo', emoji:'✨', genre:'Gospel', src:'assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3'}
 ];
 
-function showView(id,btn){
-document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-document.getElementById(id).classList.add('active');
-document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
-if(btn) btn.classList.add('active');
-if(id==='explore') renderExplore();
-if(id==='library') renderSaved();
-}
+// Audio Player Reference
+const audio = document.getElementById("vyro-player");
 
-function playTrack(title,artist,emoji){
-const trackData = tracks.findIndex(t => t.title === title);
-if(trackData === -1) return;
-
-currentTrackIndex = trackData;
-const track = tracks[currentTrackIndex];
-currentTrack = track;
-
-document.getElementById('player').classList.add('show');
-document.getElementById('playerTitle').textContent = track.title;
-document.getElementById('playerArtist').textContent = track.artist;
-document.getElementById('playerEmoji').textContent = track.emoji;
-document.getElementById('likeBtn').textContent = saved.some(t=>t.title===track.title) ? '♥' : '♡';
-
-const audioPlayer = document.getElementById("vyro-player");
-audioPlayer.src = track.src; 
-
-audioPlayer.play().then(() => {
-  document.getElementById('playPauseBtn').textContent = "⏸";
-}).catch(error => {
-  alert("Playback error: " + error.message);
+// Update progress bar and time
+audio.addEventListener('timeupdate', () => {
+  if (!audio.duration) return;
+  const percent = (audio.currentTime / audio.duration) * 100;
+  document.getElementById('seekBar').value = percent;
+  document.getElementById('currentTime').textContent = formatTime(audio.currentTime);
+  document.getElementById('totalTime').textContent = formatTime(audio.duration);
 });
+
+// Format time for UI (e.g. 1:25)
+function formatTime(seconds) {
+  const min = Math.floor(seconds / 60);
+  const sec = Math.floor(seconds % 60);
+  return `${min}:${sec < 10 ? '0' : ''}${sec}`;
 }
 
-function togglePlay() {
-const audioPlayer = document.getElementById("vyro-player");
-const btn = document.getElementById('playPauseBtn');
-if (audioPlayer.paused) {
-  audioPlayer.play().then(() => {
-    btn.textContent = "⏸";
+// Open / Close Full Player
+function openFullPlayer() { document.getElementById('fullPlayer').classList.add('show'); }
+function closeFullPlayer() { document.getElementById('fullPlayer').classList.remove('show'); }
+
+// Seek Audio
+function seekAudio() {
+  const seekBar = document.getElementById('seekBar');
+  const time = (seekBar.value / 100) * audio.duration;
+  audio.currentTime = time;
+}
+
+// Rewind / Fast Forward
+function seek(amount) {
+  audio.currentTime += amount;
+}
+
+// Play Track
+function playTrack(title,artist,emoji){
+  const trackData = tracks.findIndex(t => t.title === title);
+  if(trackData === -1) return;
+
+  currentTrackIndex = trackData;
+  const track = tracks[currentTrackIndex];
+  currentTrack = track;
+
+  // Update Mini Player
+  document.getElementById('player').classList.add('show');
+  document.getElementById('playerTitle').textContent = track.title;
+  document.getElementById('playerArtist').textContent = track.artist;
+  document.getElementById('playerEmoji').textContent = track.emoji;
+  
+  // Update Full Player
+  document.getElementById('fpTitle').textContent = track.title;
+  document.getElementById('fpArtist').textContent = track.artist;
+  document.getElementById('fpEmoji').textContent = track.emoji;
+
+  // Update Like Buttons
+  const isSaved = saved.some(t=>t.title===track.title);
+  document.getElementById('likeBtn').textContent = isSaved ? '♥' : '♡';
+  document.getElementById('fpLikeBtn').textContent = isSaved ? '♥' : '♡';
+
+  // Play Audio
+  audio.src = track.src; 
+  audio.play().then(() => {
+    updatePlayIcons(true);
   }).catch(error => {
     alert("Playback error: " + error.message);
   });
-} else {
-  audioPlayer.pause();
-  btn.textContent = "▶";
-}
 }
 
+// Toggle Play/Pause
+function togglePlay() {
+  if (audio.paused) {
+    audio.play().then(() => { updatePlayIcons(true); });
+  } else {
+    audio.pause();
+    updatePlayIcons(false);
+  }
+}
+
+// Update Play/Pause Icons & Vinyl Spin
+function updatePlayIcons(isPlaying) {
+  document.getElementById('playPauseBtn').textContent = isPlaying ? "⏸" : "▶";
+  document.getElementById('fpPlayPauseBtn').textContent = isPlaying ? "⏸" : "▶";
+  
+  if(isPlaying) {
+    document.getElementById('fpVinyl').classList.add('playing');
+  } else {
+    document.getElementById('fpVinyl').classList.remove('playing');
+  }
+}
+
+// Next Track
 function nextTrack() {
   currentTrackIndex++;
-  if (currentTrackIndex >= tracks.length) {
-    currentTrackIndex = 0; 
-  }
+  if (currentTrackIndex >= tracks.length) { currentTrackIndex = 0; }
   const next = tracks[currentTrackIndex];
   playTrack(next.title, next.artist, next.emoji);
 }
 
+// Toggle Like
 function toggleLike() {
-if (!currentTrack) return;
-let i = saved.findIndex(t => t.title === currentTrack.title);
-if(i >= 0) {
-  saved.splice(i,1);
-  alert("Removed from Library");
-} else {
-  saved.push(currentTrack);
-  alert("Saved to Library! ❤️");
-}
-localStorage.setItem('vyro_saved', JSON.stringify(saved));
-document.getElementById('likeBtn').textContent = i >= 0 ? '♡' : '♥';
-renderSaved();
+  if (!currentTrack) return;
+  let i = saved.findIndex(t => t.title === currentTrack.title);
+  if(i >= 0) {
+    saved.splice(i,1);
+    alert("Removed from Library");
+  } else {
+    saved.push(currentTrack);
+    alert("Saved to Library! ❤️");
+  }
+  localStorage.setItem('vyro_saved', JSON.stringify(saved));
+  
+  const isSaved = i < 0;
+  document.getElementById('likeBtn').textContent = isSaved ? '♥' : '♡';
+  document.getElementById('fpLikeBtn').textContent = isSaved ? '♥' : '♡';
+  renderSaved();
 }
 
+// Views
+function showView(id,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(id==='explore') renderExplore('All');
+  if(id==='library') renderSaved();
+}
+
+// Render Library
 function renderSaved() {
-const el = document.getElementById('savedTracks');
-if(!saved.length){
-  el.innerHTML = 'No saved tracks yet.<br>Tap ♡ on a track to add it to your library.';
-  el.className = 'empty';
-  return;
-}
-el.className = '';
-el.innerHTML = saved.map(t => `
-  <div class="artist-row">
-    <div class="artist-art">${t.emoji}</div>
-    <div><strong>${t.title}</strong><small>${t.artist}</small></div>
-    <button class="follow" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶ Play</button>
-  </div>
-`).join('');
-}
-
-function renderExplore(){
-document.getElementById('exploreGrid').innerHTML=tracks.map(t=>`
-  <div class="music-card">
-    <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">${t.emoji}</div>
-    <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶</button></div>
-    <div class="artist">${t.artist} · ${t.genre}</div>
-  </div>
-`).join('');
+  const el = document.getElementById('savedTracks');
+  if(!saved.length){
+    el.innerHTML = 'No saved tracks yet.<br>Tap ♡ on a track to add it to your library.';
+    el.className = 'empty';
+    return;
+  }
+  el.className = '';
+  el.innerHTML = saved.map(t => `
+    <div class="artist-row">
+      <div class="artist-art">${t.emoji}</div>
+      <div><strong>${t.title}</strong><small>${t.artist}</small></div>
+      <button class="follow" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶ Play</button>
+    </div>
+  `).join('');
 }
 
+// Render Explore
+function renderExplore(genre = 'All') {
+  const grid = document.getElementById('exploreGrid');
+  const filtered = genre === 'All' ? tracks : tracks.filter(t => t.genre === genre);
+  
+  if(filtered.length === 0) {
+    grid.innerHTML = '<p style="color:#aaa; padding: 20px;">No tracks in this genre yet.</p>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(t => `
+    <div class="music-card">
+      <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">${t.emoji}</div>
+      <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶</button></div>
+      <div class="artist">${t.artist} · ${t.genre}</div>
+    </div>
+  `).join('');
+}
+
+// Genre Filter
+function filterGenre(btn, g) {
+  document.querySelectorAll('.genres .genre').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderExplore(g);
+}
+
+// Search
 function searchTracks(q){
-const term=q.toLowerCase().trim();
-const matches=tracks.filter(t=>(t.title+' '+t.artist+' '+t.genre).toLowerCase().includes(term));
-const msg=document.getElementById('searchMessage');
-if(msg){
-  msg.innerHTML=term?(matches.length?matches.map(t=>`<div class="artist-row"><div class="artist-art">${t.emoji}</div><div><strong>${t.title}</strong><small>${t.artist} · ${t.genre}</small></div><button class="follow" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶ Play</button></div>`).join(''):'No demo results found. Try another search.'): 'Try searching “Come”, “Loving”, or “Ogunba”.';
-}
-document.querySelectorAll('#trackGrid .music-card').forEach(c=>{
-  c.style.display=!term||c.dataset.title.toLowerCase().includes(term)||c.dataset.artist.toLowerCase().includes(term)||c.dataset.genre.toLowerCase().includes(term)?'':'none';
-});
+  const term=q.toLowerCase().trim();
+  const matches=tracks.filter(t=>(t.title+' '+t.artist+' '+t.genre).toLowerCase().includes(term));
+  const msg=document.getElementById('searchMessage');
+  if(msg){
+    msg.innerHTML=term?(matches.length?matches.map(t=>`<div class="artist-row"><div class="artist-art">${t.emoji}</div><div><strong>${t.title}</strong><small>${t.artist} · ${t.genre}</small></div><button class="follow" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶ Play</button></div>`).join(''):'No results found. Try another search.'): 'Try searching “Come”, “Loving”, or “Ogunba”.';
+  }
+  document.querySelectorAll('#trackGrid .music-card').forEach(c=>{
+    c.style.display=!term||c.dataset.title.toLowerCase().includes(term)||c.dataset.artist.toLowerCase().includes(term)||c.dataset.genre.toLowerCase().includes(term)?'':'none';
+  });
 }
 
+// Home Genre Filter
 function genrePick(btn,g){
-document.querySelectorAll('.genre').forEach(b=>b.classList.remove('active'));
-btn.classList.add('active');
-document.querySelectorAll('#trackGrid .music-card').forEach(c=>c.style.display=g==='All'||c.dataset.genre===g?'':'none');
+  document.querySelectorAll('.genre').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#trackGrid .music-card').forEach(c=>c.style.display=g==='All'||c.dataset.genre===g?'':'none');
 }
 
-function filterGenre(g){
-showView('explore');
-renderExplore();
-document.querySelectorAll('#exploreGrid .music-card').forEach((c,i)=>c.style.display=tracks[i].genre===g?'':'none');
-}
-
-// --- FIXED FOLLOW FUNCTIONS ---
+// Follow Artists
 function follow(btn) {
-  // This looks for the <strong> tag INSIDE the div that holds the text
   const artistName = btn.parentElement.querySelector('div > strong').textContent;
   let followedArtists = JSON.parse(localStorage.getItem('vyro_followed')) || [];
   
@@ -262,15 +419,14 @@ function checkFollowedArtists() {
   document.querySelectorAll('.artist-row').forEach(row => {
     const artistNameElement = row.querySelector('div > strong');
     const btn = row.querySelector('.follow');
-    
     if (btn && artistNameElement && followedArtists.includes(artistNameElement.textContent)) {
       btn.textContent = '✓ Following';
     }
   });
 }
 
-// Initialize app
-renderExplore();
+// Initialize
+renderExplore('All');
 renderSaved();
 checkFollowedArtists(); 
 </script>
