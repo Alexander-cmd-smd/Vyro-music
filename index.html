@@ -104,7 +104,7 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 let currentTrack = null; 
 let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; 
 
-// Updated tracks with your exact file paths
+// Tracks mapped to your exact file names
 const tracks = [
   {id: '1', title:'Ayomide', artist:'Ogunba Alex', emoji:'🌙', genre:'Afrobeats', src:'assets/Ogunba Alex - Ayomide - 1792054497422 2026-10-15 09_54.m4a'},
   {id: '2', title:'Pain On Me', artist:'Ogunba Alex', emoji:'☁️', genre:'Hip-Hop', src:'assets/Ogunba Alex - pain on me - 1788704276529 2026-09-06 15_17.m4a'},
@@ -138,7 +138,7 @@ audioPlayer.src = currentTrack.src;
 audioPlayer.play().then(() => {
   document.getElementById('playPauseBtn').textContent = "⏸";
 }).catch(error => {
-  alert("Playback error: " + error.message + "\nCheck the file name in your code.");
+  alert("Playback error: " + error.message + "\nThe browser cannot play this file format or the link is wrong.");
 });
 }
 
@@ -232,4 +232,4 @@ renderExplore();
 renderSaved();
 </script>
 </body>
-                                                                                                                            </html>
+</html>
