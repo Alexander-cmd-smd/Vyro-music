@@ -377,4 +377,94 @@ function renderExplore(genre = 'All') {
   grid.innerHTML = filtered.map(t => `
     <div class="music-card">
       <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">${t.emoji}</div>
-      <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">
+      <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶</button></div>
+      <div class="artist">${t.artist} · ${t.genre}</div>
+    </div>
+  `).join('');
+}
+
+function filterGenre(btn, g) {
+  document.querySelectorAll('.genres .genre').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderExplore(g);
+}
+
+function searchTracks(q){
+  const term=q.toLowerCase().trim();
+  const matches=tracks.filter(t=>(t.title+' '+t.artist+' '+t.genre).toLowerCase().includes(term));
+  const msg=document.getElementById('searchMessage');
+  if(msg){
+    msg.innerHTML=term?(matches.length?matches.map(t=>`<div class="artist-row"><div class="artist-art">${t.emoji}</div><div><strong>${t.title}</strong><small>${t.artist} · ${t.genre}</small></div><button class="follow" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶ Play</button></div>`).join(''):'No results found. Try another search.'): 'Try searching “Come”, “Loving”, or “Ogunba”.';
+  }
+  document.querySelectorAll('#trackGrid .music-card').forEach(c=>{
+    c.style.display=!term||c.dataset.title.toLowerCase().includes(term)||c.dataset.artist.toLowerCase().includes(term)||c.dataset.genre.toLowerCase().includes(term)?'':'none';
+  });
+}
+
+function genrePick(btn,g){
+  document.querySelectorAll('.genre').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#trackGrid .music-card').forEach(c=>c.style.display=g==='All'||c.dataset.genre===g?'':'none');
+}
+
+function follow(btn) {
+  const artistName = btn.parentElement.querySelector('div > strong').textContent;
+  let followedArtists = JSON.parse(localStorage.getItem('vyro_followed')) || [];
+  
+  if (followedArtists.includes(artistName)) {
+    followedArtists = followedArtists.filter(name => name !== artistName);
+    btn.textContent = '+ Follow';
+  } else {
+    followedArtists.push(artistName);
+    btn.textContent = '✓ Following';
+  }
+  localStorage.setItem('vyro_followed', JSON.stringify(followedArtists));
+}
+
+function checkFollowedArtists() {
+  let followedArtists = JSON.parse(localStorage.getItem('vyro_followed')) || [];
+  document.querySelectorAll('.artist-row').forEach(row => {
+    const artistNameElement = row.querySelector('.info-div > strong');
+    const btn = row.querySelector('.follow');
+    if (btn && artistNameElement && followedArtists.includes(artistNameElement.textContent)) {
+      btn.textContent = '✓ Following';
+    }
+  });
+}
+
+// --- ARTIST PROFILE FUNCTIONS ---
+function openArtist(name, bio, emoji) {
+  document.getElementById('apName').textContent = name;
+  document.getElementById('apBio').textContent = bio;
+  document.getElementById('apEmoji').textContent = emoji;
+  
+  // Find all tracks by this artist
+  const artistTracks = tracks.filter(t => t.artist === name);
+  
+  const listEl = document.getElementById('apSongList');
+  if(artistTracks.length === 0) {
+    listEl.innerHTML = '<p style="color:#aaa; font-size: 14px;">No tracks uploaded yet.</p>';
+  } else {
+    listEl.innerHTML = artistTracks.map(t => `
+      <div class="artist-row" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">
+        <div class="artist-art" style="font-size: 16px;">${t.emoji}</div>
+        <div class="info-div"><strong>${t.title}</strong><small>${t.genre}</small></div>
+        <button class="follow" style="padding: 6px 10px;">▶ Play</button>
+      </div>
+    `).join('');
+  }
+  
+  document.getElementById('artistPanel').classList.add('show');
+}
+
+function closeArtist() {
+  document.getElementById('artistPanel').classList.remove('show');
+}
+
+// Initialize
+renderExplore('All');
+renderSaved();
+checkFollowedArtists(); 
+</script>
+</body>
+</html>
