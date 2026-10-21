@@ -221,7 +221,6 @@ let currentUser = null;
 
 const audio = document.getElementById("vyro-player");
 
-// --- RESTORE MUSIC ON REFRESH ---
 let lastPlayed = JSON.parse(localStorage.getItem('vyro_last_played'));
 if (lastPlayed) {
   document.getElementById('player').classList.add('show');
@@ -246,7 +245,6 @@ if (lastPlayed) {
 renderApp(); 
 setTimeout(() => { loadTracksFromCloud(); }, 1000);
 
-// --- FIREBASE AUTHENTICATION LOGIC ---
 const { auth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } = window.firebaseAuth;
 
 onAuthStateChanged(auth, (user) => {
@@ -279,16 +277,14 @@ function artistSignup() {
   createUserWithEmailAndPassword(auth, email, pass)
     .then((userCredential) => {
       localStorage.setItem('vyro_artist_name_' + email, name);
-      document.getElementById('dashArtistName').textContent = name;
-      document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
       
       sendEmailVerification(userCredential.user)
         .then(() => {
-          alert("✅ Account created! We just sent a verification link to your email. Please check your inbox and verify before logging in.");
+          alert("✅ Account created! Please check your email inbox to verify your account before logging in.");
           signOut(auth);
         })
         .catch((error) => {
-          alert("Account created, but we couldn't send the verification email: " + error.message);
+          alert("Account created, but error sending email: " + error.message);
         });
     })
     .catch(err => alert("Signup Error: " + err.message));
@@ -306,12 +302,10 @@ function artistLogin() {
         alert("Welcome back!");
       } else {
         alert("⚠️ Your email is not verified yet. Please check your inbox for the verification link.");
-        sendEmailVerification(userCredential.user);
         signOut(auth);
       }
     })
     .catch(err => {
-      // This will show the exact error from Firebase
       alert("Login Error: " + err.code + "\n" + err.message);
     });
 }
@@ -340,7 +334,6 @@ function togglePasswordVisibility() {
   else { passInput.type = "password"; }
 }
 
-// --- CLOUD DATA ---
 async function loadTracksFromCloud() {
   const { db, collection, getDocs } = window.firebaseDB;
   try {
@@ -446,7 +439,6 @@ async function handleCloudUpload() {
   }
 }
 
-// PLAYER LOGIC
 audio.addEventListener('ended', () => { nextTrack(); });
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
@@ -616,4 +608,4 @@ function genrePick(btn,g){
 }
 </script>
 </body>
-      </html>
+  </html>
