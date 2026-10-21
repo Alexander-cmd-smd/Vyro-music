@@ -24,8 +24,13 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
   
-  window.firebaseDB = { db, collection, addDoc, getDocs };
-  window.firebaseAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, updateProfile };
+  // Expose everything globally so there are no initialization errors
+  window.fb = {
+    db, auth, collection, addDoc, getDocs,
+    createUserWithEmailAndPassword, signInWithEmailAndPassword, 
+    signOut, onAuthStateChanged, sendPasswordResetEmail, 
+    sendEmailVerification, updateProfile
+  };
 </script>
 
 <style>
@@ -90,59 +95,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 .dash-btn { width: 100%; padding: 14px; background: linear-gradient(90deg, var(--purple), var(--pink)); border-radius: 8px; color: white; font-weight: 800; font-size: 16px; margin-bottom: 10px; }
 .dash-logout { background: transparent; border: 1px solid #ff4f4f; color: #ff4f4f; }
 .forgot-link { color: var(--pink); font-size: 12px; text-align: right; display: block; margin-bottom: 15px; cursor: pointer; }
-
-/* Dashboard Stats */
-.stat-card {
-  background: var(--panel);
-  border: 1px solid #2a213a;
-  border-radius: 14px;
-  padding: 14px 8px;
-  text-align: center;
-}
-.stat-value {
-  font-size: 22px;
-  font-weight: 950;
-  background: linear-gradient(90deg, var(--purple), var(--pink));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.stat-label {
-  font-size: 10px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-top: 3px;
-}
-.upload-label {
-  display: block;
-  padding: 12px;
-  background: #090711;
-  border: 1px dashed #302541;
-  border-radius: 8px;
-  text-align: center;
-  font-size: 13px;
-  color: var(--muted);
-  cursor: pointer;
-  margin-bottom: 12px;
-  transition: 0.2s;
-}
-.upload-label:hover {
-  border-color: var(--pink);
-  color: var(--white);
-}
-.my-track-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  background: #090711;
-  border-radius: 10px;
-  margin-bottom: 8px;
-}
-.my-track-item .mt-info { flex: 1; min-width: 0; }
-.my-track-item strong { font-size: 13px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.my-track-item small { color: var(--muted); font-size: 11px; }
 </style>
 </head>
 <body>
@@ -233,83 +185,54 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
   <!-- DASHBOARD -->
   <div id="artistDashboard" style="display: none;">
     
-    <!-- HEADER -->
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <div class="ap-art" id="dashAvatar" style="width:60px;height:60px;font-size:24px;margin:0;">A</div>
-      <div style="flex:1;min-width:0;">
-        <h2 style="margin:0;font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="dashArtistName">Artist</h2>
-        <p style="margin:3px 0 0;color:var(--muted);font-size:12px;">Artist Dashboard</p>
-      </div>
-    </div>
-
-    <!-- STATS CARDS -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
-      <div class="stat-card">
-        <div class="stat-value" id="statStreams">0</div>
-        <div class="stat-label">Streams</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statFollowers">0</div>
-        <div class="stat-label">Followers</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statTracks">0</div>
-        <div class="stat-label">Tracks</div>
-      </div>
-    </div>
-
-    <!-- EARNINGS & PAYMENT -->
+    <!-- Stats -->
     <div class="dash-box">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-        <h3 style="margin:0;font-size:16px;">Earnings & Payment</h3>
-        <span style="font-size:10px;color:var(--green);background:#00ff8815;padding:4px 8px;border-radius:20px;">● LIVE</span>
+      <h2 style="margin-top:0;">Welcome back, <br><span id="dashArtistName" style="color:var(--pink);">Artist</span></h2>
+      <p style="color:#aaa; font-size:13px;">This is your official cloud dashboard.</p>
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <div style="flex:1; background:#090711; padding:15px; border-radius:12px; text-align:center;">
+          <h3 style="margin:0; font-size:28px; color:var(--purple);" id="statPlays">106</h3>
+          <small style="color:#aaa; font-size:12px;">Plays</small>
+        </div>
+        <div style="flex:1; background:#090711; padding:15px; border-radius:12px; text-align:center;">
+          <h3 style="margin:0; font-size:28px; color:var(--purple);" id="statFollowers">13</h3>
+          <small style="color:#aaa; font-size:12px;">Followers</small>
+        </div>
       </div>
-
-      <div style="background:linear-gradient(135deg,#37146a,#6b2c9f);border-radius:14px;padding:18px;margin-bottom:15px;">
-        <p style="margin:0;color:#d9c8f0;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;">Available Balance</p>
-        <h2 style="margin:5px 0 0;font-size:32px;" id="dashBalance">₦0.00</h2>
-        <p style="margin:5px 0 0;color:#d9c8f0;font-size:11px;">Total earned: <span id="dashTotalEarned">₦0.00</span></p>
-      </div>
-
-      <button class="dash-btn" onclick="requestWithdraw()" id="withdrawBtn">💸 Withdraw Funds</button>
-      <p style="text-align:center;color:var(--muted);font-size:11px;margin:8px 0 0;">Minimum withdrawal is ₦5,000</p>
     </div>
 
-    <!-- UPLOAD TRACK -->
+    <!-- Earnings & Withdraw -->
+    <div class="dash-box" style="border-color: var(--green);">
+      <h2 style="font-size:18px; margin-top:0;">Earnings & Payment</h2>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <div>
+          <h3 style="margin:0; font-size:24px; color:var(--green);" id="statEarnings">₦0.00</h3>
+          <small style="color:#aaa; font-size:12px;">Available Balance</small>
+        </div>
+        <button class="dash-btn" style="width: auto; padding: 10px 20px; background: var(--green); color: #000; margin-bottom: 0;" onclick="requestWithdraw()">Withdraw</button>
+      </div>
+      <p style="color:#aaa; font-size:11px; margin:0;">Minimum withdrawal is ₦5,000.</p>
+    </div>
+
+    <!-- Upload -->
     <div class="dash-box">
-      <h3 style="margin:0 0 15px;font-size:16px;">Upload New Track</h3>
+      <h2 style="font-size:18px; margin-top:0;">Upload New Track</h2>
+      <input type="text" id="uploadTitle" class="dash-input" placeholder="Song Title" style="margin-bottom: 15px;">
+      <select id="uploadGenre" class="dash-input" style="margin-bottom: 15px;"><option value="Afrobeats">Afrobeats</option><option value="Hip-Hop">Hip-Hop</option><option value="R&B">R&B</option><option value="Gospel">Gospel</option></select>
       
-      <div class="dash-input-group">
-        <input type="text" id="uploadTitle" class="dash-input" placeholder="Track title">
-      </div>
+      <input type="file" id="audioUpload" accept="audio/*" style="display:none;" onchange="document.getElementById('audioLabel').innerText = event.target.files[0].name;">
+      <button class="dash-btn" onclick="document.getElementById('audioUpload').click()" style="background: #211634; border: 1px solid var(--purple);">
+        <span id="audioLabel">🎵 Select Audio File (MP3)</span>
+      </button>
 
-      <div class="dash-input-group">
-        <select id="uploadGenre" class="dash-input">
-          <option value="Afrobeats">Afrobeats</option>
-          <option value="Hip-Hop">Hip-Hop</option>
-          <option value="R&B">R&B</option>
-          <option value="Gospel">Gospel</option>
-        </select>
-      </div>
+      <input type="file" id="imageUpload" accept="image/*" style="display:none;" onchange="document.getElementById('imageLabel').innerText = event.target.files[0].name;">
+      <button class="dash-btn" onclick="document.getElementById('imageUpload').click()" style="background: #211634; border: 1px solid var(--purple);">
+        <span id="imageLabel">🖼️ Select Cover Image (Optional)</span>
+      </button>
 
-      <input type="file" id="audioUpload" accept="audio/*" style="display:none;" onchange="document.getElementById('audioLabel').innerText='✓ '+this.files[0].name">
-      <label for="audioUpload" id="audioLabel" class="upload-label">🎵 Select Audio File (MP3)</label>
-
-      <input type="file" id="imageUpload" accept="image/*" style="display:none;" onchange="document.getElementById('imageLabel').innerText='✓ '+this.files[0].name">
-      <label for="imageUpload" id="imageLabel" class="upload-label">🖼️ Select Cover Image (Optional)</label>
-
-      <button class="dash-btn" onclick="handleCloudUpload()">🚀 Upload to VYRO</button>
-      <div id="uploadStatus" style="text-align:center;font-size:12px;margin-top:10px;min-height:16px;"></div>
+      <button class="dash-btn" onclick="handleCloudUpload()" style="margin-top: 15px;">🚀 Upload to VYRO</button>
+      <div id="uploadStatus" style="color:#4b8dff; font-size:13px; margin-top:10px;"></div>
     </div>
-
-    <!-- MY TRACKS -->
-    <div class="dash-box">
-      <h3 style="margin:0 0 15px;font-size:16px;">My Tracks</h3>
-      <div id="myTracksList">
-        <div class="empty" style="padding:15px;font-size:12px;">No tracks yet. Upload your first song above.</div>
-      </div>
-    </div>
-
     <button class="dash-btn dash-logout" onclick="artistLogout()">Log Out</button>
   </div>
 </div>
@@ -398,8 +321,8 @@ if (lastPlayed) {
 renderApp(); 
 setTimeout(() => { loadTracksFromCloud(); }, 1000);
 
-// Delay Firebase Auth to prevent the "Cannot access auth" error
-const { auth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateProfile } = window.firebaseAuth;
+// Unpack global Firebase variables
+const { auth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateProfile } = window.fb;
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -413,18 +336,15 @@ onAuthStateChanged(auth, (user) => {
     
     document.getElementById('dashArtistName').textContent = savedArtistName;
     
-    let savedProfilePic = localStorage.getItem('vyro_profile_pic_' + user.email) || user.photoURL;
-    const dashAvatar = document.getElementById('dashAvatar');
+    let savedProfilePic = localStorage.getItem('vyro_profile_pic_' + user.email);
+    if(user.photoURL) savedProfilePic = user.photoURL;
     
     if(savedProfilePic) {
-      dashAvatar.innerHTML = `<img src="${savedProfilePic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-      document.getElementById('userAvatar').innerHTML = `<img src="${savedProfilePic}" style="width:100%;height:100%;object-fit:cover;">`;
+      document.getElementById('userAvatar').innerHTML = `<img src="${savedProfilePic}" style="width:100%; height:100%; object-fit:cover;">`;
     } else {
-      dashAvatar.textContent = savedArtistName.charAt(0).toUpperCase();
       document.getElementById('userAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
     }
-    
-    loadArtistDashboard(savedArtistName);
+
   } else {
     currentUser = null;
     document.getElementById('artistLoggedOut').style.display = 'block';
@@ -433,118 +353,6 @@ onAuthStateChanged(auth, (user) => {
     document.getElementById('userAvatar').textContent = 'V';
   }
 });
-
-function loadArtistDashboard(artistName) {
-  const statsKey = 'vyro_stats_' + artistName;
-  const stats = JSON.parse(localStorage.getItem(statsKey)) || {
-    streams: Math.floor(Math.random() * 500) + 50,
-    followers: Math.floor(Math.random() * 100) + 5,
-    totalEarned: 0
-  };
-  
-  const myTracks = allTracks.filter(t => t.artist === artistName);
-  
-  let totalStreams = 0;
-  myTracks.forEach(t => {
-    const trackStats = JSON.parse(localStorage.getItem('vyro_track_stats_' + t.title)) || { streams: Math.floor(Math.random() * 200) };
-    totalStreams += trackStats.streams;
-  });
-  totalStreams += stats.streams;
-  
-  const streamsEl = document.getElementById('statStreams');
-  const followersEl = document.getElementById('statFollowers');
-  const tracksEl = document.getElementById('statTracks');
-  
-  animateCount(streamsEl, totalStreams);
-  animateCount(followersEl, stats.followers);
-  animateCount(tracksEl, myTracks.length);
-  
-  const balance = totalStreams * 0.05;
-  const totalEarned = balance + (stats.totalEarned || 0);
-  
-  document.getElementById('dashBalance').textContent = '₦' + balance.toFixed(2);
-  document.getElementById('dashTotalEarned').textContent = '₦' + totalEarned.toFixed(2);
-  
-  localStorage.setItem(statsKey, JSON.stringify({ ...stats, streams: totalStreams, followers: stats.followers, totalEarned: stats.totalEarned || 0 }));
-  
-  renderMyTracks(myTracks);
-}
-
-function animateCount(el, target) {
-  let current = 0;
-  const step = Math.max(1, Math.floor(target / 30));
-  const timer = setInterval(() => {
-    current += step;
-    if (current >= target) { current = target; clearInterval(timer); }
-    el.textContent = current.toLocaleString();
-  }, 30);
-}
-
-function renderMyTracks(tracks) {
-  const list = document.getElementById('myTracksList');
-  if (!tracks.length) {
-    list.innerHTML = '<div class="empty" style="padding:15px;font-size:12px;">No tracks yet. Upload your first song above.</div>';
-    return;
-  }
-  list.innerHTML = tracks.map((t) => {
-    const cover = t.cover ? `<img src="${t.cover}" style="width:100%;height:100%;object-fit:cover;">` : '🎵';
-    const safeTitle = t.title.replace(/'/g, "\\'");
-    const safeArtist = t.artist.replace(/'/g, "\\'");
-    return `
-      <div class="my-track-item">
-        <div class="artist-art" style="width:40px;height:40px;border-radius:8px;font-size:16px;">${cover}</div>
-        <div class="mt-info">
-          <strong>${t.title}</strong>
-          <small>${t.genre} · ${t.artist}</small>
-        </div>
-        <button onclick="playTrack('${safeTitle}', '${safeArtist}', '🎵', '${t.src}')" 
-          style="background:linear-gradient(135deg,var(--purple),var(--pink));width:32px;height:32px;border-radius:50%;">▶</button>
-      </div>
-    `;
-  }).join('');
-}
-
-function requestWithdraw() {
-  const balanceText = document.getElementById('dashBalance').textContent;
-  const balance = parseFloat(balanceText.replace('₦', '').replace(/,/g, ''));
-  
-  if (balance < 5000) {
-    alert(`⚠️ Minimum withdrawal is ₦5,000.\n\nYour current balance: ${balanceText}\n\nKeep uploading and sharing your music to earn more!`);
-    return;
-  }
-  
-  const amount = prompt(`Available balance: ${balanceText}\n\nEnter amount to withdraw (min ₦5,000):`, Math.floor(balance));
-  if (!amount) return;
-  
-  const amt = parseFloat(amount);
-  if (isNaN(amt) || amt < 5000) { alert("❌ Minimum withdrawal is ₦5,000"); return; }
-  if (amt > balance) { alert("❌ Amount exceeds available balance"); return; }
-  
-  const bankName = prompt("Enter your bank name:");
-  if (!bankName) return;
-  const accountNo = prompt("Enter your account number (10 digits):");
-  if (!accountNo || accountNo.length !== 10) { alert("❌ Invalid account number"); return; }
-  
-  const artistName = currentUser ? (localStorage.getItem('vyro_artist_name_' + currentUser.email) || currentUser.displayName) : 'Artist';
-  const withdrawals = JSON.parse(localStorage.getItem('vyro_withdrawals_' + artistName)) || [];
-  withdrawals.push({
-    amount: amt,
-    bank: bankName,
-    account: accountNo,
-    date: new Date().toISOString(),
-    status: 'pending'
-  });
-  localStorage.setItem('vyro_withdrawals_' + artistName, JSON.stringify(withdrawals));
-  
-  const statsKey = 'vyro_stats_' + artistName;
-  const stats = JSON.parse(localStorage.getItem(statsKey)) || { totalEarned: 0 };
-  stats.totalEarned = (stats.totalEarned || 0) + amt;
-  localStorage.setItem(statsKey, JSON.stringify(stats));
-  
-  loadArtistDashboard(artistName);
-  
-  alert(`✅ Withdrawal request submitted!\n\nAmount: ₦${amt.toFixed(2)}\nBank: ${bankName}\nAccount: ****${accountNo.slice(-4)}\n\nFunds will arrive in 3-5 business days.`);
-}
 
 function showSignupPage() {
   document.getElementById('artistLoggedOut').style.display = 'none';
@@ -571,8 +379,6 @@ async function createArtistAccount() {
   errorDiv.innerHTML = "Creating account... Please wait.";
 
   try {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
     let profilePicURL = '';
     
     if (imageFile) {
@@ -664,8 +470,12 @@ function togglePasswordVisibility(inputId) {
   else { passInput.type = "password"; }
 }
 
+function requestWithdraw() {
+  alert("Withdrawal request submitted! You will receive your funds in 3-5 business days (Simulation).");
+}
+
 async function loadTracksFromCloud() {
-  const { db, collection, getDocs } = window.firebaseDB;
+  const { db, collection, getDocs } = window.fb;
   try {
     const querySnapshot = await getDocs(collection(db, "tracks"));
     let cloudTracks = [];
@@ -676,10 +486,6 @@ async function loadTracksFromCloud() {
       localStorage.setItem('vyro_cloud_cache', JSON.stringify(cloudTracks));
       allTracks = [...baseTracks, ...cloudTracks];
       renderApp();
-      if (currentUser) {
-        const artistName = localStorage.getItem('vyro_artist_name_' + currentUser.email) || currentUser.displayName || currentUser.email.split('@')[0];
-        loadArtistDashboard(artistName);
-      }
     }
   } catch(e) {
     console.error("Cloud fetch failed, using cache:", e);
@@ -690,14 +496,12 @@ function renderApp() {
   const grid = document.getElementById('trackGrid');
   grid.innerHTML = allTracks.map(t => {
     const coverContent = t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:1;">` : `<div style="position:absolute; z-index:2; font-size: 38px; display:block;">🎵</div>`;
-    const safeTitle = t.title.replace(/'/g, "\\'");
-    const safeArtist = t.artist.replace(/'/g, "\\'");
     return `
       <div class="music-card">
         <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">
           ${coverContent}
         </div>
-        <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${safeTitle}','${safeArtist}','🎵','${t.src}')">▶</button></div>
+        <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','🎵','${t.src}')">▶</button></div>
         <div class="artist">${t.artist} · ${t.genre}</div>
       </div>
     `;
@@ -755,7 +559,6 @@ async function handleCloudUpload() {
     
     cachedCloudTracks.push(newTrack);
     localStorage.setItem('vyro_cloud_cache', JSON.stringify(cachedCloudTracks));
-    localStorage.setItem('vyro_track_stats_' + title, JSON.stringify({ streams: 0 }));
     allTracks = [...baseTracks, ...cachedCloudTracks];
     renderApp();
     
@@ -767,10 +570,8 @@ async function handleCloudUpload() {
     
     status.innerHTML = "✅ Success! Song is live!";
     
-    const { db, collection, addDoc } = window.firebaseDB;
+    const { db, collection, addDoc } = window.fb;
     await addDoc(collection(db, "tracks"), newTrack);
-    
-    loadArtistDashboard(artistName);
     
   } catch (error) {
     console.error(error);
@@ -836,14 +637,7 @@ function playTrack(title,artist,emoji,src){
   document.getElementById('fpLikeBtn').textContent = isSaved ? '♥' : '♡';
 
   audio.src = track.src; 
-  audio.play().then(() => { 
-    updatePlayIcons(true); 
-    // Increment stream count for the track
-    const tsKey = 'vyro_track_stats_' + track.title;
-    const ts = JSON.parse(localStorage.getItem(tsKey)) || { streams: 0 };
-    ts.streams++;
-    localStorage.setItem(tsKey, JSON.stringify(ts));
-  }).catch(error => { alert("Playback error: " + error.message); });
+  audio.play().then(() => { updatePlayIcons(true); }).catch(error => { alert("Playback error: " + error.message); });
   
   localStorage.setItem('vyro_last_played', JSON.stringify(track));
 }
@@ -896,27 +690,19 @@ function showView(id,btn){
   if(btn) btn.classList.add('active');
   if(id==='explore') renderExplore('All');
   if(id==='library') renderSaved();
-  if(id==='artist' && currentUser) {
-    const artistName = localStorage.getItem('vyro_artist_name_' + currentUser.email) || currentUser.displayName || currentUser.email.split('@')[0];
-    loadArtistDashboard(artistName);
-  }
 }
 
 function renderSaved() {
   const el = document.getElementById('savedTracks');
   if(!saved.length){ el.innerHTML = 'No saved tracks yet.<br>Tap ♡ on a track to add it to your library.'; el.className = 'empty'; return; }
   el.className = '';
-  el.innerHTML = saved.map(t => {
-    const safeTitle = t.title.replace(/'/g, "\\'");
-    const safeArtist = t.artist.replace(/'/g, "\\'");
-    return `
-    <div class="artist-row" onclick="playTrack('${safeTitle}','${safeArtist}','🎵','${t.src}')">
+  el.innerHTML = saved.map(t => `
+    <div class="artist-row" onclick="playTrack('${t.title}','${t.artist}','🎵','${t.src}')">
       <div class="artist-art">${t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '🎵'}</div>
       <div class="info-div"><strong>${t.title}</strong><small>${t.artist}</small></div>
       <button class="follow">▶ Play</button>
     </div>
-  `;
-  }).join('');
+  `).join('');
 }
 
 function renderExplore(genre = 'All') {
@@ -927,14 +713,12 @@ function renderExplore(genre = 'All') {
 
   grid.innerHTML = filtered.map(t => {
     const coverContent = t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:1;">` : `<div style="position:absolute; z-index:2; font-size: 38px; display:block;">🎵</div>`;
-    const safeTitle = t.title.replace(/'/g, "\\'");
-    const safeArtist = t.artist.replace(/'/g, "\\'");
     return `
       <div class="music-card">
         <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">
           ${coverContent}
         </div>
-        <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${safeTitle}','${safeArtist}','🎵','${t.src}')">▶</button></div>
+        <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','🎵','${t.src}')">▶</button></div>
         <div class="artist">${t.artist} · ${t.genre}</div>
       </div>
     `;
@@ -952,11 +736,7 @@ function searchTracks(q){
   const matches=allTracks.filter(t=>(t.title+' '+t.artist+' '+t.genre).toLowerCase().includes(term));
   const msg=document.getElementById('searchMessage');
   if(msg){
-    msg.innerHTML=term?(matches.length?matches.map(t=>{
-      const safeTitle = t.title.replace(/'/g, "\\'");
-      const safeArtist = t.artist.replace(/'/g, "\\'");
-      return `<div class="artist-row" onclick="playTrack('${safeTitle}','${safeArtist}','🎵','${t.src}')"><div class="artist-art">${t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '🎵'}</div><div class="info-div"><strong>${t.title}</strong><small>${t.artist} · ${t.genre}</small></div><button class="follow">▶ Play</button></div>`;
-    }).join(''):'No results found. Try another search.'): 'Try searching for an artist or song.';
+    msg.innerHTML=term?(matches.length?matches.map(t=>`<div class="artist-row" onclick="playTrack('${t.title}','${t.artist}','🎵','${t.src}')"><div class="artist-art">${t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '🎵'}</div><div class="info-div"><strong>${t.title}</strong><small>${t.artist} · ${t.genre}</small></div><button class="follow">▶ Play</button></div>`).join(''):'No results found. Try another search.'): 'Try searching for an artist or song.';
   }
 }
 
@@ -968,4 +748,4 @@ function genrePick(btn,g){
 }
 </script>
 </body>
-  </html>
+</html>
