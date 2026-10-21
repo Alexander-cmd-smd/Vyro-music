@@ -308,10 +308,10 @@ async function handleCloudUpload(event) {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-  formData.append('resource_type', 'video'); // Audio files are treated as video by Cloudinary
+  formData.append('resource_type', 'auto'); // CHANGED TO AUTO FOR AUDIO SUPPORT
 
   try {
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`, {
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`, { // CHANGED TO AUTO HERE TOO
       method: 'POST',
       body: formData
     });
@@ -537,4 +537,4 @@ function artistLogout() {
 }
 </script>
 </body>
-      </html>
+  </html>
