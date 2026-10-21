@@ -26,11 +26,12 @@ button{cursor:pointer;border:0;color:white;font-weight:800}.primary{border-radiu
 footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 @media(min-width:600px){.cards{grid-template-columns:repeat(4,minmax(0,1fr))}.hero{padding:30px}.hero h2{font-size:34px}}
 </style>
-
 </head>
 <body>
 <header><div class="logo">VYRO</div><div class="avatar">V</div></header>
 <main>
+
+<!-- HOME TAB -->
 <div class="view active" id="home">
 <div class="eyebrow">Your sound. Your world.</div><h1>Feel something<br><span>different.</span></h1>
 <div class="search">⌕ <input id="searchInput" placeholder="Search songs, artists, moods..." oninput="searchTracks(this.value)"></div>
@@ -45,108 +46,198 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 <div class="music-card" data-genre="Gospel" data-title="Higher Ground" data-artist="Eli Ray"><div class="cover c4">✨</div><div class="track-title">Higher Ground <button class="play-small" onclick="playTrack('Higher Ground','Eli Ray','✨')">▶</button></div><div class="artist">Eli Ray · Gospel</div></div>
 </div>
 </div>
-<audio id="vyro-player" controls preload="metadata">
-  <source src="assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3" type="audio/mpeg" />
-  Your browser does not support audio playback.
-</audio>
+
+<!-- EXPLORE TAB -->
 <div class="view" id="explore"><div class="eyebrow">Open your ears</div><h1>Explore <span>sounds.</span></h1><p style="color:var(--muted);font-size:13px;line-height:1.6">A world of independent voices, new releases and unexpected favourites.</p><div class="section-head"><h3>Popular genres</h3></div><div class="genres" style="flex-wrap:wrap"><button class="genre" onclick="filterGenre('Afrobeats')">Afrobeats</button><button class="genre" onclick="filterGenre('Hip-Hop')">Hip-Hop</button><button class="genre" onclick="filterGenre('R&B')">R&B</button><button class="genre" onclick="filterGenre('Gospel')">Gospel</button></div><div class="section-head"><h3>Featured artists</h3></div><div class="artist-row"><div class="artist-art">🎤</div><div><strong>Alex_skiddo</strong><small>Independent artist · Nigeria</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div><div class="artist-row"><div class="artist-art">🌙</div><div><strong>Nova Lane</strong><small>Hip-Hop · Demo profile</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div><div class="artist-row"><div class="artist-art">💜</div><div><strong>Mira Sol</strong><small>R&B · Demo profile</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div><div class="section-head"><h3>All demo tracks</h3></div><div class="cards" id="exploreGrid"></div></div>
-  <!-- ... the end of your music cards ... -->
-</div> <!-- This closes the track grid -->
-</div> <!-- THIS closes the Home tab! Make sure this is here -->
-<audio id="vyro-player" controls preload="metadata">
-  ...
+
+<!-- SEARCH TAB -->
+<div class="view" id="search"><div class="eyebrow">Find your next favourite</div><h1>Search <span>VYRO.</span></h1><div class="search">⌕ <input placeholder="Type a song or artist..." oninput="searchTracks(this.value)"></div><div id="searchMessage" class="empty">Try searching “Midnight”, “Nova”, or “Afrobeats”.</div></div>
+
+<!-- LIBRARY TAB -->
+<div class="view" id="library"><div class="eyebrow">Your personal space</div><h1>Your <span>Library.</span></h1><p style="color:var(--muted);font-size:13px">Your saved tracks will appear here on this device.</p><div id="savedTracks" class="empty">No saved tracks yet.<br>Tap ♡ on a track to add it to your library.</div></div>
+
+<!-- ARTIST HUB TAB -->
+<div class="view" id="artist"><div class="eyebrow">For the next generation</div><h1>Artist <span>Hub.</span></h1><section class="hero"><span class="pill">INDEPENDENT ARTISTS</span><h2>Your sound deserves a stage.</h2><p>Build your profile, introduce your music and connect with listeners around the world.</p></section><div class="section-head"><h3>What artists can do</h3></div><div class="artist-row"><div class="artist-art">🎶</div><div><strong>Showcase your sound</strong><small>Artist profile, bio and releases</small></div></div><div class="artist-row"><div class="artist-art">📣</div><div><strong>Reach new listeners</strong><small>Discovery and promotional features</small></div></div><div class="artist-row"><div class="artist-art">📊</div><div><strong>Grow with insights</strong><small>Future listening and audience stats</small></div></div>
+  
+  <!-- Artist Hub Google Form -->
+  <div style="padding: 20px 15px;">
+    <h2 style="color: #ffffff; font-size: 24px; margin-bottom: 8px;">Join VYRO as an Artist</h2>
+    <p style="color: #aaaaaa; font-size: 14px; margin-bottom: 20px;">Submit your music and get discovered.</p>
+    <div style="width: 100%; max-width: 700px; margin: 0 auto; border-radius: 16px; overflow: hidden; background: #ffffff;">
+      <iframe 
+        src="https://docs.google.com/forms/d/e/1FAIpQLScDTS-5xJEcqWkigvDe3gmNJ2X4H-wcArtU8T3WwaPmjyxPkw/viewform?embedded=true" 
+        width="100%" 
+        height="1493" 
+        frameborder="0" 
+        marginheight="0" 
+        marginwidth="0"
+        style="display: block; border: none;">
+        Loading form…
+      </iframe>
+    </div>
+  </div>
+
+</div>
+
+<footer>VYRO — FEEL THE SOUND · Prototype preview</footer>
+</main>
+
+<!-- FIXED CUSTOM PLAYER -->
+<div class="player" id="player">
+  <div class="player-art" id="playerEmoji">♫</div>
+  <div class="player-info">
+    <strong id="playerTitle">Select a track</strong>
+    <small id="playerArtist">VYRO player</small>
+  </div>
+  <button onclick="toggleLike()" id="likeBtn" aria-label="Save track">♡</button>
+  <button onclick="togglePlay()" id="playPauseBtn">▶</button>
+</div>
+
+<nav class="nav">
+  <button class="active" onclick="showView('home',this)"><span>⌂</span>Home</button>
+  <button onclick="showView('explore',this)"><span>◈</span>Explore</button>
+  <button onclick="showView('search',this)"><span>⌕</span>Search</button>
+  <button onclick="showView('library',this)"><span>♡</span>Library</button>
+  <button onclick="showView('artist',this)"><span>♫</span>Artist Hub</button>
+</nav>
+
+<!-- HIDDEN REAL AUDIO PLAYER (Fixes the double player) -->
+<audio id="vyro-player" style="display:none;" controls preload="metadata">
+  <source src="assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3" type="audio/mpeg" />
 </audio>
 
-<div class="view" id="explore">...
-<div class="view" id="search"><div class="eyebrow">Find your next favourite</div><h1>Search <span>VYRO.</span></h1><div class="search">⌕ <input placeholder="Type a song or artist..." oninput="searchTracks(this.value)"></div><div id="searchMessage" class="empty">Try searching “Midnight”, “Nova”, or “Afrobeats”.</div></div>
-<div class="view" id="library"><div class="eyebrow">Your personal space</div><h1>Your <span>Library.</span></h1><p style="color:var(--muted);font-size:13px">Your saved tracks will appear here on this device.</p><div id="savedTracks" class="empty">No saved tracks yet.<br>Tap ♡ on a track to add it to your library.</div></div>
-<div class="view" id="artist"><div class="eyebrow">For the next generation</div><h1>Artist <span>Hub.</span></h1><section class="hero"><span class="pill">INDEPENDENT ARTISTS</span><h2>Your sound deserves a stage.</h2><p>Build your profile, introduce your music and connect with listeners around the world.</p><button class="primary" onclick="alert('Prototype preview: artist sign-up and secure music uploads will be added in a later version.')">Join the artist waitlist</button></section><div class="section-head"><h3>What artists can do</h3></div><div class="artist-row"><div class="artist-art">🎶</div><div><strong>Showcase your sound</strong><small>Artist profile, bio and releases</small></div></div><div class="artist-row"><div class="artist-art">📣</div><div><strong>Reach new listeners</strong><small>Discovery and promotional features</small></div></div><div class="artist-row"><div class="artist-art">📊</div><div><strong>Grow with insights</strong><small>Future listening and audience stats</small></div></div><div class="empty">This is a design prototype. Uploads, accounts, streaming rights and payments are not connected yet.</div></div>
-  <!-- Artist Hub Form -->
-<div style="padding: 20px 15px;">
-  <h2 style="color: #ffffff; font-size: 24px; margin-bottom: 8px;">Join VYRO as an Artist</h2>
-  <p style="color: #aaaaaa; font-size: 14px; margin-bottom: 20px;">Submit your music and get discovered.</p>
-  
-  <div style="width: 100%; max-width: 700px; margin: 0 auto; border-radius: 16px; overflow: hidden; background: #ffffff;">
-    <iframe 
-      src="https://docs.google.com/forms/d/e/1FAIpQLScDTS-5xJEcqWkigvDe3gmNJ2X4H-wcArtU8T3WwaPmjyxPkw/viewform?embedded=true" 
-      width="100%" 
-      height="1493" 
-      frameborder="0" 
-      marginheight="0" 
-      marginwidth="0"
-      style="display: block; border: none;">
-      Loading form…
-    </iframe>
-  </div>
-</div>
-<footer>VYRO — FEEL THE SOUND · Prototype preview · Demo tracks are fictional</footer>
-</main>
-<div class="player" id="player"><div class="player-art" id="playerEmoji">♫</div><div class="player-info"><strong id="playerTitle">Select a track</strong><small id="playerArtist">VYRO demo player · no audio attached</small></div><button onclick="toggleLike()" id="likeBtn" aria-label="Save track">♡</button><button onclick="alert('This prototype uses demo controls only. Audio playback will be connected when licensed tracks are added.')">▶</button></div>
-<nav class="nav"><button class="active" onclick="showView('home',this)"><span>⌂</span>Home</button><button onclick="showView('explore',this)"><span>◈</span>Explore</button><button onclick="showView('search',this)"><span>⌕</span>Search</button><button onclick="showView('library',this)"><span>♡</span>Library</button><button onclick="showView('artist',this)"><span>♫</span>Artist Hub</button></nav>
 <script>
-let currentTrack=null; let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; const tr...=[{title:'Midnight Motion',artist:'Demo Artist',emoji:'🌙',genre:'Afrobeats'},{title:'Purple Skies',artist:'Nova Lane',emoji:'☁️',genre:'Hip-Hop'},{title:'Slow Burn',artist:'Mira Sol',emoji:'💫',genre:'R&B'},{title:'Higher Ground',artist:'Eli Ray',emoji:'✨',genre:'Gospel'}];
-function showView(id,btn){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');else{const b=[...document.querySelectorAll('.nav button')].find(x=>x.textContent.toLowerCase().includes(id==='artist'?'artist':id));if(b)b.classList.add('active')}if(id==='explore')renderExplore();if(id==='library')renderSaved()}
-function playTrack(title,artist,emoji){currentTrack={title,artist,emoji};document.getElementById('player').classList.add('show');document.getElementById('playerTitle').textContent=title;document.getElementById('playerArtist').textContent=artist+' · demo player';document.getElementById('playerEmoji').textContent=emoji;document.getElementById('likeBtn').textContent=saved.some(t=>t.title===title)?'♥':'♡'}
+let currentTrack = null; 
+let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; 
+
+// Fixed the typo here (changed "const tr...=[" to "const tracks=")
+const tracks = [
+  {title:'Midnight Motion',artist:'Demo Artist',emoji:'🌙',genre:'Afrobeats'},
+  {title:'Purple Skies',artist:'Nova Lane',emoji:'☁️',genre:'Hip-Hop'},
+  {title:'Slow Burn',artist:'Mira Sol',emoji:'💫',genre:'R&B'},
+  {title:'Higher Ground',artist:'Eli Ray',emoji:'✨',genre:'Gospel'}
+];
+
+function showView(id,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(id==='explore') renderExplore();
+  if(id==='library') renderSaved();
+}
+
+function playTrack(title,artist,emoji){
+  currentTrack={title,artist,emoji};
+  document.getElementById('player').classList.add('show');
+  document.getElementById('playerTitle').textContent=title;
+  document.getElementById('playerArtist').textContent=artist;
+  document.getElementById('playerEmoji').textContent=emoji;
+  document.getElementById('likeBtn').textContent=saved.some(t=>t.title===title)?'♥':'♡';
+  
+  // Play the real audio if it's the real track
+  const audioPlayer = document.getElementById("vyro-player");
+  if (title === "Tell Yur Mummy" || title === "Alex_skiddo") {
+      audioPlayer.play();
+      document.getElementById('playPauseBtn').textContent = "⏸";
+  }
+}
+
+function togglePlay() {
+  const audioPlayer = document.getElementById("vyro-player");
+  const btn = document.getElementById('playPauseBtn');
+  if (audioPlayer.paused) {
+    audioPlayer.play();
+    btn.textContent = "⏸";
+  } else {
+    audioPlayer.pause();
+    btn.textContent = "▶";
+  }
+}
+
 function toggleLike() {
   if (!currentTrack) return;
-  
-  // Check if the song is already in the saved list
   const index = saved.findIndex(t => t.title === currentTrack.title);
   
   if (index > -1) {
-    saved.splice(index, 1); // Remove it
+    saved.splice(index, 1); 
     alert("Removed from Library");
   } else {
-    saved.push({ title: currentTrack.title, artist: currentTrack.artist }); // Add it
+    saved.push({ title: currentTrack.title, artist: currentTrack.artist }); 
     alert("Saved to Library! ❤️");
   }
   
-  // Save to phone memory
   localStorage.setItem('vyro_saved', JSON.stringify(saved));
-  
-  // Refresh the Library tab
+  document.getElementById('likeBtn').textContent = saved.some(t=>t.title===currentTrack.title)?'♥':'♡';
   renderSaved();
 }
+
 function renderSaved() {
-  const libraryContainer = document.getElementById('library');
+  const libraryContainer = document.getElementById('savedTracks');
   if (!libraryContainer) return;
 
   if (saved.length === 0) {
-    libraryContainer.innerHTML = '<p style="color: #aaa; padding: 20px;">No saved songs yet. Tap the ❤️ while a song plays!</p>';
+    libraryContainer.innerHTML = 'No saved tracks yet.<br>Tap ♡ on a track to add it to your library.';
     return;
   }
 
-  let html = '<h2 style="color: #fff; margin-bottom: 15px;">Your Library</h2><ul style="list-style: none; padding: 0;">';
-  
+  let html = '';
   saved.forEach((track) => {
     html += `
-      <li style="background: #1c1c2e; padding: 15px; margin-bottom: 10px; border-radius: 12px; color: white;">
-        <strong>${track.title}</strong><br>
-        <span style="color: #aaa; font-size: 14px;">${track.artist}</span>
-      </li>
+      <div class="artist-row">
+        <div class="artist-art">🎵</div>
+        <div>
+          <strong>${track.title}</strong>
+          <small>${track.artist}</small>
+        </div>
+      </div>
     `;
   });
   
-  html += '</ul>';
   libraryContainer.innerHTML = html;
 }
-function renderExplore(){document.getElementById('exploreGrid').innerHTML=tracks.map(t=>`<div class="music-card"><div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">${t.emoji}</div><div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶</button></div><div class="artist">${t.artist} · ${t.genre}</div></div>`).join('')}
-function searchTracks(q){const term=q.toLowerCase().trim();const matches=tracks.filter(t=>(t.title+' '+t.artist+' '+t.genre).toLowerCase().includes(term));const msg=document.getElementById('searchMessage');if(msg)msg.innerHTML=term?(matches.length?matches.map(t=>`<div class="artist-row"><div class="artist-art">${t.emoji}</div><div><strong>${t.title}</strong><small>${t.artist} · ${t.genre}</small></div><button class="follow" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶ Play</button></div>`).join(''):'No demo results found. Try another search.'): 'Try searching “Midnight”, “Nova”, or “Afrobeats”.';document.querySelectorAll('#trackGrid .music-card').forEach(c=>c.style.display=!term||c.dataset.title.toLowerCase().includes(term)||c.dataset.artist.toLowerCase().includes(term)||c.dataset.genre.toLowerCase().includes(term)?'':'none')}
-function genrePick(btn,g){document.querySelectorAll('.genre').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('#trackGrid .music-card').forEach(c=>c.style.display=g==='All'||c.dataset.genre===g?'':'none')}
-function filterGenre(g){showView('explore');renderExplore();document.querySelectorAll('#exploreGrid .music-card').forEach((c,i)=>c.style.display=tracks[i].genre===g?'':'none')}
-function follow(btn){btn.textContent=btn.textContent.includes('Follow')?'✓ Following':'+ Follow';}
+
+function renderExplore(){
+  document.getElementById('exploreGrid').innerHTML=tracks.map(t=>`
+    <div class="music-card">
+      <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">${t.emoji}</div>
+      <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶</button></div>
+      <div class="artist">${t.artist} · ${t.genre}</div>
+    </div>
+  `).join('');
+}
+
+function searchTracks(q){
+  const term=q.toLowerCase().trim();
+  const matches=tracks.filter(t=>(t.title+' '+t.artist+' '+t.genre).toLowerCase().includes(term));
+  const msg=document.getElementById('searchMessage');
+  if(msg){
+    msg.innerHTML=term?(matches.length?matches.map(t=>`<div class="artist-row"><div class="artist-art">${t.emoji}</div><div><strong>${t.title}</strong><small>${t.artist} · ${t.genre}</small></div><button class="follow" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶ Play</button></div>`).join(''):'No demo results found. Try another search.'): 'Try searching “Midnight”, “Nova”, or “Afrobeats”.';
+  }
+  
+  document.querySelectorAll('#trackGrid .music-card').forEach(c=>{
+    c.style.display=!term||c.dataset.title.toLowerCase().includes(term)||c.dataset.artist.toLowerCase().includes(term)||c.dataset.genre.toLowerCase().includes(term)?'':'none';
+  });
+}
+
+function genrePick(btn,g){
+  document.querySelectorAll('.genre').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#trackGrid .music-card').forEach(c=>c.style.display=g==='All'||c.dataset.genre===g?'':'none');
+}
+
+function filterGenre(g){
+  showView('explore');
+  renderExplore();
+  document.querySelectorAll('#exploreGrid .music-card').forEach((c,i)=>c.style.display=tracks[i].genre===g?'':'none');
+}
+
+function follow(btn){
+  btn.textContent=btn.textContent.includes('Follow')?'✓ Following':'+ Follow';
+}
+
 renderExplore();
 renderSaved();
 </script>
-</body></html>
-<script>
-  const playlist = [
-    { title: "Tell Yur Mummy", src: "assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3" }
-  ];
-
-  function playTrack(index) {
-    const audioPlayer = document.getElementById("vyro-player");
-    audioPlayer.src = playlist[index].src;
-    audioPlayer.play(); 
-  }
-</script>
+</body>
+    </html>
