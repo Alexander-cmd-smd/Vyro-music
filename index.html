@@ -33,33 +33,54 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 
 <!-- HOME TAB -->
 <div class="view active" id="home">
-<div class="eyebrow">Your sound. Your world.</div><h1>Feel something<br><span>different.</span></h1>
-<div class="search">⌕ <input id="searchInput" placeholder="Search songs, artists, moods..." oninput="searchTracks(this.value)"></div>
-<section class="hero"><span class="pill">VYRO SPOTLIGHT</span><h2>Fresh sounds.<br>New energy.</h2><p>Discover your next favourite artist, from local gems to sounds around the world.</p><button class="primary" onclick="showView('explore')">Explore music ↗</button></section>
-<div class="section-head"><h3>Made for your mood</h3><button onclick="showView('explore')">See all</button></div>
-<div class="genres"><button class="genre active" onclick="genrePick(this,'All')">For you</button><button class="genre" onclick="genrePick(this,'Afrobeats')">Afrobeats</button><button class="genre" onclick="genrePick(this,'Hip-Hop')">Hip-Hop</button><button class="genre" onclick="genrePick(this,'R&B')">R&B</button><button class="genre" onclick="genrePick(this,'Gospel')">Gospel</button></div>
-<div class="section-head"><h3>Discover picks</h3><button onclick="showView('explore')">More music</button></div>
-<div class="cards" id="trackGrid">
-<div class="music-card" data-genre="Afrobeats" data-title="Midnight Motion" data-artist="Demo Artist"><div class="cover c1">🌙</div><div class="track-title">Midnight Motion <button class="play-small" onclick="playTrack('Midnight Motion','Demo Artist','🌙')">▶</button></div><div class="artist">Demo Artist · Afrobeats</div></div>
-<div class="music-card" data-genre="Hip-Hop" data-title="Purple Skies" data-artist="Nova Lane"><div class="cover c2">☁️</div><div class="track-title">Purple Skies <button class="play-small" onclick="playTrack('Purple Skies','Nova Lane','☁️')">▶</button></div><div class="artist">Nova Lane · Hip-Hop</div></div>
-<div class="music-card" data-genre="R&B" data-title="Slow Burn" data-artist="Mira Sol"><div class="cover c3">💫</div><div class="track-title">Slow Burn <button class="play-small" onclick="playTrack('Slow Burn','Mira Sol','💫')">▶</button></div><div class="artist">Mira Sol · R&B</div></div>
-<div class="music-card" data-genre="Gospel" data-title="Higher Ground" data-artist="Eli Ray"><div class="cover c4">✨</div><div class="track-title">Higher Ground <button class="play-small" onclick="playTrack('Higher Ground','Eli Ray','✨')">▶</button></div><div class="artist">Eli Ray · Gospel</div></div>
-</div>
+  <div class="eyebrow">Your sound. Your world.</div><h1>Feel something<br><span>different.</span></h1>
+  <div class="search">⌕ <input id="searchInput" placeholder="Search songs, artists, moods..." oninput="searchTracks(this.value)"></div>
+  <section class="hero"><span class="pill">VYRO SPOTLIGHT</span><h2>Fresh sounds.<br>New energy.</h2><p>Discover your next favourite artist, from local gems to sounds around the world.</p><button class="primary" onclick="showView('explore')">Explore music ↗</button></section>
+  <div class="section-head"><h3>Made for your mood</h3><button onclick="showView('explore')">See all</button></div>
+  <div class="genres"><button class="genre active" onclick="genrePick(this,'All')">For you</button><button class="genre" onclick="genrePick(this,'Afrobeats')">Afrobeats</button><button class="genre" onclick="genrePick(this,'Hip-Hop')">Hip-Hop</button><button class="genre" onclick="genrePick(this,'R&B')">R&B</button><button class="genre" onclick="genrePick(this,'Gospel')">Gospel</button></div>
+  <div class="section-head"><h3>Discover picks</h3><button onclick="showView('explore')">More music</button></div>
+  <div class="cards" id="trackGrid">
+    <div class="music-card" data-genre="Afrobeats" data-title="Midnight Motion" data-artist="Demo Artist"><div class="cover c1">🌙</div><div class="track-title">Midnight Motion <button class="play-small" onclick="playTrack('Midnight Motion','Demo Artist','🌙')">▶</button></div><div class="artist">Demo Artist · Afrobeats</div></div>
+    <div class="music-card" data-genre="Hip-Hop" data-title="Purple Skies" data-artist="Nova Lane"><div class="cover c2">☁️</div><div class="track-title">Purple Skies <button class="play-small" onclick="playTrack('Purple Skies','Nova Lane','☁️')">▶</button></div><div class="artist">Nova Lane · Hip-Hop</div></div>
+    <div class="music-card" data-genre="R&B" data-title="Slow Burn" data-artist="Mira Sol"><div class="cover c3">💫</div><div class="track-title">Slow Burn <button class="play-small" onclick="playTrack('Slow Burn','Mira Sol','💫')">▶</button></div><div class="artist">Mira Sol · R&B</div></div>
+    <div class="music-card" data-genre="Gospel" data-title="Higher Ground" data-artist="Eli Ray"><div class="cover c4">✨</div><div class="track-title">Higher Ground <button class="play-small" onclick="playTrack('Higher Ground','Eli Ray','✨')">▶</button></div><div class="artist">Eli Ray · Gospel</div></div>
+  </div>
 </div>
 
 <!-- EXPLORE TAB -->
-<div class="view" id="explore"><div class="eyebrow">Open your ears</div><h1>Explore <span>sounds.</span></h1><p style="color:var(--muted);font-size:13px;line-height:1.6">A world of independent voices, new releases and unexpected favourites.</p><div class="section-head"><h3>Popular genres</h3></div><div class="genres" style="flex-wrap:wrap"><button class="genre" onclick="filterGenre('Afrobeats')">Afrobeats</button><button class="genre" onclick="filterGenre('Hip-Hop')">Hip-Hop</button><button class="genre" onclick="filterGenre('R&B')">R&B</button><button class="genre" onclick="filterGenre('Gospel')">Gospel</button></div><div class="section-head"><h3>Featured artists</h3></div><div class="artist-row"><div class="artist-art">🎤</div><div><strong>Alex_skiddo</strong><small>Independent artist · Nigeria</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div><div class="artist-row"><div class="artist-art">🌙</div><div><strong>Nova Lane</strong><small>Hip-Hop · Demo profile</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div><div class="artist-row"><div class="artist-art">💜</div><div><strong>Mira Sol</strong><small>R&B · Demo profile</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div><div class="section-head"><h3>All demo tracks</h3></div><div class="cards" id="exploreGrid"></div></div>
+<div class="view" id="explore">
+  <div class="eyebrow">Open your ears</div><h1>Explore <span>sounds.</span></h1><p style="color:var(--muted);font-size:13px;line-height:1.6">A world of independent voices, new releases and unexpected favourites.</p>
+  <div class="section-head"><h3>Popular genres</h3></div><div class="genres" style="flex-wrap:wrap"><button class="genre" onclick="filterGenre('Afrobeats')">Afrobeats</button><button class="genre" onclick="filterGenre('Hip-Hop')">Hip-Hop</button><button class="genre" onclick="filterGenre('R&B')">R&B</button><button class="genre" onclick="filterGenre('Gospel')">Gospel</button></div>
+  <div class="section-head"><h3>Featured artists</h3></div>
+  <div class="artist-row"><div class="artist-art">🎤</div><div><strong>Alex_skiddo</strong><small>Independent artist · Nigeria</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div>
+  <div class="artist-row"><div class="artist-art">🌙</div><div><strong>Nova Lane</strong><small>Hip-Hop · Demo profile</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div>
+  <div class="artist-row"><div class="artist-art">💜</div><div><strong>Mira Sol</strong><small>R&B · Demo profile</small></div><button class="follow" onclick="follow(this)">+ Follow</button></div>
+  <div class="section-head"><h3>All demo tracks</h3></div><div class="cards" id="exploreGrid"></div>
+</div>
 
 <!-- SEARCH TAB -->
-<div class="view" id="search"><div class="eyebrow">Find your next favourite</div><h1>Search <span>VYRO.</span></h1><div class="search">⌕ <input placeholder="Type a song or artist..." oninput="searchTracks(this.value)"></div><div id="searchMessage" class="empty">Try searching “Midnight”, “Nova”, or “Afrobeats”.</div></div>
+<div class="view" id="search">
+  <div class="eyebrow">Find your next favourite</div><h1>Search <span>VYRO.</span></h1>
+  <div class="search">⌕ <input placeholder="Type a song or artist..." oninput="searchTracks(this.value)"></div>
+  <div id="searchMessage" class="empty">Try searching “Midnight”, “Nova”, or “Afrobeats”.</div>
+</div>
 
 <!-- LIBRARY TAB -->
-<div class="view" id="library"><div class="eyebrow">Your personal space</div><h1>Your <span>Library.</span></h1><p style="color:var(--muted);font-size:13px">Your saved tracks will appear here on this device.</p><div id="savedTracks" class="empty">No saved tracks yet.<br>Tap ♡ on a track to add it to your library.</div></div>
+<div class="view" id="library">
+  <div class="eyebrow">Your personal space</div><h1>Your <span>Library.</span></h1><p style="color:var(--muted);font-size:13px">Your saved tracks will appear here on this device.</p>
+  <div id="savedTracks" class="empty">No saved tracks yet.<br>Tap ♡ on a track to add it to your library.</div>
+</div>
 
 <!-- ARTIST HUB TAB -->
-<div class="view" id="artist"><div class="eyebrow">For the next generation</div><h1>Artist <span>Hub.</span></h1><section class="hero"><span class="pill">INDEPENDENT ARTISTS</span><h2>Your sound deserves a stage.</h2><p>Build your profile, introduce your music and connect with listeners around the world.</p></section><div class="section-head"><h3>What artists can do</h3></div><div class="artist-row"><div class="artist-art">🎶</div><div><strong>Showcase your sound</strong><small>Artist profile, bio and releases</small></div></div><div class="artist-row"><div class="artist-art">📣</div><div><strong>Reach new listeners</strong><small>Discovery and promotional features</small></div></div><div class="artist-row"><div class="artist-art">📊</div><div><strong>Grow with insights</strong><small>Future listening and audience stats</small></div></div>
+<div class="view" id="artist">
+  <div class="eyebrow">For the next generation</div><h1>Artist <span>Hub.</span></h1>
+  <section class="hero"><span class="pill">INDEPENDENT ARTISTS</span><h2>Your sound deserves a stage.</h2><p>Build your profile, introduce your music and connect with listeners around the world.</p></section>
+  <div class="section-head"><h3>What artists can do</h3></div>
+  <div class="artist-row"><div class="artist-art">🎶</div><div><strong>Showcase your sound</strong><small>Artist profile, bio and releases</small></div></div>
+  <div class="artist-row"><div class="artist-art">📣</div><div><strong>Reach new listeners</strong><small>Discovery and promotional features</small></div></div>
+  <div class="artist-row"><div class="artist-art">📊</div><div><strong>Grow with insights</strong><small>Future listening and audience stats</small></div></div>
   
-  <!-- Artist Hub Google Form -->
+  <!-- Artist Hub Form -->
   <div style="padding: 20px 15px;">
     <h2 style="color: #ffffff; font-size: 24px; margin-bottom: 8px;">Join VYRO as an Artist</h2>
     <p style="color: #aaaaaa; font-size: 14px; margin-bottom: 20px;">Submit your music and get discovered.</p>
@@ -76,13 +97,12 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
       </iframe>
     </div>
   </div>
-
 </div>
 
 <footer>VYRO — FEEL THE SOUND · Prototype preview</footer>
 </main>
 
-<!-- FIXED CUSTOM PLAYER -->
+<!-- CUSTOM VYRO PLAYER (The only one you will see) -->
 <div class="player" id="player">
   <div class="player-art" id="playerEmoji">♫</div>
   <div class="player-info">
@@ -93,6 +113,7 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
   <button onclick="togglePlay()" id="playPauseBtn">▶</button>
 </div>
 
+<!-- BOTTOM NAVIGATION -->
 <nav class="nav">
   <button class="active" onclick="showView('home',this)"><span>⌂</span>Home</button>
   <button onclick="showView('explore',this)"><span>◈</span>Explore</button>
@@ -101,7 +122,7 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
   <button onclick="showView('artist',this)"><span>♫</span>Artist Hub</button>
 </nav>
 
-<!-- HIDDEN REAL AUDIO PLAYER (Fixes the double player) -->
+<!-- REAL AUDIO TAG (Hidden so the ugly white bar doesn't show) -->
 <audio id="vyro-player" style="display:none;" controls preload="metadata">
   <source src="assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3" type="audio/mpeg" />
 </audio>
@@ -110,7 +131,7 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 let currentTrack = null; 
 let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; 
 
-// Fixed the typo here (changed "const tr...=[" to "const tracks=")
+// The Demo Tracks
 const tracks = [
   {title:'Midnight Motion',artist:'Demo Artist',emoji:'🌙',genre:'Afrobeats'},
   {title:'Purple Skies',artist:'Nova Lane',emoji:'☁️',genre:'Hip-Hop'},
@@ -118,15 +139,19 @@ const tracks = [
   {title:'Higher Ground',artist:'Eli Ray',emoji:'✨',genre:'Gospel'}
 ];
 
+// Navigation Switcher
 function showView(id,btn){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  
   document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
+  
   if(id==='explore') renderExplore();
   if(id==='library') renderSaved();
 }
 
+// When you click a track card
 function playTrack(title,artist,emoji){
   currentTrack={title,artist,emoji};
   document.getElementById('player').classList.add('show');
@@ -135,14 +160,13 @@ function playTrack(title,artist,emoji){
   document.getElementById('playerEmoji').textContent=emoji;
   document.getElementById('likeBtn').textContent=saved.some(t=>t.title===title)?'♥':'♡';
   
-  // Play the real audio if it's the real track
+  // Play the real audio file
   const audioPlayer = document.getElementById("vyro-player");
-  if (title === "Tell Yur Mummy" || title === "Alex_skiddo") {
-      audioPlayer.play();
-      document.getElementById('playPauseBtn').textContent = "⏸";
-  }
+  audioPlayer.play();
+  document.getElementById('playPauseBtn').textContent = "⏸";
 }
 
+// When you click the Play/Pause button on the custom player
 function togglePlay() {
   const audioPlayer = document.getElementById("vyro-player");
   const btn = document.getElementById('playPauseBtn');
@@ -155,6 +179,7 @@ function togglePlay() {
   }
 }
 
+// Like / Save track
 function toggleLike() {
   if (!currentTrack) return;
   const index = saved.findIndex(t => t.title === currentTrack.title);
@@ -172,31 +197,34 @@ function toggleLike() {
   renderSaved();
 }
 
+// Display saved tracks in Library Tab
 function renderSaved() {
-  const libraryContainer = document.getElementById('savedTracks');
-  if (!libraryContainer) return;
+  const container = document.getElementById('savedTracks');
+  if (!container) return;
 
   if (saved.length === 0) {
-    libraryContainer.innerHTML = 'No saved tracks yet.<br>Tap ♡ on a track to add it to your library.';
+    container.innerHTML = 'No saved tracks yet.<br>Tap ♡ on a track to add it to your library.';
+    container.className = 'empty';
     return;
   }
 
+  container.className = ''; // Removes the dashed box when songs are added
   let html = '';
   saved.forEach((track) => {
     html += `
       <div class="artist-row">
         <div class="artist-art">🎵</div>
         <div>
-          <strong>${track.title}</strong>
+          <strong>${track.title}</strong><br>
           <small>${track.artist}</small>
         </div>
       </div>
     `;
   });
-  
-  libraryContainer.innerHTML = html;
+  container.innerHTML = html;
 }
 
+// Explore Tab Render
 function renderExplore(){
   document.getElementById('exploreGrid').innerHTML=tracks.map(t=>`
     <div class="music-card">
@@ -207,6 +235,7 @@ function renderExplore(){
   `).join('');
 }
 
+// Search Function
 function searchTracks(q){
   const term=q.toLowerCase().trim();
   const matches=tracks.filter(t=>(t.title+' '+t.artist+' '+t.genre).toLowerCase().includes(term));
@@ -220,24 +249,28 @@ function searchTracks(q){
   });
 }
 
+// Genre Filter on Home Tab
 function genrePick(btn,g){
   document.querySelectorAll('.genre').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   document.querySelectorAll('#trackGrid .music-card').forEach(c=>c.style.display=g==='All'||c.dataset.genre===g?'':'none');
 }
 
+// Genre Filter on Explore Tab
 function filterGenre(g){
   showView('explore');
   renderExplore();
   document.querySelectorAll('#exploreGrid .music-card').forEach((c,i)=>c.style.display=tracks[i].genre===g?'':'none');
 }
 
+// Follow Button
 function follow(btn){
   btn.textContent=btn.textContent.includes('Follow')?'✓ Following':'+ Follow';
 }
 
+// Initial load
 renderExplore();
 renderSaved();
 </script>
 </body>
-    </html>
+</html>
