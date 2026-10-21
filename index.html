@@ -5,12 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#090711">
 <title>VYRO — Feel the Sound</title>
-<!-- FIREBASE SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // YOUR REAL FIREBASE CONFIG
   const firebaseConfig = {
     apiKey: "AIzaSyCQ3b4qiC3nW_5KJcNZE4oh88sJ2agBcaQ",
     authDomain: "vyro-cd4ab.firebaseapp.com",
@@ -49,8 +47,6 @@ button{cursor:pointer;border:0;color:white;font-weight:800}.primary{border-radiu
 .view{display:none}.view.active{display:block}.empty{padding:25px;border:1px dashed #554169;border-radius:16px;color:#b8adc9;text-align:center;font-size:13px;line-height:1.6}
 footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 @media(min-width:600px){.cards{grid-template-columns:repeat(4,minmax(0,1fr))}.hero{padding:30px}.hero h2{font-size:34px}}
-
-/* --- FULL SCREEN PLAYER --- */
 #fullPlayer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #1a0b2e, #090711); z-index: 100; display: flex; flex-direction: column; padding: 20px; transform: translateY(100%); transition: transform 0.4s ease; }
 #fullPlayer.show { transform: translateY(0); }
 .fp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -72,8 +68,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 .fp-controls { display: flex; justify-content: center; align-items: center; gap: 30px; margin-bottom: 40px; }
 .fp-controls button { background: none; font-size: 35px; color: white; }
 .fp-controls .play-btn { font-size: 60px; background: white; color: black; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; padding-left: 5px; }
-
-/* --- ARTIST PROFILE PANEL --- */
 #artistPanel { position: fixed; bottom: 0; left: 0; right: 0; height: 80vh; background: linear-gradient(180deg, #1a0b2e, #090711); z-index: 90; border-radius: 24px 24px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.8); transform: translateY(100%); transition: transform 0.4s ease; display: flex; flex-direction: column; padding: 20px; border-top: 2px solid var(--purple); }
 #artistPanel.show { transform: translateY(0); }
 .ap-header { display: flex; justify-content: flex-end; margin-bottom: 10px; }
@@ -83,8 +77,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 .ap-name { font-size: 24px; font-weight: 800; margin: 0; }
 .ap-bio { color: var(--muted); font-size: 13px; text-align: center; margin-top: 5px; }
 .ap-songs { flex: 1; overflow-y: auto; margin-top: 10px; }
-
-/* --- DASHBOARD STYLES --- */
 .dash-box { background: #151122; border: 1px solid var(--purple); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
 .dash-input-group { position: relative; margin-bottom: 15px; }
 .dash-input { width: 100%; padding: 12px; background: #090711; border: 1px solid #302541; border-radius: 8px; color: white; font-family: inherit; padding-right: 40px; margin-bottom: 0; }
@@ -98,8 +90,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <body>
 <header><div class="logo">VYRO</div><div class="avatar" id="userAvatar" style="cursor:pointer;" onclick="showView('artist', document.querySelector('.nav button:last-child'))">V</div></header>
 <main>
-
-<!-- HOME TAB -->
 <div class="view active" id="home">
 <div class="eyebrow">Your sound. Your world.</div><h1>Feel something<br><span>different.</span></h1>
 <div class="search">⌕ <input id="searchInput" placeholder="Search songs, artists, moods..." oninput="searchTracks(this.value)"></div>
@@ -111,79 +101,44 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <p style="color: #aaa; text-align: center; grid-column: span 2;">Connecting to VYRO Cloud...</p>
 </div>
 </div>
-
-<!-- EXPLORE TAB -->
 <div class="view" id="explore"><div class="eyebrow">Open your ears</div><h1>Explore <span>sounds.</span></h1><p style="color:var(--muted);font-size:13px;line-height:1.6">A world of independent voices, new releases and unexpected favourites.</p>
 <div class="section-head"><h3>Popular genres</h3></div>
-<div class="genres" style="flex-wrap:wrap">
-  <button class="genre" onclick="filterGenre(this,'Afrobeats')">Afrobeats</button>
-  <button class="genre" onclick="filterGenre(this,'Hip-Hop')">Hip-Hop</button>
-  <button class="genre" onclick="filterGenre(this,'R&B')">R&B</button>
-  <button class="genre" onclick="filterGenre(this,'Gospel')">Gospel</button>
-</div>
+<div class="genres" style="flex-wrap:wrap"><button class="genre" onclick="filterGenre(this,'Afrobeats')">Afrobeats</button><button class="genre" onclick="filterGenre(this,'Hip-Hop')">Hip-Hop</button><button class="genre" onclick="filterGenre(this,'R&B')">R&B</button><button class="genre" onclick="filterGenre(this,'Gospel')">Gospel</button></div>
 <div class="section-head"><h3>All tracks</h3></div>
 <div class="cards" id="exploreGrid"></div>
 </div>
-
-<!-- SEARCH TAB -->
 <div class="view" id="search"><div class="eyebrow">Find your next favourite</div><h1>Search <span>VYRO.</span></h1><div class="search">⌕ <input placeholder="Type a song or artist..." oninput="searchTracks(this.value)"></div><div id="searchMessage" class="empty">Try searching for an artist or song.</div></div>
-
-<!-- LIBRARY TAB -->
 <div class="view" id="library"><div class="eyebrow">Your personal space</div><h1>Your <span>Library.</span></h1><p style="color:var(--muted);font-size:13px">Your saved tracks will appear here on this device.</p><div id="savedTracks" class="empty">No saved tracks yet.<br>Tap ♡ on a track to add it to your library.</div></div>
-
-<!-- ARTIST HUB TAB -->
 <div class="view" id="artist">
 <div class="eyebrow">For the next generation</div><h1>Artist <span>Hub.</span></h1>
-
-<!-- LOGGED OUT VIEW -->
 <div id="artistLoggedOut">
   <section class="hero"><span class="pill">INDEPENDENT ARTISTS</span><h2>Your sound deserves a stage.</h2><p>Build your profile, introduce your music and connect with listeners around the world.</p></section>
-  
   <div class="dash-box" style="margin-top: 20px;">
     <h2 style="font-size: 20px; margin-top:0;">Artist Portal</h2>
-    
-    <div class="dash-input-group">
-      <input type="text" id="artistNameInput" class="dash-input" placeholder="Artist Name">
-    </div>
-    
-    <div class="dash-input-group">
-      <input type="password" id="artistPassInput" class="dash-input" placeholder="Create/Enter Password">
-      <button type="button" class="eye-icon" onclick="togglePasswordVisibility()">👁️</button>
-    </div>
-    
+    <div class="dash-input-group"><input type="text" id="artistNameInput" class="dash-input" placeholder="Artist Name"></div>
+    <div class="dash-input-group"><input type="password" id="artistPassInput" class="dash-input" placeholder="Create/Enter Password"><button type="button" class="eye-icon" onclick="togglePasswordVisibility()">👁️</button></div>
     <button class="dash-btn" onclick="artistLogin()">Login / Create Account</button>
-    
     <a class="forgot-link" onclick="forgotPassword()">Forgot Password?</a>
   </div>
 </div>
-
-<!-- LOGGED IN DASHBOARD VIEW -->
 <div id="artistDashboard" style="display: none;">
   <div class="dash-box">
     <h2 style="margin-top:0;">Welcome back, <br><span id="dashArtistName" style="color:var(--pink);">Artist</span></h2>
     <p style="color:#aaa; font-size:13px;">This is your official artist dashboard.</p>
     <div style="display: flex; gap: 10px; margin-top: 20px;">
       <div style="flex:1; background:#090711; padding:10px; border-radius:10px; text-align:center;">
-        <h3 style="margin:0; font-size:24px; color:var(--purple);" id="dashPlays">0</h3>
-        <small style="color:#aaa; font-size:10px;">Plays</small>
+        <h3 style="margin:0; font-size:24px; color:var(--purple);" id="dashPlays">0</h3><small style="color:#aaa; font-size:10px;">Plays</small>
       </div>
       <div style="flex:1; background:#090711; padding:10px; border-radius:10px; text-align:center;">
-        <h3 style="margin:0; font-size:24px; color:var(--purple);" id="dashFollowers">0</h3>
-        <small style="color:#aaa; font-size:10px;">Followers</small>
+        <h3 style="margin:0; font-size:24px; color:var(--purple);" id="dashFollowers">0</h3><small style="color:#aaa; font-size:10px;">Followers</small>
       </div>
     </div>
   </div>
-
   <div class="dash-box">
     <h2 style="font-size:18px; margin-top:0;">Upload New Track</h2>
     <p style="color:#aaa; font-size:12px; margin-bottom:10px;">Select an MP3. It will instantly upload to the cloud and go live!</p>
     <input type="text" id="uploadTitle" class="dash-input" placeholder="Song Title" style="margin-bottom: 15px;">
-    <select id="uploadGenre" class="dash-input" style="margin-bottom: 15px;">
-      <option value="Afrobeats">Afrobeats</option>
-      <option value="Hip-Hop">Hip-Hop</option>
-      <option value="R&B">R&B</option>
-      <option value="Gospel">Gospel</option>
-    </select>
+    <select id="uploadGenre" class="dash-input" style="margin-bottom: 15px;"><option value="Afrobeats">Afrobeats</option><option value="Hip-Hop">Hip-Hop</option><option value="R&B">R&B</option><option value="Gospel">Gospel</option></select>
     <input type="file" id="audioUpload" accept="audio/*" style="display:none;" onchange="handleCloudUpload(event)">
     <button class="dash-btn" onclick="document.getElementById('audioUpload').click()">+ Select Audio File</button>
     <div id="uploadStatus" style="color:#4b8dff; font-size:13px; margin-top:10px;"></div>
@@ -193,23 +148,17 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 </div>
 <footer>VYRO — CLOUD PROTOTYPE</footer>
 </main>
-
-<!-- ARTIST PROFILE PANEL -->
 <div id="artistPanel">
   <div class="ap-header"><button onclick="closeArtist()">✕</button></div>
   <div class="ap-profile"><div class="ap-art" id="apEmoji">🎤</div><h2 class="ap-name" id="apName">Artist Name</h2><p class="ap-bio" id="apBio">Artist Bio</p></div>
   <div class="ap-songs"><h3 style="font-size: 16px; margin-bottom: 10px; color: var(--muted);">Popular Tracks</h3><div id="apSongList"></div></div>
 </div>
-
-<!-- MINI PLAYER -->
 <div class="player" id="player" onclick="openFullPlayer()">
 <div class="player-art" id="playerEmoji">♫</div>
 <div class="player-info"><strong id="playerTitle">Select a track</strong><small id="playerArtist">VYRO player</small></div>
 <button onclick="event.stopPropagation(); toggleLike()" id="likeBtn" aria-label="Save track">♡</button>
 <button onclick="event.stopPropagation(); togglePlay()" id="playPauseBtn">▶</button>
 </div>
-
-<!-- FULL SCREEN PLAYER -->
 <div id="fullPlayer">
   <div class="fp-header"><button onclick="closeFullPlayer()">⌄</button><span style="font-size: 12px; font-weight: 800; letter-spacing: 2px; color: var(--muted);">NOW PLAYING</span><button onclick="toggleLike()" id="fpLikeBtn">♡</button></div>
   <div class="fp-vinyl-container"><div class="fp-vinyl" id="fpVinyl"><div class="fp-art" id="fpEmoji">♫</div></div></div>
@@ -218,8 +167,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
   <div class="fp-controls"><button onclick="seek(-10)">⏪</button><button class="play-btn" onclick="togglePlay()" id="fpPlayPauseBtn">▶</button><button onclick="seek(10)">⏩</button></div>
   <div class="fp-controls" style="gap: 60px; margin-bottom: 20px;"><button onclick="prevTrack()" style="font-size: 30px;">⏮</button><button onclick="nextTrack()" style="font-size: 30px;">⏭</button></div>
 </div>
-
-<!-- BOTTOM NAVIGATION -->
 <nav class="nav">
 <button class="active" onclick="showView('home',this)"><span>⌂</span>Home</button>
 <button onclick="showView('explore',this)"><span>◈</span>Explore</button>
@@ -227,7 +174,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <button onclick="showView('library',this)"><span>♡</span>Library</button>
 <button onclick="showView('artist',this)"><span>♫</span>Artist Hub</button>
 </nav>
-
 <audio id="vyro-player" style="width: 0; height: 0; opacity: 0; position: absolute;" controls preload="metadata"></audio>
 
 <script>
@@ -296,31 +242,27 @@ async function handleCloudUpload(event) {
   formData.append('file', file);
   formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
   
-  // BULLETPROOF UPLOAD URL FOR AUDIO
   const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
 
   try {
-    const response = await fetch(uploadUrl, {
-      method: 'POST',
-      body: formData
-    });
-    
+    const response = await fetch(uploadUrl, { method: 'POST', body: formData });
     const data = await response.json();
-    if(!response.ok) throw new Error(data.error?.message || "Upload failed");
+    if(!response.ok) throw new Error(data.error.message || "Upload failed");
 
     const downloadURL = data.secure_url;
-    alert("✅ Cloudinary Success! Now saving to database..."); // <--- THE TEST ALERT
-    
-    const { db, collection, addDoc } = window.firebaseDB;
     const newTrack = { title: title, artist: currentArtist, genre: genre, src: downloadURL, createdAt: Date.now() };
     
-    await addDoc(collection(db, "tracks"), newTrack);
-    
-    status.innerHTML = "✅ Success! Your track is live globally.";
+    allTracks.push(newTrack);
+    status.innerHTML = "✅ Success! Uploading to global database...";
     document.getElementById('uploadTitle').value = '';
     event.target.value = '';
     
-    loadTracksFromCloud();
+    renderApp();
+    document.getElementById('uploadStatus').innerHTML = "✅ Success! Song is live!";
+
+    const { db, collection, addDoc } = window.firebaseDB;
+    await addDoc(collection(db, "tracks"), newTrack);
+    
   } catch (error) {
     console.error(error);
     status.innerHTML = "❌ Error: " + error.message;
@@ -335,31 +277,22 @@ function togglePasswordVisibility() {
 
 function forgotPassword() {
   const nameInput = document.getElementById('artistNameInput').value.trim();
-  if(!nameInput) {
-    alert("Please type your Artist Name in the box above first, then click Forgot Password.");
-    return;
-  }
+  if(!nameInput) { alert("Please type your Artist Name first."); return; }
   let accounts = JSON.parse(localStorage.getItem('vyro_artist_accounts')) || {};
-  if(!accounts[nameInput]) {
-    alert("No account found with the name: " + nameInput + ". Please check spelling or create a new account.");
-    return;
-  }
+  if(!accounts[nameInput]) { alert("No account found with that name."); return; }
   let newPass = prompt("Reset Password for " + nameInput + "\n\nEnter a new password:");
   if(newPass && newPass.trim() !== "") {
     accounts[nameInput] = newPass.trim();
     localStorage.setItem('vyro_artist_accounts', JSON.stringify(accounts));
-    alert("✅ Password successfully reset! You can now log in.");
+    alert("✅ Password reset! You can now log in.");
   }
 }
 
 function artistLogin() {
   const nameInput = document.getElementById('artistNameInput').value.trim();
   const passInput = document.getElementById('artistPassInput').value.trim();
-  
-  if(!nameInput || !passInput) { alert("Please enter both an artist name and a password."); return; }
-  
+  if(!nameInput || !passInput) { alert("Enter name and password."); return; }
   let accounts = JSON.parse(localStorage.getItem('vyro_artist_accounts')) || {};
-  
   if(accounts[nameInput]) {
     if(accounts[nameInput] === passInput) {
       localStorage.setItem('vyro_current_artist', nameInput);
@@ -548,4 +481,4 @@ function genrePick(btn,g){
 }
 </script>
 </body>
-                               </html>
+</html>
