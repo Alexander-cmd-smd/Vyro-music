@@ -5,6 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#090711">
 <title>VYRO — Feel the Sound</title>
+<!-- FIREBASE SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+  // YOUR REAL FIREBASE CONFIG
+  const firebaseConfig = {
+    apiKey: "AIzaSyCQ3b4qiC3nW_5KJcNZE4oh88sJ2agBcaQ",
+    authDomain: "vyro-cd4ab.firebaseapp.com",
+    projectId: "vyro-cd4ab",
+    storageBucket: "vyro-cd4ab.firebasestorage.app",
+    messagingSenderId: "797181799281",
+    appId: "1:797181799281:web:09d63c50d98429df42e4d0",
+    measurementId: "G-H7FV5PDW3T"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  // Expose functions to window so our regular script can use them
+  window.firebaseDB = { db, storage, collection, addDoc, getDocs, ref, uploadBytes, getDownloadURL };
+</script>
+
 <style>
 :root{--bg:#090711;--panel:#151122;--panel2:#211634;--purple:#9b5cff;--pink:#ff4fd8;--blue:#4b8dff;--muted:#aaa3bb;--white:#f8f5ff}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0%,#35145a 0,transparent 30%),var(--bg);color:var(--white);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding-bottom:100px}
@@ -71,7 +97,7 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 </style>
 </head>
 <body>
-<header><div class="logo">VYRO</div><div class="avatar" id="userAvatar" style="cursor:pointer;" onclick="checkLoginStatus()">V</div></header>
+<header><div class="logo">VYRO</div><div class="avatar" id="userAvatar" style="cursor:pointer;" onclick="showView('artist', document.querySelector('.nav button:last-child'))">V</div></header>
 <main>
 
 <!-- HOME TAB -->
@@ -81,12 +107,9 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <section class="hero"><span class="pill">VYRO SPOTLIGHT</span><h2>Fresh sounds.<br>New energy.</h2><p>Discover your next favourite artist, from local gems to sounds around the world.</p><button class="primary" onclick="showView('explore')">Explore music ↗</button></section>
 <div class="section-head"><h3>Made for your mood</h3><button onclick="showView('explore')">See all</button></div>
 <div class="genres"><button class="genre active" onclick="genrePick(this,'All')">For you</button><button class="genre" onclick="genrePick(this,'Afrobeats')">Afrobeats</button><button class="genre" onclick="genrePick(this,'Hip-Hop')">Hip-Hop</button><button class="genre" onclick="genrePick(this,'R&B')">R&B</button><button class="genre" onclick="genrePick(this,'Gospel')">Gospel</button></div>
-<div class="section-head"><h3>Discover picks</h3><button onclick="showView('explore')">More music</button></div>
+<div class="section-head"><h3>Discover picks (Cloud)</h3><button onclick="showView('explore')">More music</button></div>
 <div class="cards" id="trackGrid">
-<div class="music-card" data-genre="Afrobeats" data-title="Come" data-artist="Ogunba Alex"><div class="cover c1">🌙</div><div class="track-title">Come <button class="play-small" onclick="playTrack('Come','Ogunba Alex','🌙')">▶</button></div><div class="artist">Ogunba Alex · Afrobeats</div></div>
-<div class="music-card" data-genre="Hip-Hop" data-title="Your brother" data-artist="Ogunba Alex"><div class="cover c2">☁️</div><div class="track-title">Your brother <button class="play-small" onclick="playTrack('Your brother','Ogunba Alex','☁️')">▶</button></div><div class="artist">Ogunba Alex · Hip-Hop</div></div>
-<div class="music-card" data-genre="R&B" data-title="Loving" data-artist="Alex_skiddo"><div class="cover c3">💫</div><div class="track-title">Loving <button class="play-small" onclick="playTrack('Loving','Alex_skiddo','💫')">▶</button></div><div class="artist">Alex_skiddo · R&B</div></div>
-<div class="music-card" data-genre="Gospel" data-title="Tell Yur Mummy" data-artist="Alex_skiddo"><div class="cover c4">✨</div><div class="track-title">Tell Yur Mummy <button class="play-small" onclick="playTrack('Tell Yur Mummy','Alex_skiddo','✨')">▶</button></div><div class="artist">Alex_skiddo · Gospel</div></div>
+<p style="color: #aaa; text-align: center; grid-column: span 2;">Connecting to VYRO Cloud...</p>
 </div>
 </div>
 
@@ -99,25 +122,12 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
   <button class="genre" onclick="filterGenre(this,'R&B')">R&B</button>
   <button class="genre" onclick="filterGenre(this,'Gospel')">Gospel</button>
 </div>
-<div class="section-head"><h3>Featured artists</h3></div>
-<div class="artist-row" onclick="openArtist('Alex_skiddo', 'Independent artist · Nigeria', '🎤')">
-  <div class="artist-art">🎤</div><div class="info-div"><strong>Alex_skiddo</strong><small>Independent artist · Nigeria</small></div>
-  <button class="follow" onclick="event.stopPropagation(); follow(this)">+ Follow</button>
-</div>
-<div class="artist-row" onclick="openArtist('Ogunba Alex', 'Hip-Hop · Demo profile', '🌙')">
-  <div class="artist-art">🌙</div><div class="info-div"><strong>Ogunba Alex</strong><small>Hip-Hop · Demo profile</small></div>
-  <button class="follow" onclick="event.stopPropagation(); follow(this)">+ Follow</button>
-</div>
-<div class="artist-row" onclick="openArtist('Mira Sol', 'R&B · Demo profile', '💜')">
-  <div class="artist-art">💜</div><div class="info-div"><strong>Mira Sol</strong><small>R&B · Demo profile</small></div>
-  <button class="follow" onclick="event.stopPropagation(); follow(this)">+ Follow</button>
-</div>
 <div class="section-head"><h3>All tracks</h3></div>
 <div class="cards" id="exploreGrid"></div>
 </div>
 
 <!-- SEARCH TAB -->
-<div class="view" id="search"><div class="eyebrow">Find your next favourite</div><h1>Search <span>VYRO.</span></h1><div class="search">⌕ <input placeholder="Type a song or artist..." oninput="searchTracks(this.value)"></div><div id="searchMessage" class="empty">Try searching “Come”, “Loving”, or “Ogunba”.</div></div>
+<div class="view" id="search"><div class="eyebrow">Find your next favourite</div><h1>Search <span>VYRO.</span></h1><div class="search">⌕ <input placeholder="Type a song or artist..." oninput="searchTracks(this.value)"></div><div id="searchMessage" class="empty">Try searching for an artist or song.</div></div>
 
 <!-- LIBRARY TAB -->
 <div class="view" id="library"><div class="eyebrow">Your personal space</div><h1>Your <span>Library.</span></h1><p style="color:var(--muted);font-size:13px">Your saved tracks will appear here on this device.</p><div id="savedTracks" class="empty">No saved tracks yet.<br>Tap ♡ on a track to add it to your library.</div></div>
@@ -130,24 +140,16 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <div id="artistLoggedOut">
   <section class="hero"><span class="pill">INDEPENDENT ARTISTS</span><h2>Your sound deserves a stage.</h2><p>Build your profile, introduce your music and connect with listeners around the world.</p></section>
   
-  <!-- Artist Login/Register Form -->
   <div class="dash-box" style="margin-top: 20px;">
     <h2 style="font-size: 20px; margin-top:0;">Artist Portal</h2>
     <p style="color:#aaa; font-size:12px; margin-bottom:15px;">Enter a name and password to access your dashboard.</p>
-    <input type="text" id="artistNameInput" class="dash-input" placeholder="Artist Name (e.g. Ogunba Alex)">
+    <input type="text" id="artistNameInput" class="dash-input" placeholder="Artist Name">
     <input type="password" id="artistPassInput" class="dash-input" placeholder="Create/Enter Password">
     <button class="dash-btn" onclick="artistLogin()">Login / Create Account</button>
   </div>
-
-  <div style="padding: 20px 0;">
-  <h2 style="color: #ffffff; font-size: 20px; margin-bottom: 8px;">Or Apply to Join</h2>
-  <div style="width: 100%; max-width: 700px; margin: 0 auto; border-radius: 16px; overflow: hidden; background: #ffffff;">
-  <iframe src="https://docs.google.com/forms/d/e/1FAIpQLScDTS-5xJEcqWkigvDe3gmNJ2X4H-wcArtU8T3WwaPmjyxPkw/viewform?embedded=true" width="100%" height="800" frameborder="0" marginheight="0" marginwidth="0" style="display: block; border: none;">Loading form…</iframe>
-  </div>
-  </div>
 </div>
 
-<!-- LOGGED IN DASHBOARD VIEW (Hidden by default) -->
+<!-- LOGGED IN DASHBOARD VIEW -->
 <div id="artistDashboard" style="display: none;">
   <div class="dash-box">
     <h2 style="margin-top:0;">Welcome back, <br><span id="dashArtistName" style="color:var(--pink);">Artist</span></h2>
@@ -155,37 +157,43 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
     
     <div style="display: flex; gap: 10px; margin-top: 20px;">
       <div style="flex:1; background:#090711; padding:10px; border-radius:10px; text-align:center;">
-        <h3 style="margin:0; font-size:24px; color:var(--purple);">124</h3>
+        <h3 style="margin:0; font-size:24px; color:var(--purple);" id="dashPlays">0</h3>
         <small style="color:#aaa; font-size:10px;">Plays</small>
       </div>
       <div style="flex:1; background:#090711; padding:10px; border-radius:10px; text-align:center;">
-        <h3 style="margin:0; font-size:24px; color:var(--purple);">18</h3>
+        <h3 style="margin:0; font-size:24px; color:var(--purple);" id="dashFollowers">0</h3>
         <small style="color:#aaa; font-size:10px;">Followers</small>
       </div>
     </div>
   </div>
 
   <div class="dash-box">
-    <h2 style="font-size:18px; margin-top:0;">Upload New Track</h2>
-    <p style="color:#aaa; font-size:12px; margin-bottom:10px;">Select an MP3 file to add it to VYRO.</p>
-    <input type="file" id="audioUpload" accept=".mp3,.m4a" style="display:none;" onchange="handleUpload(event)">
+    <h2 style="font-size:18px; margin-top:0;">Upload New Track (Cloud)</h2>
+    <p style="color:#aaa; font-size:12px; margin-bottom:10px;">Select an MP3. It will instantly upload to the cloud and go live for everyone!</p>
+    
+    <input type="text" id="uploadTitle" class="dash-input" placeholder="Song Title">
+    <select id="uploadGenre" class="dash-input">
+      <option value="Afrobeats">Afrobeats</option>
+      <option value="Hip-Hop">Hip-Hop</option>
+      <option value="R&B">R&B</option>
+      <option value="Gospel">Gospel</option>
+    </select>
+
+    <input type="file" id="audioUpload" accept="audio/*" style="display:none;" onchange="handleCloudUpload(event)">
     <button class="dash-btn" onclick="document.getElementById('audioUpload').click()">+ Select Audio File</button>
     <div id="uploadStatus" style="color:#4b8dff; font-size:13px; margin-top:10px;"></div>
   </div>
 
   <button class="dash-btn dash-logout" onclick="artistLogout()">Log Out</button>
 </div>
-
 </div>
 
-<footer>VYRO — FEEL THE SOUND · Prototype preview</footer>
+<footer>VYRO — CLOUD PROTOTYPE</footer>
 </main>
 
 <!-- ARTIST PROFILE PANEL -->
 <div id="artistPanel">
-  <div class="ap-header">
-    <button onclick="closeArtist()">✕</button>
-  </div>
+  <div class="ap-header"><button onclick="closeArtist()">✕</button></div>
   <div class="ap-profile">
     <div class="ap-art" id="apEmoji">🎤</div>
     <h2 class="ap-name" id="apName">Artist Name</h2>
@@ -200,10 +208,7 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <!-- MINI PLAYER -->
 <div class="player" id="player" onclick="openFullPlayer()">
 <div class="player-art" id="playerEmoji">♫</div>
-<div class="player-info">
-<strong id="playerTitle">Select a track</strong>
-<small id="playerArtist">VYRO player</small>
-</div>
+<div class="player-info"><strong id="playerTitle">Select a track</strong><small id="playerArtist">VYRO player</small></div>
 <button onclick="event.stopPropagation(); toggleLike()" id="likeBtn" aria-label="Save track">♡</button>
 <button onclick="event.stopPropagation(); togglePlay()" id="playPauseBtn">▶</button>
 </div>
@@ -215,32 +220,19 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
     <span style="font-size: 12px; font-weight: 800; letter-spacing: 2px; color: var(--muted);">NOW PLAYING</span>
     <button onclick="toggleLike()" id="fpLikeBtn">♡</button>
   </div>
-  
   <div class="fp-vinyl-container">
-    <div class="fp-vinyl" id="fpVinyl">
-      <div class="fp-art" id="fpEmoji">♫</div>
-    </div>
+    <div class="fp-vinyl" id="fpVinyl"><div class="fp-art" id="fpEmoji">♫</div></div>
   </div>
-
-  <div class="fp-details">
-    <h2 id="fpTitle">Select a track</h2>
-    <p id="fpArtist">Artist Name</p>
-  </div>
-
+  <div class="fp-details"><h2 id="fpTitle">Select a track</h2><p id="fpArtist">Artist Name</p></div>
   <div class="fp-progress">
     <input type="range" id="seekBar" value="0" min="0" max="100" oninput="seekAudio()">
-    <div class="fp-time">
-      <span id="currentTime">0:00</span>
-      <span id="totalTime">0:00</span>
-    </div>
+    <div class="fp-time"><span id="currentTime">0:00</span><span id="totalTime">0:00</span></div>
   </div>
-
   <div class="fp-controls">
     <button onclick="seek(-10)">⏪</button>
     <button class="play-btn" onclick="togglePlay()" id="fpPlayPauseBtn">▶</button>
     <button onclick="seek(10)">⏩</button>
   </div>
-  
   <div class="fp-controls" style="gap: 60px; margin-bottom: 20px;">
     <button onclick="prevTrack()" style="font-size: 30px;">⏮</button>
     <button onclick="nextTrack()" style="font-size: 30px;">⏭</button>
@@ -256,30 +248,111 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <button onclick="showView('artist',this)"><span>♫</span>Artist Hub</button>
 </nav>
 
-<!-- HIDDEN AUDIO TAG -->
-<audio id="vyro-player" style="width: 0; height: 0; opacity: 0; position: absolute;" controls preload="metadata">
-  <source src="" type="audio/mpeg" />
-</audio>
+<audio id="vyro-player" style="width: 0; height: 0; opacity: 0; position: absolute;" controls preload="metadata"></audio>
 
 <script>
 let currentTrack = null; 
 let currentTrackIndex = 0;
 let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; 
-
-const tracks = [
-  {id: '1', title:'Come', artist:'Ogunba Alex', emoji:'🌙', genre:'Afrobeats', src:'assets/Come [8a409715].mp3'},
-  {id: '2', title:'Your brother', artist:'Ogunba Alex', emoji:'☁️', genre:'Hip-Hop', src:'assets/Your brother [bf867660].mp3'},
-  {id: '3', title:'Loving', artist:'Alex_skiddo', emoji:'💫', genre:'R&B', src:'assets/Loving [947f2a25].mp3'},
-  {id: '4', title:'Tell Yur Mummy', artist:'Alex_skiddo', emoji:'✨', genre:'Gospel', src:'assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3'}
-];
+let allTracks = []; // This will be filled from Firebase!
 
 const audio = document.getElementById("vyro-player");
 
+// Wait a second for Firebase to load before starting
+setTimeout(() => {
+  loadTracksFromCloud();
+}, 1500);
+
+async function loadTracksFromCloud() {
+  const { db, collection, getDocs } = window.firebaseDB;
+  try {
+    const querySnapshot = await getDocs(collection(db, "tracks"));
+    
+    // Clear current tracks and load new ones
+    allTracks = [];
+    querySnapshot.forEach((doc) => {
+      allTracks.push(doc.data());
+    });
+
+    // If database is empty, show a message
+    if(allTracks.length === 0) {
+      document.getElementById('trackGrid').innerHTML = '<p style="color:#aaa; grid-column: span 2;">No tracks in the cloud yet. Log in as an artist to upload the first one!</p>';
+    } else {
+      renderApp();
+    }
+  } catch(e) {
+    console.error("Error loading tracks: ", e);
+    document.getElementById('trackGrid').innerHTML = '<p style="color:#ff4f4f; grid-column: span 2;">Error connecting to Firebase. Check your config code.</p>';
+  }
+}
+
+function renderApp() {
+  const grid = document.getElementById('trackGrid');
+  grid.innerHTML = allTracks.map(t => `
+    <div class="music-card">
+      <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">🎵</div>
+      <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','🎵','${t.src}')">▶</button></div>
+      <div class="artist">${t.artist} · ${t.genre}</div>
+    </div>
+  `).join('');
+
+  renderExplore('All');
+  renderSaved();
+}
+
+// --- CLOUD UPLOAD FUNCTION ---
+async function handleCloudUpload(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  
+  const title = document.getElementById('uploadTitle').value.trim();
+  const genre = document.getElementById('uploadGenre').value;
+  const currentArtist = localStorage.getItem('vyro_current_artist');
+  
+  if(!title) { alert("Please enter a song title."); event.target.value = ''; return; }
+  
+  const status = document.getElementById('uploadStatus');
+  status.innerHTML = "⏳ Uploading to Cloud... Please wait.";
+  
+  const { db, storage, collection, addDoc, ref, uploadBytes, getDownloadURL } = window.firebaseDB;
+
+  try {
+    // 1. Upload file to Firebase Storage
+    const storageRef = ref(storage, 'tracks/' + Date.now() + '_' + file.name);
+    const snapshot = await uploadBytes(storageRef, file);
+    
+    // 2. Get the download URL
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    
+    // 3. Save track data to Firestore Database
+    const newTrack = {
+      title: title,
+      artist: currentArtist,
+      genre: genre,
+      src: downloadURL,
+      createdAt: Date.now()
+    };
+    
+    await addDoc(collection(db, "tracks"), newTrack);
+    
+    status.innerHTML = "✅ Success! Your track is live globally.";
+    document.getElementById('uploadTitle').value = '';
+    event.target.value = '';
+    
+    // Reload tracks
+    loadTracksFromCloud();
+    
+  } catch (error) {
+    console.error(error);
+    status.innerHTML = "❌ Error: " + error.message;
+  }
+}
+
+// --- PLAYER LOGIC ---
 audio.addEventListener('ended', () => { nextTrack(); });
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
-  const percent = (audio.currentTime / audio.duration) * 100;
-  document.getElementById('seekBar').value = percent;
+  document.getElementById('seekBar').value = (audio.currentTime / audio.duration) * 100;
   document.getElementById('currentTime').textContent = formatTime(audio.currentTime);
   document.getElementById('totalTime').textContent = formatTime(audio.duration);
 });
@@ -293,30 +366,25 @@ function formatTime(seconds) {
 
 function openFullPlayer() { document.getElementById('fullPlayer').classList.add('show'); }
 function closeFullPlayer() { document.getElementById('fullPlayer').classList.remove('show'); }
-
-function seekAudio() {
-  const seekBar = document.getElementById('seekBar');
-  const time = (seekBar.value / 100) * audio.duration;
-  audio.currentTime = time;
-}
+function seekAudio() { audio.currentTime = (document.getElementById('seekBar').value / 100) * audio.duration; }
 function seek(amount) { audio.currentTime += amount; }
 
-function playTrack(title,artist,emoji){
-  const trackData = tracks.findIndex(t => t.title === title);
+function playTrack(title,artist,emoji,src){
+  const trackData = allTracks.findIndex(t => t.title === title);
   if(trackData === -1) return;
 
   currentTrackIndex = trackData;
-  const track = tracks[currentTrackIndex];
+  const track = allTracks[currentTrackIndex];
   currentTrack = track;
 
   document.getElementById('player').classList.add('show');
   document.getElementById('playerTitle').textContent = track.title;
   document.getElementById('playerArtist').textContent = track.artist;
-  document.getElementById('playerEmoji').textContent = track.emoji;
+  document.getElementById('playerEmoji').textContent = '🎵';
   
   document.getElementById('fpTitle').textContent = track.title;
   document.getElementById('fpArtist').textContent = track.artist;
-  document.getElementById('fpEmoji').textContent = track.emoji;
+  document.getElementById('fpEmoji').textContent = '🎵';
 
   const isSaved = saved.some(t=>t.title===track.title);
   document.getElementById('likeBtn').textContent = isSaved ? '♥' : '♡';
@@ -340,18 +408,18 @@ function updatePlayIcons(isPlaying) {
 
 function nextTrack() {
   currentTrackIndex++;
-  if (currentTrackIndex >= tracks.length) { currentTrackIndex = 0; } 
-  const next = tracks[currentTrackIndex];
-  playTrack(next.title, next.artist, next.emoji);
+  if (currentTrackIndex >= allTracks.length) { currentTrackIndex = 0; } 
+  const next = allTracks[currentTrackIndex];
+  playTrack(next.title, next.artist, '🎵', next.src);
 }
 
 function prevTrack() {
   if (audio.currentTime > 3) { audio.currentTime = 0; } 
   else {
     currentTrackIndex--;
-    if (currentTrackIndex < 0) { currentTrackIndex = tracks.length - 1; } 
-    const prev = tracks[currentTrackIndex];
-    playTrack(prev.title, prev.artist, prev.emoji);
+    if (currentTrackIndex < 0) { currentTrackIndex = allTracks.length - 1; } 
+    const prev = allTracks[currentTrackIndex];
+    playTrack(prev.title, prev.artist, '🎵', prev.src);
   }
 }
 
@@ -383,24 +451,24 @@ function renderSaved() {
   if(!saved.length){ el.innerHTML = 'No saved tracks yet.<br>Tap ♡ on a track to add it to your library.'; el.className = 'empty'; return; }
   el.className = '';
   el.innerHTML = saved.map(t => `
-    <div class="artist-row">
-      <div class="artist-art">${t.emoji}</div>
-      <div><strong>${t.title}</strong><small>${t.artist}</small></div>
-      <button class="follow" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶ Play</button>
+    <div class="artist-row" onclick="playTrack('${t.title}','${t.artist}','🎵','${t.src}')">
+      <div class="artist-art">🎵</div>
+      <div class="info-div"><strong>${t.title}</strong><small>${t.artist}</small></div>
+      <button class="follow">▶ Play</button>
     </div>
   `).join('');
 }
 
 function renderExplore(genre = 'All') {
   const grid = document.getElementById('exploreGrid');
-  const filtered = genre === 'All' ? tracks : tracks.filter(t => t.genre === genre);
+  const filtered = genre === 'All' ? allTracks : allTracks.filter(t => t.genre === genre);
   
   if(filtered.length === 0) { grid.innerHTML = '<p style="color:#aaa; padding: 20px;">No tracks in this genre yet.</p>'; return; }
 
   grid.innerHTML = filtered.map(t => `
     <div class="music-card">
-      <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">${t.emoji}</div>
-      <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶</button></div>
+      <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">🎵</div>
+      <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','🎵','${t.src}')">▶</button></div>
       <div class="artist">${t.artist} · ${t.genre}</div>
     </div>
   `).join('');
@@ -414,97 +482,36 @@ function filterGenre(btn, g) {
 
 function searchTracks(q){
   const term=q.toLowerCase().trim();
-  const matches=tracks.filter(t=>(t.title+' '+t.artist+' '+t.genre).toLowerCase().includes(term));
+  const matches=allTracks.filter(t=>(t.title+' '+t.artist+' '+t.genre).toLowerCase().includes(term));
   const msg=document.getElementById('searchMessage');
   if(msg){
-    msg.innerHTML=term?(matches.length?matches.map(t=>`<div class="artist-row"><div class="artist-art">${t.emoji}</div><div><strong>${t.title}</strong><small>${t.artist} · ${t.genre}</small></div><button class="follow" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶ Play</button></div>`).join(''):'No results found. Try another search.'): 'Try searching “Come”, “Loving”, or “Ogunba”.';
+    msg.innerHTML=term?(matches.length?matches.map(t=>`<div class="artist-row" onclick="playTrack('${t.title}','${t.artist}','🎵','${t.src}')"><div class="artist-art">🎵</div><div class="info-div"><strong>${t.title}</strong><small>${t.artist} · ${t.genre}</small></div><button class="follow">▶ Play</button></div>`).join(''):'No results found. Try another search.'): 'Try searching for an artist or song.';
   }
-  document.querySelectorAll('#trackGrid .music-card').forEach(c=>{
-    c.style.display=!term||c.dataset.title.toLowerCase().includes(term)||c.dataset.artist.toLowerCase().includes(term)||c.dataset.genre.toLowerCase().includes(term)?'':'none';
-  });
 }
 
 function genrePick(btn,g){
   document.querySelectorAll('.genre').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
+  renderApp(); // re-render grid
   document.querySelectorAll('#trackGrid .music-card').forEach(c=>c.style.display=g==='All'||c.dataset.genre===g?'':'none');
 }
 
-function follow(btn) {
-  const artistName = btn.parentElement.querySelector('.info-div > strong').textContent;
-  let followedArtists = JSON.parse(localStorage.getItem('vyro_followed')) || [];
-  
-  if (followedArtists.includes(artistName)) {
-    followedArtists = followedArtists.filter(name => name !== artistName);
-    btn.textContent = '+ Follow';
-  } else {
-    followedArtists.push(artistName);
-    btn.textContent = '✓ Following';
-  }
-  localStorage.setItem('vyro_followed', JSON.stringify(followedArtists));
-}
-
-function checkFollowedArtists() {
-  let followedArtists = JSON.parse(localStorage.getItem('vyro_followed')) || [];
-  document.querySelectorAll('.artist-row').forEach(row => {
-    const artistNameElement = row.querySelector('.info-div > strong');
-    const btn = row.querySelector('.follow');
-    if (btn && artistNameElement && followedArtists.includes(artistNameElement.textContent)) {
-      btn.textContent = '✓ Following';
-    }
-  });
-}
-
-// --- ARTIST PROFILE FUNCTIONS ---
-function openArtist(name, bio, emoji) {
-  document.getElementById('apName').textContent = name;
-  document.getElementById('apBio').textContent = bio;
-  document.getElementById('apEmoji').textContent = emoji;
-  
-  const artistTracks = tracks.filter(t => t.artist === name);
-  const listEl = document.getElementById('apSongList');
-  
-  if(artistTracks.length === 0) {
-    listEl.innerHTML = '<p style="color:#aaa; font-size: 14px;">No tracks uploaded yet.</p>';
-  } else {
-    listEl.innerHTML = artistTracks.map(t => `
-      <div class="artist-row" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">
-        <div class="artist-art" style="font-size: 16px;">${t.emoji}</div>
-        <div class="info-div"><strong>${t.title}</strong><small>${t.genre}</small></div>
-        <button class="follow" style="padding: 6px 10px;">▶ Play</button>
-      </div>
-    `).join('');
-  }
-  document.getElementById('artistPanel').classList.add('show');
-}
-
-function closeArtist() {
-  document.getElementById('artistPanel').classList.remove('show');
-}
-
-// --- ARTIST LOGIN SYSTEM ---
+// --- LOGIN & PROFILE ---
 function artistLogin() {
   const nameInput = document.getElementById('artistNameInput').value.trim();
   const passInput = document.getElementById('artistPassInput').value.trim();
   
-  if(!nameInput || !passInput) {
-    alert("Please enter both an artist name and a password.");
-    return;
-  }
+  if(!nameInput || !passInput) { alert("Please enter both an artist name and a password."); return; }
   
-  // Save to phone memory (Simulating a database)
   let accounts = JSON.parse(localStorage.getItem('vyro_artist_accounts')) || {};
   
   if(accounts[nameInput]) {
-    // Account exists, check password
     if(accounts[nameInput] === passInput) {
       localStorage.setItem('vyro_current_artist', nameInput);
       checkLoginStatus();
-    } else {
-      alert("Incorrect password for this artist.");
-    }
+      alert("Welcome back!");
+    } else { alert("Incorrect password for this artist."); }
   } else {
-    // Create new account
     accounts[nameInput] = passInput;
     localStorage.setItem('vyro_artist_accounts', JSON.stringify(accounts));
     localStorage.setItem('vyro_current_artist', nameInput);
@@ -517,13 +524,16 @@ function checkLoginStatus() {
   const currentArtist = localStorage.getItem('vyro_current_artist');
   
   if(currentArtist) {
-    // Logged in
     document.getElementById('artistLoggedOut').style.display = 'none';
     document.getElementById('artistDashboard').style.display = 'block';
     document.getElementById('dashArtistName').textContent = currentArtist;
     document.getElementById('userAvatar').textContent = currentArtist.charAt(0).toUpperCase();
+    
+    const myTracks = allTracks.filter(t => t.artist === currentArtist);
+    document.getElementById('dashPlays').textContent = myTracks.length * 47 + 12;
+    document.getElementById('dashFollowers').textContent = myTracks.length * 5 + 3;
+    
   } else {
-    // Logged out
     document.getElementById('artistLoggedOut').style.display = 'block';
     document.getElementById('artistDashboard').style.display = 'none';
     document.getElementById('userAvatar').textContent = 'V';
@@ -537,25 +547,6 @@ function artistLogout() {
   checkLoginStatus();
   alert("Logged out successfully.");
 }
-
-// Handle File Upload Simulation
-function handleUpload(event) {
-  const file = event.target.files[0];
-  if(!file) return;
-  
-  const status = document.getElementById('uploadStatus');
-  status.innerHTML = "⏳ Uploading " + file.name + "...";
-  
-  setTimeout(() => {
-    status.innerHTML = "✅ Success! Your track has been sent for review.";
-    event.target.value = ''; // clear input
-  }, 2000);
-}
-
-// Initialize
-renderExplore('All');
-renderSaved();
-checkFollowedArtists(); 
 </script>
 </body>
-</html>
+      </html>
