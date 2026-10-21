@@ -41,7 +41,7 @@ button{cursor:pointer;border:0;color:white;font-weight:800}.primary{border-radiu
 .artist-row{display:flex;gap:12px;align-items:center;background:#151122;border-radius:15px;padding:11px;margin-bottom:10px; cursor:pointer; transition: background 0.2s;}
 .artist-row:hover { background: #1f1832; }
 .artist-row .info-div { flex: 1; }
-.artist-art{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#6131bb,#f14cae);font-size:21px}.artist-row strong{font-size:14px}.artist-row small{display:block;color:var(--muted);margin-top:4px}.follow{margin-left:auto;background:#2b2040;border:1px solid #60438a;border-radius:20px;padding:8px 12px;font-size:11px}
+.artist-art{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#6131bb,#f14cae);font-size:21px; overflow:hidden;}.artist-row strong{font-size:14px}.artist-row small{display:block;color:var(--muted);margin-top:4px}.follow{margin-left:auto;background:#2b2040;border:1px solid #60438a;border-radius:20px;padding:8px 12px;font-size:11px}
 .nav{position:fixed;bottom:0;left:0;right:0;background:#100c1beF;border-top:1px solid #30243c;display:flex;justify-content:space-around;padding:12px 6px max(12px,env(safe-area-inset-bottom));backdrop-filter:blur(18px);z-index:8}.nav button{background:none;color:#9389a7;font-size:10px;display:flex;flex-direction:column;gap:5px;align-items:center;min-width:55px}.nav span{font-size:20px}.nav button.active{color:#d4a5ff}
 .player{position:fixed;bottom:69px;left:10px;right:10px;max-width:740px;margin:auto;background:linear-gradient(90deg,#24113c,#21142f);border:1px solid #59357c;border-radius:15px;padding:10px 12px;display:none;align-items:center;gap:10px;z-index:7;box-shadow:0 8px 30px #0008;cursor:pointer;transition:0.3s}.player.show{display:flex}.player-art{width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,#8d48e8,#f14fbe);display:grid;place-items:center;overflow:hidden}.player-info{min-width:0;flex:1}.player-info strong{font-size:12px;display:block}.player-info small{color:#bdb0cf;font-size:10px}.player button{background:none;font-size:20px}
 .view{display:none}.view.active{display:block}.empty{padding:25px;border:1px dashed #554169;border-radius:16px;color:#b8adc9;text-align:center;font-size:13px;line-height:1.6}
@@ -141,13 +141,11 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
     <input type="text" id="uploadTitle" class="dash-input" placeholder="Song Title" style="margin-bottom: 15px;">
     <select id="uploadGenre" class="dash-input" style="margin-bottom: 15px;"><option value="Afrobeats">Afrobeats</option><option value="Hip-Hop">Hip-Hop</option><option value="R&B">R&B</option><option value="Gospel">Gospel</option></select>
     
-    <!-- Audio Upload -->
     <input type="file" id="audioUpload" accept="audio/*" style="display:none;" onchange="document.getElementById('audioLabel').innerText = event.target.files[0].name;">
     <button class="dash-btn" onclick="document.getElementById('audioUpload').click()" style="background: #211634; border: 1px solid var(--purple);">
       <span id="audioLabel">🎵 Select Audio File (MP3)</span>
     </button>
 
-    <!-- Image Upload -->
     <input type="file" id="imageUpload" accept="image/*" style="display:none;" onchange="document.getElementById('imageLabel').innerText = event.target.files[0].name;">
     <button class="dash-btn" onclick="document.getElementById('imageUpload').click()" style="background: #211634; border: 1px solid var(--purple);">
       <span id="imageLabel">🖼️ Select Cover Image (JPG/PNG)</span>
@@ -194,7 +192,7 @@ const CLOUDINARY_CLOUD_NAME = "ixay5wda";
 const CLOUDINARY_UPLOAD_PRESET = "qvk4xtky"; 
 
 const baseTracks = [
-  {id: '1', title:'Come', artist:'Ogunba Alex', emoji:'🌙', genre:'Afrobeats', src:'assets/Come [8a409715].mp3', cover:'https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg'}, // Demo cover for base tracks
+  {id: '1', title:'Come', artist:'Ogunba Alex', emoji:'🌙', genre:'Afrobeats', src:'assets/Come [8a409715].mp3', cover:''},
   {id: '2', title:'Your brother', artist:'Ogunba Alex', emoji:'☁️', genre:'Hip-Hop', src:'assets/Your brother [bf867660].mp3', cover:''},
   {id: '3', title:'Loving', artist:'Alex_skiddo', emoji:'💫', genre:'R&B', src:'assets/Loving [947f2a25].mp3', cover:''},
   {id: '4', title:'Tell Yur Mummy', artist:'Alex_skiddo', emoji:'✨', genre:'Gospel', src:'assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3', cover:''}
@@ -203,10 +201,17 @@ const baseTracks = [
 let currentTrack = null; 
 let currentTrackIndex = 0;
 let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; 
-let allTracks = [...baseTracks];
+
+// THE CACHE SYSTEM: Load saved tracks instantly so they never disappear
+let cachedCloudTracks = JSON.parse(localStorage.getItem('vyro_cloud_cache')) || [];
+let allTracks = [...baseTracks, ...cachedCloudTracks];
 
 const audio = document.getElementById("vyro-player");
 
+// Render immediately from cache
+renderApp(); 
+
+// Then fetch fresh data in the background
 setTimeout(() => { loadTracksFromCloud(); }, 1000);
 
 async function loadTracksFromCloud() {
@@ -216,25 +221,26 @@ async function loadTracksFromCloud() {
     let cloudTracks = [];
     querySnapshot.forEach((doc) => { cloudTracks.push(doc.data()); });
 
-    allTracks = [...baseTracks, ...cloudTracks];
-    renderApp();
+    // If we found songs, update cache and redraw
+    if (cloudTracks.length > 0) {
+      cachedCloudTracks = cloudTracks;
+      localStorage.setItem('vyro_cloud_cache', JSON.stringify(cloudTracks)); // Save to phone
+      allTracks = [...baseTracks, ...cloudTracks];
+      renderApp();
+    }
   } catch(e) {
-    console.error(e);
-    allTracks = [...baseTracks];
-    renderApp();
+    console.error("Cloud fetch failed, using cache:", e);
   }
 }
 
 function renderApp() {
   const grid = document.getElementById('trackGrid');
   grid.innerHTML = allTracks.map(t => {
-    // If a song has a cover image, show it. Otherwise, show the emoji/default gradient.
-    const coverContent = t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:1;">` : `🎵`;
+    const coverContent = t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:1;">` : `<div style="position:absolute; z-index:2; font-size: 38px; display:block;">🎵</div>`;
     return `
       <div class="music-card">
         <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">
           ${coverContent}
-          <div style="position:absolute; z-index:2; font-size: 38px; display:${t.cover?'none':'block'}">🎵</div>
         </div>
         <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','🎵','${t.src}')">▶</button></div>
         <div class="artist">${t.artist} · ${t.genre}</div>
@@ -509,12 +515,11 @@ function renderExplore(genre = 'All') {
   if(filtered.length === 0) { grid.innerHTML = '<p style="color:#aaa; padding: 20px;">No tracks in this genre yet.</p>'; return; }
 
   grid.innerHTML = filtered.map(t => {
-    const coverContent = t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:1;">` : `🎵`;
+    const coverContent = t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:1;">` : `<div style="position:absolute; z-index:2; font-size: 38px; display:block;">🎵</div>`;
     return `
       <div class="music-card">
         <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">
           ${coverContent}
-          <div style="position:absolute; z-index:2; font-size: 38px; display:${t.cover?'none':'block'}">🎵</div>
         </div>
         <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','🎵','${t.src}')">▶</button></div>
         <div class="artist">${t.artist} · ${t.genre}</div>
@@ -546,4 +551,4 @@ function genrePick(btn,g){
 }
 </script>
 </body>
-</html>
+      </html>
