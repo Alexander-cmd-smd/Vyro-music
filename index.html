@@ -8,7 +8,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCQ3b4qiC3nW_5KJcNZE4oh88sJ2agBcaQ",
@@ -25,7 +25,7 @@
   const auth = getAuth(app);
   
   window.firebaseDB = { db, collection, addDoc, getDocs };
-  window.firebaseAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail };
+  window.firebaseAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification };
 </script>
 
 <style>
@@ -245,7 +245,7 @@ if (lastPlayed) {
 renderApp(); 
 setTimeout(() => { loadTracksFromCloud(); }, 1000);
 
-const { auth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } = window.firebaseAuth;
+const { auth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } = window.firebaseAuth;
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -276,10 +276,14 @@ function artistSignup() {
   
   createUserWithEmailAndPassword(auth, email, pass)
     .then((userCredential) => {
-      localStorage.setItem('vyro_artist_name_' + email, name);
-      document.getElementById('dashArtistName').textContent = name;
-      document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-      alert("Account created successfully! Welcome to VYRO.");
+      // Send verification email
+      sendEmailVerification(userCredential.user)
+        .then(() => {
+          localStorage.setItem('vyro_artist_name_' + email, name);
+          alert("Account created! Please check your email inbox to verify your account before logging in.");
+          signOut(auth); // Log them out until they verify
+        })
+        .catch((error) => alert("Error sending verification email: " + error.message));
     })
     .catch(err => alert("Signup Error: " + err.message));
 }
@@ -290,7 +294,15 @@ function artistLogin() {
   if(!email || !pass) { alert("Enter email and password."); return; }
   
   signInWithEmailAndPassword(auth, email, pass)
-    .then(() => alert("Welcome back!"))
+    .then((userCredential) => {
+      if (userCredential.user.emailVerified) {
+        alert("Welcome back!");
+      } else {
+        alert("⚠️ Your email is not verified yet. We just sent you a new link. Please check your inbox.");
+        sendEmailVerification(userCredential.user);
+        signOut(auth); // Log them out
+      }
+    })
     .catch(err => alert("Login Error: " + err.message));
 }
 
@@ -423,6 +435,7 @@ async function handleCloudUpload() {
   }
 }
 
+// PLAYER LOGIC
 audio.addEventListener('ended', () => { nextTrack(); });
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
