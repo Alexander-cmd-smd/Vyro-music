@@ -8,7 +8,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCQ3b4qiC3nW_5KJcNZE4oh88sJ2agBcaQ",
@@ -25,7 +25,7 @@
   const auth = getAuth(app);
   
   window.firebaseDB = { db, collection, addDoc, getDocs };
-  window.firebaseAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification };
+  window.firebaseAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, updateProfile };
 </script>
 
 <style>
@@ -54,7 +54,7 @@
 @keyframes loadBar { 0% { width: 0%; } 100% { width: 100%; } }
 
 header{display:flex;align-items:center;justify-content:space-between;padding:20px 18px 10px;position:sticky;top:0;background:#090711df;backdrop-filter:blur(15px);z-index:5}
-.logo{font-weight:950;letter-spacing:3px;font-size:25px;background:linear-gradient(90deg,#fff,#bd8aff,#ff68d9);-webkit-background-clip:text;color:transparent}.avatar{border:1px solid #6e4a98;border-radius:50%;width:38px;height:38px;display:grid;place-items:center;background:linear-gradient(135deg,#4d227a,#e247bd);font-weight:800}
+.logo{font-weight:950;letter-spacing:3px;font-size:25px;background:linear-gradient(90deg,#fff,#bd8aff,#ff68d9);-webkit-background-clip:text;color:transparent}.avatar{border:1px solid #6e4a98;border-radius:50%;width:38px;height:38px;display:grid;place-items:center;background:linear-gradient(135deg,#4d227a,#e247bd);font-weight:800;overflow:hidden;}
 main{max-width:760px;margin:auto;padding:8px 16px}.eyebrow{color:#c6a0ff;text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:800;margin-top:15px}
 h1{font-size:30px;line-height:1.1;margin:8px 0}h1 span{background:linear-gradient(90deg,#b58aff,#ff6bd6);-webkit-background-clip:text;color:transparent}
 .search{margin:20px 0;background:#171324;border:1px solid #302541;border-radius:15px;padding:13px 15px;color:#bcb4ca;display:flex;gap:10px;align-items:center}.search input{background:transparent;border:0;outline:0;color:white;font-size:14px;width:100%}
@@ -99,7 +99,7 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 .ap-header { display: flex; justify-content: flex-end; margin-bottom: 10px; }
 .ap-header button { background: none; color: var(--muted); font-size: 24px; }
 .ap-profile { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
-.ap-art { width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #6131bb, #f14cae); display: grid; place-items: center; font-size: 40px; margin-bottom: 15px; box-shadow: 0 0 20px rgba(241, 76, 174, 0.4); }
+.ap-art { width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #6131bb, #f14cae); display: grid; place-items: center; font-size: 40px; margin-bottom: 15px; box-shadow: 0 0 20px rgba(241, 76, 174, 0.4); overflow:hidden;}
 .ap-name { font-size: 24px; font-weight: 800; margin: 0; }
 .ap-bio { color: var(--muted); font-size: 13px; text-align: center; margin-top: 5px; }
 .ap-songs { flex: 1; overflow-y: auto; margin-top: 10px; }
@@ -143,56 +143,97 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 </div>
 <div class="view" id="search"><div class="eyebrow">Find your next favourite</div><h1>Search <span>VYRO.</span></h1><div class="search">⌕ <input placeholder="Type a song or artist..." oninput="searchTracks(this.value)"></div><div id="searchMessage" class="empty">Try searching for an artist or song.</div></div>
 <div class="view" id="library"><div class="eyebrow">Your personal space</div><h1>Your <span>Library.</span></h1><p style="color:var(--muted);font-size:13px">Your saved tracks will appear here on this device.</p><div id="savedTracks" class="empty">No saved tracks yet.<br>Tap ♡ on a track to add it to your library.</div></div>
+
+<!-- ARTIST HUB (LOGIN SCREEN) -->
 <div class="view" id="artist">
-<div class="eyebrow">For the next generation</div><h1>Artist <span>Hub.</span></h1>
-<div id="artistLoggedOut">
-  <section class="hero"><span class="pill">INDEPENDENT ARTISTS</span><h2>Your sound deserves a stage.</h2><p>Build your profile, introduce your music and connect with listeners around the world.</p></section>
-  <div class="dash-box" style="margin-top: 20px;">
-    <h2 style="font-size: 20px; margin-top:0;">Artist Portal</h2>
-    <p style="color:#aaa; font-size:12px;">Create a real cloud account to upload music.</p>
+  <div class="eyebrow">For the next generation</div><h1>Artist <span>Hub.</span></h1>
+  
+  <!-- LOGGED OUT VIEW (LOGIN ONLY) -->
+  <div id="artistLoggedOut">
+    <section class="hero"><span class="pill">INDEPENDENT ARTISTS</span><h2>Your sound deserves a stage.</h2><p>Build your profile, introduce your music and connect with listeners around the world.</p></section>
     
-    <input type="text" id="signupArtistName" class="dash-input" placeholder="Artist Name / Stage Name" style="margin-bottom: 15px;">
-    
-    <input type="email" id="artistEmailInput" class="dash-input" placeholder="Email Address" style="margin-bottom: 15px;">
-    
-    <div class="dash-input-group">
-      <input type="password" id="artistPassInput" class="dash-input" placeholder="Password">
-      <button type="button" class="eye-icon" onclick="togglePasswordVisibility()">👁️</button>
+    <div class="dash-box" style="margin-top: 20px;">
+      <h2 style="font-size: 20px; margin-top:0;">Welcome Back</h2>
+      <p style="color:#aaa; font-size:12px;">Log in to your artist account.</p>
+      
+      <input type="email" id="loginEmail" class="dash-input" placeholder="Email Address" style="margin-bottom: 15px;">
+      
+      <div class="dash-input-group">
+        <input type="password" id="loginPass" class="dash-input" placeholder="Password">
+        <button type="button" class="eye-icon" onclick="togglePasswordVisibility('loginPass')">👁️</button>
+      </div>
+      
+      <button class="dash-btn" onclick="artistLogin()">Log In</button>
+      <a class="forgot-link" onclick="forgotPassword()">Forgot Password?</a>
+      
+      <div style="text-align: center; margin-top: 20px;">
+        <p style="color: #aaa; font-size: 13px;">Don't have an account?</p>
+        <button class="dash-btn" onclick="showSignupPage()" style="background: transparent; border: 1px solid var(--pink); color: var(--pink);">Create Account</button>
+      </div>
+      
+      <div id="loginError" style="font-size: 13px; margin-top: 15px; text-align: center; font-weight: bold; line-height: 1.5;"></div>
     </div>
-    
-    <button class="dash-btn" onclick="artistSignup()" style="background: linear-gradient(90deg, #4b8dff, #9b5cff); margin-top: 10px;">Sign Up</button>
-    <button class="dash-btn" onclick="artistLogin()">Log In</button>
-    <a class="forgot-link" onclick="forgotPassword()">Forgot Password?</a>
-    
-    <div id="authError" style="font-size: 13px; margin-top: 15px; text-align: center; font-weight: bold; line-height: 1.5;"></div>
   </div>
-</div>
-<div id="artistDashboard" style="display: none;">
-  <div class="dash-box">
-    <h2 style="margin-top:0;">Welcome back, <br><span id="dashArtistName" style="color:var(--pink);">Artist</span></h2>
-    <p style="color:#aaa; font-size:13px;">This is your official cloud dashboard.</p>
-  </div>
-  <div class="dash-box">
-    <h2 style="font-size:18px; margin-top:0;">Upload New Track</h2>
-    <input type="text" id="uploadTitle" class="dash-input" placeholder="Song Title" style="margin-bottom: 15px;">
-    <select id="uploadGenre" class="dash-input" style="margin-bottom: 15px;"><option value="Afrobeats">Afrobeats</option><option value="Hip-Hop">Hip-Hop</option><option value="R&B">R&B</option><option value="Gospel">Gospel</option></select>
-    
-    <input type="file" id="audioUpload" accept="audio/*" style="display:none;" onchange="document.getElementById('audioLabel').innerText = event.target.files[0].name;">
-    <button class="dash-btn" onclick="document.getElementById('audioUpload').click()" style="background: #211634; border: 1px solid var(--purple);">
-      <span id="audioLabel">🎵 Select Audio File (MP3)</span>
-    </button>
 
-    <input type="file" id="imageUpload" accept="image/*" style="display:none;" onchange="document.getElementById('imageLabel').innerText = event.target.files[0].name;">
-    <button class="dash-btn" onclick="document.getElementById('imageUpload').click()" style="background: #211634; border: 1px solid var(--purple);">
-      <span id="imageLabel">🖼️ Select Cover Image (Optional)</span>
-    </button>
+  <!-- SIGN UP PAGE (HIDDEN BY DEFAULT) -->
+  <div id="artistSignupPage" style="display: none;">
+    <div class="dash-box" style="margin-top: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h2 style="font-size: 20px; margin:0;">Create Account</h2>
+        <button onclick="hideSignupPage()" style="background: none; color: var(--muted); font-size: 24px;">✕</button>
+      </div>
+      <p style="color:#aaa; font-size:12px; margin-bottom: 15px;">Your email will be kept private. Only your stage name and profile picture will be shown to the public.</p>
+      
+      <input type="text" id="signupName" class="dash-input" placeholder="Artist Name / Stage Name" style="margin-bottom: 15px;">
+      
+      <input type="email" id="signupEmail" class="dash-input" placeholder="Email Address (Private)" style="margin-bottom: 15px;">
+      
+      <div class="dash-input-group">
+        <input type="password" id="signupPass" class="dash-input" placeholder="Password (Min 6 characters)">
+        <button type="button" class="eye-icon" onclick="togglePasswordVisibility('signupPass')">👁️</button>
+      </div>
 
-    <button class="dash-btn" onclick="handleCloudUpload()" style="margin-top: 15px;">🚀 Upload to VYRO</button>
-    <div id="uploadStatus" style="color:#4b8dff; font-size:13px; margin-top:10px;"></div>
+      <!-- Profile Picture Upload -->
+      <p style="color:#aaa; font-size:12px; margin-bottom: 5px;">Profile Picture (Optional)</p>
+      <input type="file" id="signupImage" accept="image/*" style="display:none;" onchange="document.getElementById('imgLabel').innerText = event.target.files[0].name;">
+      <button class="dash-btn" onclick="document.getElementById('signupImage').click()" style="background: #211634; border: 1px solid var(--purple); margin-bottom: 15px;">
+        <span id="imgLabel">🖼️ Select Profile Picture</span>
+      </button>
+
+      <button class="dash-btn" onclick="createArtistAccount()" style="background: linear-gradient(90deg, #4b8dff, #9b5cff);">Sign Up</button>
+      
+      <div id="signupError" style="font-size: 13px; margin-top: 15px; text-align: center; font-weight: bold; line-height: 1.5;"></div>
+    </div>
   </div>
-  <button class="dash-btn dash-logout" onclick="artistLogout()">Log Out</button>
+
+  <!-- DASHBOARD VIEW -->
+  <div id="artistDashboard" style="display: none;">
+    <div class="dash-box">
+      <h2 style="margin-top:0;">Welcome back, <br><span id="dashArtistName" style="color:var(--pink);">Artist</span></h2>
+      <p style="color:#aaa; font-size:13px;">This is your official cloud dashboard.</p>
+    </div>
+    <div class="dash-box">
+      <h2 style="font-size:18px; margin-top:0;">Upload New Track</h2>
+      <input type="text" id="uploadTitle" class="dash-input" placeholder="Song Title" style="margin-bottom: 15px;">
+      <select id="uploadGenre" class="dash-input" style="margin-bottom: 15px;"><option value="Afrobeats">Afrobeats</option><option value="Hip-Hop">Hip-Hop</option><option value="R&B">R&B</option><option value="Gospel">Gospel</option></select>
+      
+      <input type="file" id="audioUpload" accept="audio/*" style="display:none;" onchange="document.getElementById('audioLabel').innerText = event.target.files[0].name;">
+      <button class="dash-btn" onclick="document.getElementById('audioUpload').click()" style="background: #211634; border: 1px solid var(--purple);">
+        <span id="audioLabel">🎵 Select Audio File (MP3)</span>
+      </button>
+
+      <input type="file" id="imageUpload" accept="image/*" style="display:none;" onchange="document.getElementById('imageLabel').innerText = event.target.files[0].name;">
+      <button class="dash-btn" onclick="document.getElementById('imageUpload').click()" style="background: #211634; border: 1px solid var(--purple);">
+        <span id="imageLabel">🖼️ Select Cover Image (Optional)</span>
+      </button>
+
+      <button class="dash-btn" onclick="handleCloudUpload()" style="margin-top: 15px;">🚀 Upload to VYRO</button>
+      <div id="uploadStatus" style="color:#4b8dff; font-size:13px; margin-top:10px;"></div>
+    </div>
+    <button class="dash-btn dash-logout" onclick="artistLogout()">Log Out</button>
+  </div>
 </div>
-</div>
+
 <footer>VYRO — CLOUD PROTOTYPE</footer>
 </main>
 <div id="artistPanel">
@@ -228,8 +269,8 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 setTimeout(() => {
   const splash = document.getElementById('splashScreen');
   splash.style.opacity = '0';
-  setTimeout(() => { splash.style.display = 'none'; }, 500); // Wait for fade out
-}, 10000); // 10 seconds
+  setTimeout(() => { splash.style.display = 'none'; }, 500);
+}, 10000); 
 
 const CLOUDINARY_CLOUD_NAME = "ixay5wda"; 
 const CLOUDINARY_UPLOAD_PRESET = "qvk4xtky"; 
@@ -284,61 +325,107 @@ if (lastPlayed) {
 renderApp(); 
 setTimeout(() => { loadTracksFromCloud(); }, 1000);
 
-const { auth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } = window.firebaseAuth;
+const { auth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateProfile } = window.firebaseAuth;
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user;
     document.getElementById('artistLoggedOut').style.display = 'none';
+    document.getElementById('artistSignupPage').style.display = 'none';
     document.getElementById('artistDashboard').style.display = 'block';
     
     let savedArtistName = localStorage.getItem('vyro_artist_name_' + user.email);
-    if(!savedArtistName) savedArtistName = user.email.split('@')[0];
+    if(!savedArtistName) savedArtistName = user.displayName || user.email.split('@')[0];
     
     document.getElementById('dashArtistName').textContent = savedArtistName;
-    document.getElementById('userAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
+    
+    // Check for profile image
+    let savedProfilePic = localStorage.getItem('vyro_profile_pic_' + user.email);
+    if(user.photoURL) savedProfilePic = user.photoURL;
+    
+    if(savedProfilePic) {
+      document.getElementById('userAvatar').innerHTML = `<img src="${savedProfilePic}" style="width:100%; height:100%; object-fit:cover;">`;
+    } else {
+      document.getElementById('userAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
+    }
+
   } else {
     currentUser = null;
     document.getElementById('artistLoggedOut').style.display = 'block';
+    document.getElementById('artistSignupPage').style.display = 'none';
     document.getElementById('artistDashboard').style.display = 'none';
     document.getElementById('userAvatar').textContent = 'V';
   }
 });
 
-function artistSignup() {
-  const name = document.getElementById('signupArtistName').value.trim();
-  const email = document.getElementById('artistEmailInput').value.trim();
-  const pass = document.getElementById('artistPassInput').value.trim();
-  const errorDiv = document.getElementById('authError');
+function showSignupPage() {
+  document.getElementById('artistLoggedOut').style.display = 'none';
+  document.getElementById('artistSignupPage').style.display = 'block';
+}
+
+function hideSignupPage() {
+  document.getElementById('artistLoggedOut').style.display = 'block';
+  document.getElementById('artistSignupPage').style.display = 'none';
+}
+
+async function createArtistAccount() {
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const pass = document.getElementById('signupPass').value.trim();
+  const imageFile = document.getElementById('signupImage').files[0];
+  const errorDiv = document.getElementById('signupError');
   errorDiv.innerHTML = "";
   
   if(!name || !email || !pass) { errorDiv.style.color = "#ff4f4f"; errorDiv.innerHTML = "Please fill in all fields."; return; }
   if(pass.length < 6) { errorDiv.style.color = "#ff4f4f"; errorDiv.innerHTML = "Password must be at least 6 characters."; return; }
   
-  createUserWithEmailAndPassword(auth, email, pass)
-    .then((userCredential) => {
-      localStorage.setItem('vyro_artist_name_' + email, name);
-      sendEmailVerification(userCredential.user)
-        .then(() => {
-          errorDiv.style.color = "#4b8dff";
-          errorDiv.innerHTML = "✅ Account created! Check your email for the verification link.";
-          signOut(auth);
-        })
-        .catch((error) => {
-          errorDiv.style.color = "#ff4f4f";
-          errorDiv.innerHTML = "Verification Error: " + error.message;
-        });
-    })
-    .catch(err => {
-      errorDiv.style.color = "#ff4f4f";
-      errorDiv.innerHTML = "Signup Failed: " + err.message;
+  errorDiv.style.color = "#4b8dff"; 
+  errorDiv.innerHTML = "Creating account... Please wait.";
+
+  try {
+    let profilePicURL = '';
+    
+    // Upload image if selected
+    if (imageFile) {
+      const imageData = new FormData();
+      imageData.append('file', imageFile);
+      imageData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      const imgRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+        method: 'POST', body: imageData
+      });
+      const imgJson = await imgRes.json();
+      if(imgRes.ok) profilePicURL = imgJson.secure_url;
+    }
+
+    const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+    
+    // Update their profile with Name and Picture
+    await updateProfile(userCredential.user, {
+      displayName: name,
+      photoURL: profilePicURL
     });
+
+    // Save locally for immediate UI update
+    localStorage.setItem('vyro_artist_name_' + email, name);
+    if(profilePicURL) localStorage.setItem('vyro_profile_pic_' + email, profilePicURL);
+
+    await sendEmailVerification(userCredential.user);
+    
+    errorDiv.style.color = "#4b8dff";
+    errorDiv.innerHTML = "✅ Account created! Check your email for the verification link.";
+    signOut(auth);
+    hideSignupPage();
+
+  } catch (error) {
+    errorDiv.style.color = "#ff4f4f";
+    errorDiv.innerHTML = "Signup Failed: " + error.message;
+  }
 }
 
 function artistLogin() {
-  const email = document.getElementById('artistEmailInput').value.trim();
-  const pass = document.getElementById('artistPassInput').value.trim();
-  const errorDiv = document.getElementById('authError');
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value.trim();
+  const errorDiv = document.getElementById('loginError');
   errorDiv.innerHTML = "";
   
   if(!email || !pass) { errorDiv.style.color = "#ff4f4f"; errorDiv.innerHTML = "Please enter email and password."; return; }
@@ -362,16 +449,15 @@ function artistLogin() {
 
 function artistLogout() {
   signOut(auth).then(() => {
-    document.getElementById('artistEmailInput').value = '';
-    document.getElementById('artistPassInput').value = '';
-    document.getElementById('signupArtistName').value = '';
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPass').value = '';
     alert("Logged out successfully.");
   });
 }
 
 function forgotPassword() {
-  const email = document.getElementById('artistEmailInput').value.trim();
-  const errorDiv = document.getElementById('authError');
+  const email = document.getElementById('loginEmail').value.trim();
+  const errorDiv = document.getElementById('loginError');
   if(!email) { errorDiv.style.color = "#ff4f4f"; errorDiv.innerHTML = "Type your email first."; return; }
   
   sendPasswordResetEmail(auth, email)
@@ -385,8 +471,8 @@ function forgotPassword() {
     });
 }
 
-function togglePasswordVisibility() {
-  const passInput = document.getElementById('artistPassInput');
+function togglePasswordVisibility(inputId) {
+  const passInput = document.getElementById(inputId);
   if (passInput.type === "password") { passInput.type = "text"; } 
   else { passInput.type = "password"; }
 }
@@ -434,7 +520,7 @@ async function handleCloudUpload() {
   const genre = document.getElementById('uploadGenre').value;
   
   const currentArtistEmail = currentUser.email;
-  const artistName = localStorage.getItem('vyro_artist_name_' + currentArtistEmail) || currentArtistEmail.split('@')[0];
+  const artistName = localStorage.getItem('vyro_artist_name_' + currentArtistEmail) || currentUser.displayName || currentArtistEmail.split('@')[0];
   
   if(!title) { alert("Please enter song title."); return; }
   if(!audioFile) { alert("Please select an MP3 audio file."); return; }
