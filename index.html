@@ -221,7 +221,6 @@ let currentUser = null;
 
 const audio = document.getElementById("vyro-player");
 
-// --- RESTORE MUSIC ON REFRESH ---
 let lastPlayed = JSON.parse(localStorage.getItem('vyro_last_played'));
 if (lastPlayed) {
   document.getElementById('player').classList.add('show');
@@ -246,7 +245,6 @@ if (lastPlayed) {
 renderApp(); 
 setTimeout(() => { loadTracksFromCloud(); }, 1000);
 
-// --- FIREBASE AUTHENTICATION LOGIC ---
 const { auth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } = window.firebaseAuth;
 
 onAuthStateChanged(auth, (user) => {
@@ -255,7 +253,6 @@ onAuthStateChanged(auth, (user) => {
     document.getElementById('artistLoggedOut').style.display = 'none';
     document.getElementById('artistDashboard').style.display = 'block';
     
-    // Check if we saved their Artist Name earlier, otherwise use email
     let savedArtistName = localStorage.getItem('vyro_artist_name_' + user.email);
     if(!savedArtistName) savedArtistName = user.email.split('@')[0];
     
@@ -275,16 +272,16 @@ function artistSignup() {
   const pass = document.getElementById('artistPassInput').value.trim();
   
   if(!name || !email || !pass) { alert("Please fill in your Artist Name, Email, and Password."); return; }
+  if(pass.length < 6) { alert("Password must be at least 6 characters long."); return; }
   
   createUserWithEmailAndPassword(auth, email, pass)
     .then((userCredential) => {
-      // Save their custom Artist Name to memory so it shows on the dashboard
       localStorage.setItem('vyro_artist_name_' + email, name);
       document.getElementById('dashArtistName').textContent = name;
       document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
       alert("Account created successfully! Welcome to VYRO.");
     })
-    .catch(err => alert("Error: " + err.message));
+    .catch(err => alert("Signup Error: " + err.message));
 }
 
 function artistLogin() {
@@ -294,7 +291,7 @@ function artistLogin() {
   
   signInWithEmailAndPassword(auth, email, pass)
     .then(() => alert("Welcome back!"))
-    .catch(err => alert("Error: " + err.message));
+    .catch(err => alert("Login Error: " + err.message));
 }
 
 function artistLogout() {
@@ -321,7 +318,6 @@ function togglePasswordVisibility() {
   else { passInput.type = "password"; }
 }
 
-// --- CLOUD DATA ---
 async function loadTracksFromCloud() {
   const { db, collection, getDocs } = window.firebaseDB;
   try {
@@ -364,7 +360,6 @@ async function handleCloudUpload() {
   const title = document.getElementById('uploadTitle').value.trim();
   const genre = document.getElementById('uploadGenre').value;
   
-  // Get the actual artist name from memory
   const currentArtistEmail = currentUser.email;
   const artistName = localStorage.getItem('vyro_artist_name_' + currentArtistEmail) || currentArtistEmail.split('@')[0];
   
@@ -428,7 +423,6 @@ async function handleCloudUpload() {
   }
 }
 
-// PLAYER LOGIC
 audio.addEventListener('ended', () => { nextTrack(); });
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
