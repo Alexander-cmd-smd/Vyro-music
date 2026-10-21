@@ -70,9 +70,9 @@ input[type=range]::-webkit-slider-thumb {
   cursor: pointer; -webkit-appearance: none; margin-top: -5px; box-shadow: 0 0 10px var(--pink);
 }
 .fp-time { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: -5px; }
-.fp-controls { display: flex; justify-content: center; align-items: center; gap: 40px; margin-bottom: 40px; }
-.fp-controls button { background: none; font-size: 40px; color: white; }
-.fp-controls .play-btn { font-size: 60px; background: white; color: black; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+.fp-controls { display: flex; justify-content: center; align-items: center; gap: 30px; margin-bottom: 40px; }
+.fp-controls button { background: none; font-size: 35px; color: white; }
+.fp-controls .play-btn { font-size: 60px; background: white; color: black; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; padding-left: 5px; }
 </style>
 </head>
 <body>
@@ -177,7 +177,12 @@ input[type=range]::-webkit-slider-thumb {
   <div class="fp-controls">
     <button onclick="seek(-10)">⏪</button>
     <button class="play-btn" onclick="togglePlay()" id="fpPlayPauseBtn">▶</button>
-    <button onclick="nextTrack()">⏩</button>
+    <button onclick="seek(10)">⏩</button>
+  </div>
+  
+  <div class="fp-controls" style="gap: 60px; margin-bottom: 20px;">
+    <button onclick="prevTrack()" style="font-size: 30px;">⏮</button>
+    <button onclick="nextTrack()" style="font-size: 30px;">⏭</button>
   </div>
 </div>
 
@@ -210,6 +215,11 @@ const tracks = [
 // Audio Player Reference
 const audio = document.getElementById("vyro-player");
 
+// Auto-Play Next Track When Current Ends
+audio.addEventListener('ended', () => {
+  nextTrack();
+});
+
 // Update progress bar and time
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
@@ -221,6 +231,7 @@ audio.addEventListener('timeupdate', () => {
 
 // Format time for UI (e.g. 1:25)
 function formatTime(seconds) {
+  if (isNaN(seconds)) return "0:00";
   const min = Math.floor(seconds / 60);
   const sec = Math.floor(seconds % 60);
   return `${min}:${sec < 10 ? '0' : ''}${sec}`;
@@ -237,7 +248,7 @@ function seekAudio() {
   audio.currentTime = time;
 }
 
-// Rewind / Fast Forward
+// Rewind / Fast Forward by 10 seconds
 function seek(amount) {
   audio.currentTime += amount;
 }
@@ -301,9 +312,22 @@ function updatePlayIcons(isPlaying) {
 // Next Track
 function nextTrack() {
   currentTrackIndex++;
-  if (currentTrackIndex >= tracks.length) { currentTrackIndex = 0; }
+  if (currentTrackIndex >= tracks.length) { currentTrackIndex = 0; } // Loop to start
   const next = tracks[currentTrackIndex];
   playTrack(next.title, next.artist, next.emoji);
+}
+
+// Previous Track
+function prevTrack() {
+  // If we are more than 3 seconds into the song, restart it first
+  if (audio.currentTime > 3) {
+    audio.currentTime = 0;
+  } else {
+    currentTrackIndex--;
+    if (currentTrackIndex < 0) { currentTrackIndex = tracks.length - 1; } // Loop to end
+    const prev = tracks[currentTrackIndex];
+    playTrack(prev.title, prev.artist, prev.emoji);
+  }
 }
 
 // Toggle Like
