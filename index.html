@@ -32,7 +32,7 @@
 :root{--bg:#090711;--panel:#151122;--panel2:#211634;--purple:#9b5cff;--pink:#ff4fd8;--blue:#4b8dff;--muted:#aaa3bb;--white:#f8f5ff}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0%,#35145a 0,transparent 30%),var(--bg);color:var(--white);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding-bottom:100px;}
 
-/* --- SPLASH SCREEN --- */
+/* --- AI RUN MASTER (SPLASH SCREEN) --- */
 #splashScreen {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
   background: #090711; z-index: 9999;
@@ -43,15 +43,18 @@
   font-weight: 950; letter-spacing: 5px; font-size: 45px;
   background: linear-gradient(90deg, #fff, #bd8aff, #ff68d9);
   -webkit-background-clip: text; color: transparent; margin-bottom: 20px;
+  animation: pulse 2s infinite;
 }
+@keyframes pulse { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
 .splash-loader {
   width: 200px; height: 4px; background: #302541; border-radius: 10px; overflow: hidden;
 }
 .splash-bar {
   height: 100%; width: 0%; background: linear-gradient(90deg, var(--purple), var(--pink));
-  animation: loadBar 10s linear forwards;
+  animation: loadBar 5s linear forwards;
 }
 @keyframes loadBar { 0% { width: 0%; } 100% { width: 100%; } }
+.splash-text { margin-top: 20px; font-size: 12px; color: var(--muted); letter-spacing: 2px; }
 
 header{display:flex;align-items:center;justify-content:space-between;padding:20px 18px 10px;position:sticky;top:0;background:#090711df;backdrop-filter:blur(15px);z-index:5}
 .logo{font-weight:950;letter-spacing:3px;font-size:25px;background:linear-gradient(90deg,#fff,#bd8aff,#ff68d9);-webkit-background-clip:text;color:transparent}.avatar{border:1px solid #6e4a98;border-radius:50%;width:38px;height:38px;display:grid;place-items:center;background:linear-gradient(135deg,#4d227a,#e247bd);font-weight:800;overflow:hidden;}
@@ -115,11 +118,11 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 </head>
 <body>
 
-<!-- 10 SECOND SPLASH SCREEN -->
+<!-- AI RUN MASTER (SPLASH SCREEN) -->
 <div id="splashScreen">
   <div class="splash-logo">VYRO</div>
   <div class="splash-loader"><div class="splash-bar"></div></div>
-  <p style="margin-top: 20px; font-size: 12px; color: var(--muted); letter-spacing: 2px;">FEEL THE SOUND</p>
+  <p class="splash-text">AI RUN MASTER INITIALIZING...</p>
 </div>
 
 <header><div class="logo">VYRO</div><div class="avatar" id="userAvatar" style="cursor:pointer;" onclick="showView('artist', document.querySelector('.nav button:last-child'))">V</div></header>
@@ -144,11 +147,11 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <div class="view" id="search"><div class="eyebrow">Find your next favourite</div><h1>Search <span>VYRO.</span></h1><div class="search">⌕ <input placeholder="Type a song or artist..." oninput="searchTracks(this.value)"></div><div id="searchMessage" class="empty">Try searching for an artist or song.</div></div>
 <div class="view" id="library"><div class="eyebrow">Your personal space</div><h1>Your <span>Library.</span></h1><p style="color:var(--muted);font-size:13px">Your saved tracks will appear here on this device.</p><div id="savedTracks" class="empty">No saved tracks yet.<br>Tap ♡ on a track to add it to your library.</div></div>
 
-<!-- ARTIST HUB (LOGIN SCREEN) -->
+<!-- ARTIST HUB -->
 <div class="view" id="artist">
   <div class="eyebrow">For the next generation</div><h1>Artist <span>Hub.</span></h1>
   
-  <!-- LOGGED OUT VIEW (LOGIN ONLY) -->
+  <!-- LOGIN PAGE -->
   <div id="artistLoggedOut">
     <section class="hero"><span class="pill">INDEPENDENT ARTISTS</span><h2>Your sound deserves a stage.</h2><p>Build your profile, introduce your music and connect with listeners around the world.</p></section>
     
@@ -175,7 +178,7 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
     </div>
   </div>
 
-  <!-- SIGN UP PAGE (HIDDEN BY DEFAULT) -->
+  <!-- SIGN UP PAGE -->
   <div id="artistSignupPage" style="display: none;">
     <div class="dash-box" style="margin-top: 20px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -193,7 +196,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
         <button type="button" class="eye-icon" onclick="togglePasswordVisibility('signupPass')">👁️</button>
       </div>
 
-      <!-- Profile Picture Upload -->
       <p style="color:#aaa; font-size:12px; margin-bottom: 5px;">Profile Picture (Optional)</p>
       <input type="file" id="signupImage" accept="image/*" style="display:none;" onchange="document.getElementById('imgLabel').innerText = event.target.files[0].name;">
       <button class="dash-btn" onclick="document.getElementById('signupImage').click()" style="background: #211634; border: 1px solid var(--purple); margin-bottom: 15px;">
@@ -206,7 +208,7 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
     </div>
   </div>
 
-  <!-- DASHBOARD VIEW -->
+  <!-- DASHBOARD -->
   <div id="artistDashboard" style="display: none;">
     <div class="dash-box">
       <h2 style="margin-top:0;">Welcome back, <br><span id="dashArtistName" style="color:var(--pink);">Artist</span></h2>
@@ -265,12 +267,12 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <audio id="vyro-player" style="width: 0; height: 0; opacity: 0; position: absolute;" controls preload="metadata"></audio>
 
 <script>
-// SPLASH SCREEN 10 SECOND TIMER
+// AI RUN MASTER (SPLASH SCREEN) - 5 SECONDS
 setTimeout(() => {
   const splash = document.getElementById('splashScreen');
   splash.style.opacity = '0';
   setTimeout(() => { splash.style.display = 'none'; }, 500);
-}, 10000); 
+}, 5000); 
 
 const CLOUDINARY_CLOUD_NAME = "ixay5wda"; 
 const CLOUDINARY_UPLOAD_PRESET = "qvk4xtky"; 
@@ -339,7 +341,6 @@ onAuthStateChanged(auth, (user) => {
     
     document.getElementById('dashArtistName').textContent = savedArtistName;
     
-    // Check for profile image
     let savedProfilePic = localStorage.getItem('vyro_profile_pic_' + user.email);
     if(user.photoURL) savedProfilePic = user.photoURL;
     
@@ -383,9 +384,11 @@ async function createArtistAccount() {
   errorDiv.innerHTML = "Creating account... Please wait.";
 
   try {
+    // 1-second safety delay to ensure Firebase is fully loaded
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     let profilePicURL = '';
     
-    // Upload image if selected
     if (imageFile) {
       const imageData = new FormData();
       imageData.append('file', imageFile);
@@ -397,15 +400,14 @@ async function createArtistAccount() {
       if(imgRes.ok) profilePicURL = imgJson.secure_url;
     }
 
+    const { createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut } = window.firebaseAuth;
     const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
     
-    // Update their profile with Name and Picture
     await updateProfile(userCredential.user, {
       displayName: name,
       photoURL: profilePicURL
     });
 
-    // Save locally for immediate UI update
     localStorage.setItem('vyro_artist_name_' + email, name);
     if(profilePicURL) localStorage.setItem('vyro_profile_pic_' + email, profilePicURL);
 
@@ -751,4 +753,4 @@ function genrePick(btn,g){
 }
 </script>
 </body>
-  </html>
+        </html>
