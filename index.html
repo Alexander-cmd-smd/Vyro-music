@@ -24,17 +24,15 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
   
-  // Expose to window for the main script
   window.firebaseDB = { db, collection, addDoc, getDocs };
   window.firebaseAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, updateProfile };
   
-  // Dispatch an event to let the main script know Firebase is ready
   window.dispatchEvent(new Event('firebaseReady'));
 </script>
 
 <style>
 :root{--bg:#090711;--panel:#151122;--panel2:#211634;--purple:#9b5cff;--pink:#ff4fd8;--blue:#4b8dff;--muted:#aaa3bb;--white:#f8f5ff;--green:#00ff88;}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0%,#35145a 0,transparent 30%),var(--bg);color:var(--white);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding-bottom:100px;}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0%,#35145a 0,transparent 30%),var(--bg);color:var(--white);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;padding-bottom:140px;}
 
 header{display:flex;align-items:center;justify-content:space-between;padding:20px 18px 10px;position:sticky;top:0;background:#090711df;backdrop-filter:blur(15px);z-index:5}
 .logo{font-weight:950;letter-spacing:3px;font-size:25px;background:linear-gradient(90deg,#fff,#bd8aff,#ff68d9);-webkit-background-clip:text;color:transparent}.avatar{border:1px solid #6e4a98;border-radius:50%;width:38px;height:38px;display:grid;place-items:center;background:linear-gradient(135deg,#4d227a,#e247bd);font-weight:800;overflow:hidden;}
@@ -115,6 +113,11 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 .my-track-item .mt-info { flex: 1; min-width: 0; }
 .my-track-item strong { font-size: 13px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .my-track-item small { color: var(--muted); font-size: 11px; }
+
+/* Pushes content up so the player doesn't hide the logout/withdraw buttons */
+#artistDashboard {
+  padding-bottom: 90px;
+}
 </style>
 </head>
 <body>
@@ -400,11 +403,9 @@ renderApp();
 // ==========================================
 // 2. FIREBASE INITIALIZATION HANDLING
 // ==========================================
-// We wait for the module script to fire 'firebaseReady'
 window.addEventListener('firebaseReady', () => {
   const { auth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateProfile } = window.firebaseAuth;
   
-  // Now that we have auth, initialize the listener
   onAuthStateChanged(auth, (user) => {
     if (user) {
       currentUser = user;
@@ -438,7 +439,6 @@ window.addEventListener('firebaseReady', () => {
     }
   });
 
-  // Load cloud tracks now that DB is ready
   loadTracksFromCloud();
 });
 
@@ -456,7 +456,6 @@ function hideSignupPage() {
 }
 
 async function createArtistAccount() {
-  // Error fixed: Check if Firebase loaded before trying to use it
   if(!window.firebaseAuth) { alert("Cloud connection still loading. Please wait a second and try again."); return; }
   
   const { auth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } = window.firebaseAuth;
@@ -1003,4 +1002,4 @@ function genrePick(btn,g){
 }
 </script>
 </body>
-          </html>
+</html>
