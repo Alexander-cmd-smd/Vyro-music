@@ -9,7 +9,6 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
   // YOUR REAL FIREBASE CONFIG
   const firebaseConfig = {
@@ -25,10 +24,9 @@
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-  const storage = getStorage(app);
 
-  // Expose functions to window so our regular script can use them
-  window.firebaseDB = { db, storage, collection, addDoc, getDocs, ref, uploadBytes, getDownloadURL };
+  // Expose functions to window
+  window.firebaseDB = { db, collection, addDoc, getDocs };
 </script>
 
 <style>
@@ -153,7 +151,7 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <div id="artistDashboard" style="display: none;">
   <div class="dash-box">
     <h2 style="margin-top:0;">Welcome back, <br><span id="dashArtistName" style="color:var(--pink);">Artist</span></h2>
-    <p style="color:#aaa; font-size:13px;">This is your official artist dashboard. Here you can upload new music and track your stats.</p>
+    <p style="color:#aaa; font-size:13px;">This is your official artist dashboard.</p>
     
     <div style="display: flex; gap: 10px; margin-top: 20px;">
       <div style="flex:1; background:#090711; padding:10px; border-radius:10px; text-align:center;">
@@ -168,8 +166,8 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
   </div>
 
   <div class="dash-box">
-    <h2 style="font-size:18px; margin-top:0;">Upload New Track (Cloud)</h2>
-    <p style="color:#aaa; font-size:12px; margin-bottom:10px;">Select an MP3. It will instantly upload to the cloud and go live for everyone!</p>
+    <h2 style="font-size:18px; margin-top:0;">Upload New Track</h2>
+    <p style="color:#aaa; font-size:12px; margin-bottom:10px;">Select an MP3. It will instantly upload to the cloud and go live!</p>
     
     <input type="text" id="uploadTitle" class="dash-input" placeholder="Song Title">
     <select id="uploadGenre" class="dash-input">
@@ -251,38 +249,32 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <audio id="vyro-player" style="width: 0; height: 0; opacity: 0; position: absolute;" controls preload="metadata"></audio>
 
 <script>
+// YOUR CLOUDINARY DETAILS
+const CLOUDINARY_CLOUD_NAME = "ixay5wda"; 
+const CLOUDINARY_UPLOAD_PRESET = "qvk4xtky"; 
+
 let currentTrack = null; 
 let currentTrackIndex = 0;
 let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; 
-let allTracks = []; // This will be filled from Firebase!
+let allTracks = []; 
 
 const audio = document.getElementById("vyro-player");
 
-// Wait a second for Firebase to load before starting
-setTimeout(() => {
-  loadTracksFromCloud();
-}, 1500);
+setTimeout(() => { loadTracksFromCloud(); }, 1500);
 
 async function loadTracksFromCloud() {
   const { db, collection, getDocs } = window.firebaseDB;
   try {
     const querySnapshot = await getDocs(collection(db, "tracks"));
-    
-    // Clear current tracks and load new ones
     allTracks = [];
-    querySnapshot.forEach((doc) => {
-      allTracks.push(doc.data());
-    });
+    querySnapshot.forEach((doc) => { allTracks.push(doc.data()); });
 
-    // If database is empty, show a message
     if(allTracks.length === 0) {
       document.getElementById('trackGrid').innerHTML = '<p style="color:#aaa; grid-column: span 2;">No tracks in the cloud yet. Log in as an artist to upload the first one!</p>';
-    } else {
-      renderApp();
-    }
+    } else { renderApp(); }
   } catch(e) {
-    console.error("Error loading tracks: ", e);
-    document.getElementById('trackGrid').innerHTML = '<p style="color:#ff4f4f; grid-column: span 2;">Error connecting to Firebase. Check your config code.</p>';
+    console.error(e);
+    document.getElementById('trackGrid').innerHTML = '<p style="color:#ff4f4f; grid-column: span 2;">Error connecting to Firebase.</p>';
   }
 }
 
@@ -295,12 +287,11 @@ function renderApp() {
       <div class="artist">${t.artist} · ${t.genre}</div>
     </div>
   `).join('');
-
   renderExplore('All');
   renderSaved();
 }
 
-// --- CLOUD UPLOAD FUNCTION ---
+// --- UPLOAD VIA CLOUDINARY ---
 async function handleCloudUpload(event) {
   const file = event.target.files[0];
   if(!file) return;
@@ -312,26 +303,26 @@ async function handleCloudUpload(event) {
   if(!title) { alert("Please enter a song title."); event.target.value = ''; return; }
   
   const status = document.getElementById('uploadStatus');
-  status.innerHTML = "⏳ Uploading to Cloud... Please wait.";
+  status.innerHTML = "⏳ Uploading to Cloudinary... Please wait.";
   
-  const { db, storage, collection, addDoc, ref, uploadBytes, getDownloadURL } = window.firebaseDB;
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  formData.append('resource_type', 'video'); // Audio files are treated as video by Cloudinary
 
   try {
-    // 1. Upload file to Firebase Storage
-    const storageRef = ref(storage, 'tracks/' + Date.now() + '_' + file.name);
-    const snapshot = await uploadBytes(storageRef, file);
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`, {
+      method: 'POST',
+      body: formData
+    });
     
-    // 2. Get the download URL
-    const downloadURL = await getDownloadURL(snapshot.ref);
+    const data = await response.json();
+    if(!response.ok) throw new Error(data.error.message || "Upload failed");
+
+    const downloadURL = data.secure_url;
     
-    // 3. Save track data to Firestore Database
-    const newTrack = {
-      title: title,
-      artist: currentArtist,
-      genre: genre,
-      src: downloadURL,
-      createdAt: Date.now()
-    };
+    const { db, collection, addDoc } = window.firebaseDB;
+    const newTrack = { title: title, artist: currentArtist, genre: genre, src: downloadURL, createdAt: Date.now() };
     
     await addDoc(collection(db, "tracks"), newTrack);
     
@@ -339,16 +330,14 @@ async function handleCloudUpload(event) {
     document.getElementById('uploadTitle').value = '';
     event.target.value = '';
     
-    // Reload tracks
     loadTracksFromCloud();
-    
   } catch (error) {
     console.error(error);
     status.innerHTML = "❌ Error: " + error.message;
   }
 }
 
-// --- PLAYER LOGIC ---
+// PLAYER LOGIC
 audio.addEventListener('ended', () => { nextTrack(); });
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
@@ -359,8 +348,7 @@ audio.addEventListener('timeupdate', () => {
 
 function formatTime(seconds) {
   if (isNaN(seconds)) return "0:00";
-  const min = Math.floor(seconds / 60);
-  const sec = Math.floor(seconds % 60);
+  const min = Math.floor(seconds / 60); const sec = Math.floor(seconds % 60);
   return `${min}:${sec < 10 ? '0' : ''}${sec}`;
 }
 
@@ -492,7 +480,7 @@ function searchTracks(q){
 function genrePick(btn,g){
   document.querySelectorAll('.genre').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  renderApp(); // re-render grid
+  renderApp();
   document.querySelectorAll('#trackGrid .music-card').forEach(c=>c.style.display=g==='All'||c.dataset.genre===g?'':'none');
 }
 
