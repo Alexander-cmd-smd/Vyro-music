@@ -221,6 +221,7 @@ let currentUser = null;
 
 const audio = document.getElementById("vyro-player");
 
+// --- RESTORE MUSIC ON REFRESH ---
 let lastPlayed = JSON.parse(localStorage.getItem('vyro_last_played'));
 if (lastPlayed) {
   document.getElementById('player').classList.add('show');
@@ -245,6 +246,7 @@ if (lastPlayed) {
 renderApp(); 
 setTimeout(() => { loadTracksFromCloud(); }, 1000);
 
+// --- FIREBASE AUTHENTICATION LOGIC ---
 const { auth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification } = window.firebaseAuth;
 
 onAuthStateChanged(auth, (user) => {
@@ -276,14 +278,18 @@ function artistSignup() {
   
   createUserWithEmailAndPassword(auth, email, pass)
     .then((userCredential) => {
-      // Send verification email
+      localStorage.setItem('vyro_artist_name_' + email, name);
+      document.getElementById('dashArtistName').textContent = name;
+      document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+      
       sendEmailVerification(userCredential.user)
         .then(() => {
-          localStorage.setItem('vyro_artist_name_' + email, name);
-          alert("Account created! Please check your email inbox to verify your account before logging in.");
-          signOut(auth); // Log them out until they verify
+          alert("✅ Account created! We just sent a verification link to your email. Please check your inbox and verify before logging in.");
+          signOut(auth);
         })
-        .catch((error) => alert("Error sending verification email: " + error.message));
+        .catch((error) => {
+          alert("Account created, but we couldn't send the verification email: " + error.message);
+        });
     })
     .catch(err => alert("Signup Error: " + err.message));
 }
@@ -291,19 +297,23 @@ function artistSignup() {
 function artistLogin() {
   const email = document.getElementById('artistEmailInput').value.trim();
   const pass = document.getElementById('artistPassInput').value.trim();
-  if(!email || !pass) { alert("Enter email and password."); return; }
+  
+  if(!email || !pass) { alert("Please enter your email and password."); return; }
   
   signInWithEmailAndPassword(auth, email, pass)
     .then((userCredential) => {
       if (userCredential.user.emailVerified) {
         alert("Welcome back!");
       } else {
-        alert("⚠️ Your email is not verified yet. We just sent you a new link. Please check your inbox.");
+        alert("⚠️ Your email is not verified yet. Please check your inbox for the verification link.");
         sendEmailVerification(userCredential.user);
-        signOut(auth); // Log them out
+        signOut(auth);
       }
     })
-    .catch(err => alert("Login Error: " + err.message));
+    .catch(err => {
+      // This will show the exact error from Firebase
+      alert("Login Error: " + err.code + "\n" + err.message);
+    });
 }
 
 function artistLogout() {
@@ -330,6 +340,7 @@ function togglePasswordVisibility() {
   else { passInput.type = "password"; }
 }
 
+// --- CLOUD DATA ---
 async function loadTracksFromCloud() {
   const { db, collection, getDocs } = window.firebaseDB;
   try {
@@ -605,4 +616,4 @@ function genrePick(btn,g){
 }
 </script>
 </body>
-</html>
+      </html>
