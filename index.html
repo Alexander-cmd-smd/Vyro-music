@@ -148,7 +148,7 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 
     <input type="file" id="imageUpload" accept="image/*" style="display:none;" onchange="document.getElementById('imageLabel').innerText = event.target.files[0].name;">
     <button class="dash-btn" onclick="document.getElementById('imageUpload').click()" style="background: #211634; border: 1px solid var(--purple);">
-      <span id="imageLabel">🖼️ Select Cover Image (JPG/PNG)</span>
+      <span id="imageLabel">🖼️ Select Cover Image (Optional)</span>
     </button>
 
     <button class="dash-btn" onclick="handleCloudUpload()" style="margin-top: 15px;">🚀 Upload to VYRO</button>
@@ -191,27 +191,33 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 const CLOUDINARY_CLOUD_NAME = "ixay5wda"; 
 const CLOUDINARY_UPLOAD_PRESET = "qvk4xtky"; 
 
+// AI Cover Art Generator (If user doesn't upload an image)
+const defaultAIcovers = [
+  "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop", // Purple neon
+  "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=500&auto=format&fit=crop", // Concert
+  "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=500&auto=format&fit=crop", // DJ Deck
+  "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=500&auto=format&fit=crop", // Mic
+  "https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop"  // Abstract music
+];
+
 const baseTracks = [
-  {id: '1', title:'Come', artist:'Ogunba Alex', emoji:'🌙', genre:'Afrobeats', src:'assets/Come [8a409715].mp3', cover:''},
-  {id: '2', title:'Your brother', artist:'Ogunba Alex', emoji:'☁️', genre:'Hip-Hop', src:'assets/Your brother [bf867660].mp3', cover:''},
-  {id: '3', title:'Loving', artist:'Alex_skiddo', emoji:'💫', genre:'R&B', src:'assets/Loving [947f2a25].mp3', cover:''},
-  {id: '4', title:'Tell Yur Mummy', artist:'Alex_skiddo', emoji:'✨', genre:'Gospel', src:'assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3', cover:''}
+  {id: '1', title:'Come', artist:'Ogunba Alex', emoji:'🌙', genre:'Afrobeats', src:'assets/Come [8a409715].mp3', cover:defaultAIcovers[0]},
+  {id: '2', title:'Your brother', artist:'Ogunba Alex', emoji:'☁️', genre:'Hip-Hop', src:'assets/Your brother [bf867660].mp3', cover:defaultAIcovers[1]},
+  {id: '3', title:'Loving', artist:'Alex_skiddo', emoji:'💫', genre:'R&B', src:'assets/Loving [947f2a25].mp3', cover:defaultAIcovers[2]},
+  {id: '4', title:'Tell Yur Mummy', artist:'Alex_skiddo', emoji:'✨', genre:'Gospel', src:'assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3', cover:defaultAIcovers[3]}
 ];
 
 let currentTrack = null; 
 let currentTrackIndex = 0;
 let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; 
 
-// THE CACHE SYSTEM: Load saved tracks instantly so they never disappear
+// THE CACHE SYSTEM
 let cachedCloudTracks = JSON.parse(localStorage.getItem('vyro_cloud_cache')) || [];
 let allTracks = [...baseTracks, ...cachedCloudTracks];
 
 const audio = document.getElementById("vyro-player");
 
-// Render immediately from cache
 renderApp(); 
-
-// Then fetch fresh data in the background
 setTimeout(() => { loadTracksFromCloud(); }, 1000);
 
 async function loadTracksFromCloud() {
@@ -221,10 +227,9 @@ async function loadTracksFromCloud() {
     let cloudTracks = [];
     querySnapshot.forEach((doc) => { cloudTracks.push(doc.data()); });
 
-    // If we found songs, update cache and redraw
     if (cloudTracks.length > 0) {
       cachedCloudTracks = cloudTracks;
-      localStorage.setItem('vyro_cloud_cache', JSON.stringify(cloudTracks)); // Save to phone
+      localStorage.setItem('vyro_cloud_cache', JSON.stringify(cloudTracks));
       allTracks = [...baseTracks, ...cloudTracks];
       renderApp();
     }
@@ -251,7 +256,7 @@ function renderApp() {
   renderSaved();
 }
 
-// --- UPLOAD LOGIC WITH COVER IMAGE ---
+// --- UPLOAD LOGIC WITH CLOUDINARY ---
 async function handleCloudUpload() {
   const audioFile = document.getElementById('audioUpload').files[0];
   const imageFile = document.getElementById('imageUpload').files[0];
@@ -293,12 +298,18 @@ async function handleCloudUpload() {
       });
       const imgJson = await imgRes.json();
       if(imgRes.ok) coverURL = imgJson.secure_url;
+    } else {
+      // Assign a random AI image if they didn't upload one
+      coverURL = defaultAIcovers[Math.floor(Math.random() * defaultAIcovers.length)];
     }
 
-    // 3. Save to Database
-    const newTrack = { title: title, artist: currentArtist, genre: genre, src: downloadURL, cover: coverURL, createdAt: Date.now() };
+    // 3. Save to Database (Let Firebase auto-generate ID to prevent errors)
+    const newTrack = { title: title, artist: currentArtist, genre: genre, src: downloadURL, cover: coverURL };
     
-    allTracks.push(newTrack);
+    // Save to phone cache instantly so it doesn't disappear
+    cachedCloudTracks.push(newTrack);
+    localStorage.setItem('vyro_cloud_cache', JSON.stringify(cachedCloudTracks));
+    allTracks = [...baseTracks, ...cachedCloudTracks];
     renderApp();
     
     // Clear inputs
@@ -306,10 +317,11 @@ async function handleCloudUpload() {
     document.getElementById('audioUpload').value = '';
     document.getElementById('imageUpload').value = '';
     document.getElementById('audioLabel').innerText = "🎵 Select Audio File (MP3)";
-    document.getElementById('imageLabel').innerText = "🖼️ Select Cover Image (JPG/PNG)";
+    document.getElementById('imageLabel').innerText = "🖼️ Select Cover Image (Optional)";
     
     status.innerHTML = "✅ Success! Song is live!";
     
+    // Send to Firebase Cloud
     const { db, collection, addDoc } = window.firebaseDB;
     await addDoc(collection(db, "tracks"), newTrack);
     
@@ -427,10 +439,10 @@ function playTrack(title,artist,emoji,src){
   document.getElementById('fpTitle').textContent = track.title;
   document.getElementById('fpArtist').textContent = track.artist;
   
-  // Set Full Player Cover (Vinyl Center)
+  // Set Full Player Cover
   if (track.cover) {
     document.getElementById('fpEmoji').innerHTML = `<img src="${track.cover}" style="width:100%; height:100%; object-fit:cover;">`;
-    document.getElementById('fpEmoji').style.fontSize = '0'; // Hide emoji
+    document.getElementById('fpEmoji').style.fontSize = '0'; 
   } else {
     document.getElementById('fpEmoji').innerHTML = '🎵';
     document.getElementById('fpEmoji').style.fontSize = '60px';
