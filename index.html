@@ -10,6 +10,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+  // YOUR REAL FIREBASE CONFIG
   const firebaseConfig = {
     apiKey: "AIzaSyCQ3b4qiC3nW_5KJcNZE4oh88sJ2agBcaQ",
     authDomain: "vyro-cd4ab.firebaseapp.com",
@@ -295,15 +296,21 @@ async function handleCloudUpload(event) {
   formData.append('file', file);
   formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
   
-  // CHANGED TO EXACT AUTO UPLOAD URL FOR AUDIO
+  // BULLETPROOF UPLOAD URL FOR AUDIO
   const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
 
   try {
-    const response = await fetch(uploadUrl, { method: 'POST', body: formData });
+    const response = await fetch(uploadUrl, {
+      method: 'POST',
+      body: formData
+    });
+    
     const data = await response.json();
-    if(!response.ok) throw new Error(data.error.message || "Upload failed");
+    if(!response.ok) throw new Error(data.error?.message || "Upload failed");
 
     const downloadURL = data.secure_url;
+    alert("✅ Cloudinary Success! Now saving to database..."); // <--- THE TEST ALERT
+    
     const { db, collection, addDoc } = window.firebaseDB;
     const newTrack = { title: title, artist: currentArtist, genre: genre, src: downloadURL, createdAt: Date.now() };
     
@@ -541,4 +548,4 @@ function genrePick(btn,g){
 }
 </script>
 </body>
-</html>
+                               </html>
