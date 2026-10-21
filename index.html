@@ -191,13 +191,13 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 const CLOUDINARY_CLOUD_NAME = "ixay5wda"; 
 const CLOUDINARY_UPLOAD_PRESET = "qvk4xtky"; 
 
-// AI Cover Art Generator (If user doesn't upload an image)
+// AI Cover Art Generator
 const defaultAIcovers = [
-  "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop", // Purple neon
-  "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=500&auto=format&fit=crop", // Concert
-  "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=500&auto=format&fit=crop", // DJ Deck
-  "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=500&auto=format&fit=crop", // Mic
-  "https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop"  // Abstract music
+  "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=500&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=500&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=500&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop"
 ];
 
 const baseTracks = [
@@ -211,11 +211,34 @@ let currentTrack = null;
 let currentTrackIndex = 0;
 let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; 
 
-// THE CACHE SYSTEM
 let cachedCloudTracks = JSON.parse(localStorage.getItem('vyro_cloud_cache')) || [];
 let allTracks = [...baseTracks, ...cachedCloudTracks];
 
 const audio = document.getElementById("vyro-player");
+
+// --- RESTORE MUSIC ON REFRESH ---
+let lastPlayed = JSON.parse(localStorage.getItem('vyro_last_played'));
+if (lastPlayed) {
+  // Set the UI to show the last played song
+  document.getElementById('player').classList.add('show');
+  document.getElementById('playerTitle').textContent = lastPlayed.title;
+  document.getElementById('playerArtist').textContent = lastPlayed.artist;
+  if(lastPlayed.cover) {
+    document.getElementById('playerEmoji').innerHTML = `<img src="${lastPlayed.cover}" style="width:100%; height:100%; object-fit:cover;">`;
+    document.getElementById('fpEmoji').innerHTML = `<img src="${lastPlayed.cover}" style="width:100%; height:100%; object-fit:cover;">`;
+    document.getElementById('fpEmoji').style.fontSize = '0';
+  }
+  document.getElementById('fpTitle').textContent = lastPlayed.title;
+  document.getElementById('fpArtist').textContent = lastPlayed.artist;
+  
+  currentTrack = lastPlayed;
+  audio.src = lastPlayed.src;
+  audio.currentTime = lastPlayed.time || 0;
+  
+  // Browsers block autoplay on refresh. We set the UI to paused, and the user just has to tap Play.
+  document.getElementById('playPauseBtn').textContent = "▶";
+  document.getElementById('fpPlayPauseBtn').textContent = "▶";
+}
 
 renderApp(); 
 setTimeout(() => { loadTracksFromCloud(); }, 1000);
@@ -256,7 +279,6 @@ function renderApp() {
   renderSaved();
 }
 
-// --- UPLOAD LOGIC WITH CLOUDINARY ---
 async function handleCloudUpload() {
   const audioFile = document.getElementById('audioUpload').files[0];
   const imageFile = document.getElementById('imageUpload').files[0];
@@ -271,7 +293,6 @@ async function handleCloudUpload() {
   status.innerHTML = "⏳ Uploading Audio... Please wait.";
 
   try {
-    // 1. Upload Audio
     const audioData = new FormData();
     audioData.append('file', audioFile);
     audioData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
@@ -286,7 +307,6 @@ async function handleCloudUpload() {
     const downloadURL = audioJson.secure_url;
     let coverURL = '';
 
-    // 2. Upload Image (if selected)
     if (imageFile) {
       status.innerHTML = "⏳ Uploading Cover Art... Please wait.";
       const imageData = new FormData();
@@ -299,20 +319,16 @@ async function handleCloudUpload() {
       const imgJson = await imgRes.json();
       if(imgRes.ok) coverURL = imgJson.secure_url;
     } else {
-      // Assign a random AI image if they didn't upload one
       coverURL = defaultAIcovers[Math.floor(Math.random() * defaultAIcovers.length)];
     }
 
-    // 3. Save to Database (Let Firebase auto-generate ID to prevent errors)
     const newTrack = { title: title, artist: currentArtist, genre: genre, src: downloadURL, cover: coverURL };
     
-    // Save to phone cache instantly so it doesn't disappear
     cachedCloudTracks.push(newTrack);
     localStorage.setItem('vyro_cloud_cache', JSON.stringify(cachedCloudTracks));
     allTracks = [...baseTracks, ...cachedCloudTracks];
     renderApp();
     
-    // Clear inputs
     document.getElementById('uploadTitle').value = '';
     document.getElementById('audioUpload').value = '';
     document.getElementById('imageUpload').value = '';
@@ -321,7 +337,6 @@ async function handleCloudUpload() {
     
     status.innerHTML = "✅ Success! Song is live!";
     
-    // Send to Firebase Cloud
     const { db, collection, addDoc } = window.firebaseDB;
     await addDoc(collection(db, "tracks"), newTrack);
     
@@ -404,6 +419,12 @@ audio.addEventListener('timeupdate', () => {
   document.getElementById('seekBar').value = (audio.currentTime / audio.duration) * 100;
   document.getElementById('currentTime').textContent = formatTime(audio.currentTime);
   document.getElementById('totalTime').textContent = formatTime(audio.duration);
+
+  // Save current time to memory
+  if(currentTrack) {
+    currentTrack.time = audio.currentTime;
+    localStorage.setItem('vyro_last_played', JSON.stringify(currentTrack));
+  }
 });
 
 function formatTime(seconds) {
@@ -429,7 +450,6 @@ function playTrack(title,artist,emoji,src){
   document.getElementById('playerTitle').textContent = track.title;
   document.getElementById('playerArtist').textContent = track.artist;
   
-  // Set Mini Player Cover
   if (track.cover) {
     document.getElementById('playerEmoji').innerHTML = `<img src="${track.cover}" style="width:100%; height:100%; object-fit:cover;">`;
   } else {
@@ -439,7 +459,6 @@ function playTrack(title,artist,emoji,src){
   document.getElementById('fpTitle').textContent = track.title;
   document.getElementById('fpArtist').textContent = track.artist;
   
-  // Set Full Player Cover
   if (track.cover) {
     document.getElementById('fpEmoji').innerHTML = `<img src="${track.cover}" style="width:100%; height:100%; object-fit:cover;">`;
     document.getElementById('fpEmoji').style.fontSize = '0'; 
@@ -454,6 +473,9 @@ function playTrack(title,artist,emoji,src){
 
   audio.src = track.src; 
   audio.play().then(() => { updatePlayIcons(true); }).catch(error => { alert("Playback error: " + error.message); });
+  
+  // Save to memory for refresh
+  localStorage.setItem('vyro_last_played', JSON.stringify(track));
 }
 
 function togglePlay() {
@@ -563,4 +585,4 @@ function genrePick(btn,g){
 }
 </script>
 </body>
-      </html>
+</html>
