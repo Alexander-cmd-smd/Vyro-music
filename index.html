@@ -76,17 +76,59 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 <div class="player" id="player"><div class="player-art" id="playerEmoji">♫</div><div class="player-info"><strong id="playerTitle">Select a track</strong><small id="playerArtist">VYRO demo player · no audio attached</small></div><button onclick="toggleLike()" id="likeBtn" aria-label="Save track">♡</button><button onclick="alert('This prototype uses demo controls only. Audio playback will be connected when licensed tracks are added.')">▶</button></div>
 <nav class="nav"><button class="active" onclick="showView('home',this)"><span>⌂</span>Home</button><button onclick="showView('explore',this)"><span>◈</span>Explore</button><button onclick="showView('search',this)"><span>⌕</span>Search</button><button onclick="showView('library',this)"><span>♡</span>Library</button><button onclick="showView('artist',this)"><span>♫</span>Artist Hub</button></nav>
 <script>
-let currentTrack=null;let saved=[];const tracks=[{title:'Midnight Motion',artist:'Demo Artist',emoji:'🌙',genre:'Afrobeats'},{title:'Purple Skies',artist:'Nova Lane',emoji:'☁️',genre:'Hip-Hop'},{title:'Slow Burn',artist:'Mira Sol',emoji:'💫',genre:'R&B'},{title:'Higher Ground',artist:'Eli Ray',emoji:'✨',genre:'Gospel'}];
+let currentTrack=null; let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; const tr...=[{title:'Midnight Motion',artist:'Demo Artist',emoji:'🌙',genre:'Afrobeats'},{title:'Purple Skies',artist:'Nova Lane',emoji:'☁️',genre:'Hip-Hop'},{title:'Slow Burn',artist:'Mira Sol',emoji:'💫',genre:'R&B'},{title:'Higher Ground',artist:'Eli Ray',emoji:'✨',genre:'Gospel'}];
 function showView(id,btn){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');else{const b=[...document.querySelectorAll('.nav button')].find(x=>x.textContent.toLowerCase().includes(id==='artist'?'artist':id));if(b)b.classList.add('active')}if(id==='explore')renderExplore();if(id==='library')renderSaved()}
 function playTrack(title,artist,emoji){currentTrack={title,artist,emoji};document.getElementById('player').classList.add('show');document.getElementById('playerTitle').textContent=title;document.getElementById('playerArtist').textContent=artist+' · demo player';document.getElementById('playerEmoji').textContent=emoji;document.getElementById('likeBtn').textContent=saved.some(t=>t.title===title)?'♥':'♡'}
-function toggleLike(){if(!currentTrack)return;let i=saved.findIndex(t=>t.title===currentTrack.title);if(i>=0)saved.splice(i,1);else saved.push(currentTrack);document.getElementById('likeBtn').textContent=i>=0?'♡':'♥';renderSaved()}
-function renderSaved(){const el=document.getElementById('savedTracks');if(!saved.length){el.innerHTML='No saved tracks yet.<br>Tap ♡ on a track to add it to your library.';el.className='empty';return}el.className='';el.innerHTML=saved.map(t=>`<div class="artist-row"><div class="artist-art">${t.emoji}</div><div><strong>${t.title}</strong><small>${t.artist}</small></div><button class="follow" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶ Play</button></div>`).join('')}
+function toggleLike() {
+  if (!currentTrack) return;
+  
+  // Check if the song is already in the saved list
+  const index = saved.findIndex(t => t.title === currentTrack.title);
+  
+  if (index > -1) {
+    saved.splice(index, 1); // Remove it
+    alert("Removed from Library");
+  } else {
+    saved.push({ title: currentTrack.title, artist: currentTrack.artist }); // Add it
+    alert("Saved to Library! ❤️");
+  }
+  
+  // Save to phone memory
+  localStorage.setItem('vyro_saved', JSON.stringify(saved));
+  
+  // Refresh the Library tab
+  renderSaved();
+}
+function renderSaved() {
+  const libraryContainer = document.getElementById('library');
+  if (!libraryContainer) return;
+
+  if (saved.length === 0) {
+    libraryContainer.innerHTML = '<p style="color: #aaa; padding: 20px;">No saved songs yet. Tap the ❤️ while a song plays!</p>';
+    return;
+  }
+
+  let html = '<h2 style="color: #fff; margin-bottom: 15px;">Your Library</h2><ul style="list-style: none; padding: 0;">';
+  
+  saved.forEach((track) => {
+    html += `
+      <li style="background: #1c1c2e; padding: 15px; margin-bottom: 10px; border-radius: 12px; color: white;">
+        <strong>${track.title}</strong><br>
+        <span style="color: #aaa; font-size: 14px;">${track.artist}</span>
+      </li>
+    `;
+  });
+  
+  html += '</ul>';
+  libraryContainer.innerHTML = html;
+}
 function renderExplore(){document.getElementById('exploreGrid').innerHTML=tracks.map(t=>`<div class="music-card"><div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">${t.emoji}</div><div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶</button></div><div class="artist">${t.artist} · ${t.genre}</div></div>`).join('')}
 function searchTracks(q){const term=q.toLowerCase().trim();const matches=tracks.filter(t=>(t.title+' '+t.artist+' '+t.genre).toLowerCase().includes(term));const msg=document.getElementById('searchMessage');if(msg)msg.innerHTML=term?(matches.length?matches.map(t=>`<div class="artist-row"><div class="artist-art">${t.emoji}</div><div><strong>${t.title}</strong><small>${t.artist} · ${t.genre}</small></div><button class="follow" onclick="playTrack('${t.title}','${t.artist}','${t.emoji}')">▶ Play</button></div>`).join(''):'No demo results found. Try another search.'): 'Try searching “Midnight”, “Nova”, or “Afrobeats”.';document.querySelectorAll('#trackGrid .music-card').forEach(c=>c.style.display=!term||c.dataset.title.toLowerCase().includes(term)||c.dataset.artist.toLowerCase().includes(term)||c.dataset.genre.toLowerCase().includes(term)?'':'none')}
 function genrePick(btn,g){document.querySelectorAll('.genre').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('#trackGrid .music-card').forEach(c=>c.style.display=g==='All'||c.dataset.genre===g?'':'none')}
 function filterGenre(g){showView('explore');renderExplore();document.querySelectorAll('#exploreGrid .music-card').forEach((c,i)=>c.style.display=tracks[i].genre===g?'':'none')}
 function follow(btn){btn.textContent=btn.textContent.includes('Follow')?'✓ Following':'+ Follow';}
 renderExplore();
+renderSaved();
 </script>
 </body></html>
 <script>
