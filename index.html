@@ -8,6 +8,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCQ3b4qiC3nW_5KJcNZE4oh88sJ2agBcaQ",
@@ -21,7 +22,11 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const auth = getAuth(app);
+  
+  // Expose to global window so our main script can use them
   window.firebaseDB = { db, collection, addDoc, getDocs };
+  window.firebaseAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail };
 </script>
 
 <style>
@@ -115,30 +120,23 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
   <section class="hero"><span class="pill">INDEPENDENT ARTISTS</span><h2>Your sound deserves a stage.</h2><p>Build your profile, introduce your music and connect with listeners around the world.</p></section>
   <div class="dash-box" style="margin-top: 20px;">
     <h2 style="font-size: 20px; margin-top:0;">Artist Portal</h2>
-    <div class="dash-input-group"><input type="text" id="artistNameInput" class="dash-input" placeholder="Artist Name"></div>
-    <div class="dash-input-group"><input type="password" id="artistPassInput" class="dash-input" placeholder="Create/Enter Password"><button type="button" class="eye-icon" onclick="togglePasswordVisibility()">👁️</button></div>
-    <button class="dash-btn" onclick="artistLogin()">Login / Create Account</button>
+    <p style="color:#aaa; font-size:12px;">Create a real cloud account to upload music.</p>
+    <div class="dash-input-group"><input type="email" id="artistEmailInput" class="dash-input" placeholder="Email Address"></div>
+    <div class="dash-input-group"><input type="password" id="artistPassInput" class="dash-input" placeholder="Password"><button type="button" class="eye-icon" onclick="togglePasswordVisibility()">👁️</button></div>
+    <button class="dash-btn" onclick="artistSignup()" style="background: linear-gradient(90deg, #4b8dff, #9b5cff);">Sign Up</button>
+    <button class="dash-btn" onclick="artistLogin()">Log In</button>
     <a class="forgot-link" onclick="forgotPassword()">Forgot Password?</a>
   </div>
 </div>
 <div id="artistDashboard" style="display: none;">
   <div class="dash-box">
     <h2 style="margin-top:0;">Welcome back, <br><span id="dashArtistName" style="color:var(--pink);">Artist</span></h2>
-    <p style="color:#aaa; font-size:13px;">This is your official artist dashboard.</p>
-    <div style="display: flex; gap: 10px; margin-top: 20px;">
-      <div style="flex:1; background:#090711; padding:10px; border-radius:10px; text-align:center;">
-        <h3 style="margin:0; font-size:24px; color:var(--purple);" id="dashPlays">0</h3><small style="color:#aaa; font-size:10px;">Plays</small>
-      </div>
-      <div style="flex:1; background:#090711; padding:10px; border-radius:10px; text-align:center;">
-        <h3 style="margin:0; font-size:24px; color:var(--purple);" id="dashFollowers">0</h3><small style="color:#aaa; font-size:10px;">Followers</small>
-      </div>
-    </div>
+    <p style="color:#aaa; font-size:13px;">This is your official cloud dashboard.</p>
   </div>
   <div class="dash-box">
     <h2 style="font-size:18px; margin-top:0;">Upload New Track</h2>
-    <p style="color:#aaa; font-size:12px; margin-bottom:10px;">Select an MP3 and Cover Image. It will instantly upload to the cloud!</p>
-    
     <input type="text" id="uploadTitle" class="dash-input" placeholder="Song Title" style="margin-bottom: 15px;">
+    <input type="text" id="uploadArtistName" class="dash-input" placeholder="Artist Name (Stage Name)" style="margin-bottom: 15px;">
     <select id="uploadGenre" class="dash-input" style="margin-bottom: 15px;"><option value="Afrobeats">Afrobeats</option><option value="Hip-Hop">Hip-Hop</option><option value="R&B">R&B</option><option value="Gospel">Gospel</option></select>
     
     <input type="file" id="audioUpload" accept="audio/*" style="display:none;" onchange="document.getElementById('audioLabel').innerText = event.target.files[0].name;">
@@ -191,7 +189,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 const CLOUDINARY_CLOUD_NAME = "ixay5wda"; 
 const CLOUDINARY_UPLOAD_PRESET = "qvk4xtky"; 
 
-// AI Cover Art Generator
 const defaultAIcovers = [
   "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=500&auto=format&fit=crop",
@@ -214,12 +211,13 @@ let saved = JSON.parse(localStorage.getItem('vyro_saved')) || [];
 let cachedCloudTracks = JSON.parse(localStorage.getItem('vyro_cloud_cache')) || [];
 let allTracks = [...baseTracks, ...cachedCloudTracks];
 
+let currentUser = null; 
+
 const audio = document.getElementById("vyro-player");
 
 // --- RESTORE MUSIC ON REFRESH ---
 let lastPlayed = JSON.parse(localStorage.getItem('vyro_last_played'));
 if (lastPlayed) {
-  // Set the UI to show the last played song
   document.getElementById('player').classList.add('show');
   document.getElementById('playerTitle').textContent = lastPlayed.title;
   document.getElementById('playerArtist').textContent = lastPlayed.artist;
@@ -235,7 +233,6 @@ if (lastPlayed) {
   audio.src = lastPlayed.src;
   audio.currentTime = lastPlayed.time || 0;
   
-  // Browsers block autoplay on refresh. We set the UI to paused, and the user just has to tap Play.
   document.getElementById('playPauseBtn').textContent = "▶";
   document.getElementById('fpPlayPauseBtn').textContent = "▶";
 }
@@ -243,6 +240,69 @@ if (lastPlayed) {
 renderApp(); 
 setTimeout(() => { loadTracksFromCloud(); }, 1000);
 
+// --- FIREBASE AUTHENTICATION LOGIC ---
+const { auth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } = window.firebaseAuth;
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUser = user;
+    document.getElementById('artistLoggedOut').style.display = 'none';
+    document.getElementById('artistDashboard').style.display = 'block';
+    const displayName = user.email.split('@')[0];
+    document.getElementById('dashArtistName').textContent = displayName;
+    document.getElementById('userAvatar').textContent = displayName.charAt(0).toUpperCase();
+  } else {
+    currentUser = null;
+    document.getElementById('artistLoggedOut').style.display = 'block';
+    document.getElementById('artistDashboard').style.display = 'none';
+    document.getElementById('userAvatar').textContent = 'V';
+  }
+});
+
+function artistSignup() {
+  const email = document.getElementById('artistEmailInput').value.trim();
+  const pass = document.getElementById('artistPassInput').value.trim();
+  if(!email || !pass) { alert("Enter email and password."); return; }
+  
+  createUserWithEmailAndPassword(auth, email, pass)
+    .then(() => alert("Account created successfully! Welcome to VYRO."))
+    .catch(err => alert("Error: " + err.message));
+}
+
+function artistLogin() {
+  const email = document.getElementById('artistEmailInput').value.trim();
+  const pass = document.getElementById('artistPassInput').value.trim();
+  if(!email || !pass) { alert("Enter email and password."); return; }
+  
+  signInWithEmailAndPassword(auth, email, pass)
+    .then(() => alert("Welcome back!"))
+    .catch(err => alert("Error: " + err.message));
+}
+
+function artistLogout() {
+  signOut(auth).then(() => {
+    document.getElementById('artistEmailInput').value = '';
+    document.getElementById('artistPassInput').value = '';
+    alert("Logged out successfully.");
+  });
+}
+
+function forgotPassword() {
+  const email = document.getElementById('artistEmailInput').value.trim();
+  if(!email) { alert("Please type your email address in the box first."); return; }
+  
+  sendPasswordResetEmail(auth, email)
+    .then(() => alert("✅ Password reset email sent! Check your inbox."))
+    .catch(err => alert("Error: " + err.message));
+}
+
+function togglePasswordVisibility() {
+  const passInput = document.getElementById('artistPassInput');
+  if (passInput.type === "password") { passInput.type = "text"; } 
+  else { passInput.type = "password"; }
+}
+
+// --- CLOUD DATA ---
 async function loadTracksFromCloud() {
   const { db, collection, getDocs } = window.firebaseDB;
   try {
@@ -283,10 +343,10 @@ async function handleCloudUpload() {
   const audioFile = document.getElementById('audioUpload').files[0];
   const imageFile = document.getElementById('imageUpload').files[0];
   const title = document.getElementById('uploadTitle').value.trim();
+  const artistName = document.getElementById('uploadArtistName').value.trim();
   const genre = document.getElementById('uploadGenre').value;
-  const currentArtist = localStorage.getItem('vyro_current_artist');
   
-  if(!title) { alert("Please enter a song title."); return; }
+  if(!title || !artistName) { alert("Please enter song title and artist name."); return; }
   if(!audioFile) { alert("Please select an MP3 audio file."); return; }
   
   const status = document.getElementById('uploadStatus');
@@ -322,7 +382,7 @@ async function handleCloudUpload() {
       coverURL = defaultAIcovers[Math.floor(Math.random() * defaultAIcovers.length)];
     }
 
-    const newTrack = { title: title, artist: currentArtist, genre: genre, src: downloadURL, cover: coverURL };
+    const newTrack = { title: title, artist: artistName, genre: genre, src: downloadURL, cover: coverURL };
     
     cachedCloudTracks.push(newTrack);
     localStorage.setItem('vyro_cloud_cache', JSON.stringify(cachedCloudTracks));
@@ -346,72 +406,6 @@ async function handleCloudUpload() {
   }
 }
 
-function togglePasswordVisibility() {
-  const passInput = document.getElementById('artistPassInput');
-  if (passInput.type === "password") { passInput.type = "text"; } 
-  else { passInput.type = "password"; }
-}
-
-function forgotPassword() {
-  const nameInput = document.getElementById('artistNameInput').value.trim();
-  if(!nameInput) { alert("Please type your Artist Name first."); return; }
-  let accounts = JSON.parse(localStorage.getItem('vyro_artist_accounts')) || {};
-  if(!accounts[nameInput]) { alert("No account found with that name."); return; }
-  let newPass = prompt("Reset Password for " + nameInput + "\n\nEnter a new password:");
-  if(newPass && newPass.trim() !== "") {
-    accounts[nameInput] = newPass.trim();
-    localStorage.setItem('vyro_artist_accounts', JSON.stringify(accounts));
-    alert("✅ Password reset! You can now log in.");
-  }
-}
-
-function artistLogin() {
-  const nameInput = document.getElementById('artistNameInput').value.trim();
-  const passInput = document.getElementById('artistPassInput').value.trim();
-  if(!nameInput || !passInput) { alert("Enter name and password."); return; }
-  let accounts = JSON.parse(localStorage.getItem('vyro_artist_accounts')) || {};
-  if(accounts[nameInput]) {
-    if(accounts[nameInput] === passInput) {
-      localStorage.setItem('vyro_current_artist', nameInput);
-      checkLoginStatus();
-      alert("Welcome back!");
-    } else { alert("Incorrect password for this artist."); }
-  } else {
-    accounts[nameInput] = passInput;
-    localStorage.setItem('vyro_artist_accounts', JSON.stringify(accounts));
-    localStorage.setItem('vyro_current_artist', nameInput);
-    alert("Account created successfully! Welcome to VYRO.");
-    checkLoginStatus();
-  }
-}
-
-function checkLoginStatus() {
-  const currentArtist = localStorage.getItem('vyro_current_artist');
-  
-  if(currentArtist) {
-    document.getElementById('artistLoggedOut').style.display = 'none';
-    document.getElementById('artistDashboard').style.display = 'block';
-    document.getElementById('dashArtistName').textContent = currentArtist;
-    document.getElementById('userAvatar').textContent = currentArtist.charAt(0).toUpperCase();
-    
-    const myTracks = allTracks.filter(t => t.artist === currentArtist);
-    document.getElementById('dashPlays').textContent = myTracks.length * 47 + 12;
-    document.getElementById('dashFollowers').textContent = myTracks.length * 5 + 3;
-  } else {
-    document.getElementById('artistLoggedOut').style.display = 'block';
-    document.getElementById('artistDashboard').style.display = 'none';
-    document.getElementById('userAvatar').textContent = 'V';
-  }
-}
-
-function artistLogout() {
-  localStorage.removeItem('vyro_current_artist');
-  document.getElementById('artistNameInput').value = '';
-  document.getElementById('artistPassInput').value = '';
-  checkLoginStatus();
-  alert("Logged out successfully.");
-}
-
 // PLAYER LOGIC
 audio.addEventListener('ended', () => { nextTrack(); });
 audio.addEventListener('timeupdate', () => {
@@ -420,7 +414,6 @@ audio.addEventListener('timeupdate', () => {
   document.getElementById('currentTime').textContent = formatTime(audio.currentTime);
   document.getElementById('totalTime').textContent = formatTime(audio.duration);
 
-  // Save current time to memory
   if(currentTrack) {
     currentTrack.time = audio.currentTime;
     localStorage.setItem('vyro_last_played', JSON.stringify(currentTrack));
@@ -474,7 +467,6 @@ function playTrack(title,artist,emoji,src){
   audio.src = track.src; 
   audio.play().then(() => { updatePlayIcons(true); }).catch(error => { alert("Playback error: " + error.message); });
   
-  // Save to memory for refresh
   localStorage.setItem('vyro_last_played', JSON.stringify(track));
 }
 
@@ -526,7 +518,6 @@ function showView(id,btn){
   if(btn) btn.classList.add('active');
   if(id==='explore') renderExplore('All');
   if(id==='library') renderSaved();
-  if(id==='artist') checkLoginStatus();
 }
 
 function renderSaved() {
@@ -585,4 +576,4 @@ function genrePick(btn,g){
 }
 </script>
 </body>
-</html>
+      </html>
