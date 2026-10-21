@@ -43,7 +43,7 @@ button{cursor:pointer;border:0;color:white;font-weight:800}.primary{border-radiu
 .artist-row .info-div { flex: 1; }
 .artist-art{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#6131bb,#f14cae);font-size:21px}.artist-row strong{font-size:14px}.artist-row small{display:block;color:var(--muted);margin-top:4px}.follow{margin-left:auto;background:#2b2040;border:1px solid #60438a;border-radius:20px;padding:8px 12px;font-size:11px}
 .nav{position:fixed;bottom:0;left:0;right:0;background:#100c1beF;border-top:1px solid #30243c;display:flex;justify-content:space-around;padding:12px 6px max(12px,env(safe-area-inset-bottom));backdrop-filter:blur(18px);z-index:8}.nav button{background:none;color:#9389a7;font-size:10px;display:flex;flex-direction:column;gap:5px;align-items:center;min-width:55px}.nav span{font-size:20px}.nav button.active{color:#d4a5ff}
-.player{position:fixed;bottom:69px;left:10px;right:10px;max-width:740px;margin:auto;background:linear-gradient(90deg,#24113c,#21142f);border:1px solid #59357c;border-radius:15px;padding:10px 12px;display:none;align-items:center;gap:10px;z-index:7;box-shadow:0 8px 30px #0008;cursor:pointer;transition:0.3s}.player.show{display:flex}.player-art{width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,#8d48e8,#f14fbe);display:grid;place-items:center}.player-info{min-width:0;flex:1}.player-info strong{font-size:12px;display:block}.player-info small{color:#bdb0cf;font-size:10px}.player button{background:none;font-size:20px}
+.player{position:fixed;bottom:69px;left:10px;right:10px;max-width:740px;margin:auto;background:linear-gradient(90deg,#24113c,#21142f);border:1px solid #59357c;border-radius:15px;padding:10px 12px;display:none;align-items:center;gap:10px;z-index:7;box-shadow:0 8px 30px #0008;cursor:pointer;transition:0.3s}.player.show{display:flex}.player-art{width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,#8d48e8,#f14fbe);display:grid;place-items:center;overflow:hidden}.player-info{min-width:0;flex:1}.player-info strong{font-size:12px;display:block}.player-info small{color:#bdb0cf;font-size:10px}.player button{background:none;font-size:20px}
 .view{display:none}.view.active{display:block}.empty{padding:25px;border:1px dashed #554169;border-radius:16px;color:#b8adc9;text-align:center;font-size:13px;line-height:1.6}
 footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 @media(min-width:600px){.cards{grid-template-columns:repeat(4,minmax(0,1fr))}.hero{padding:30px}.hero h2{font-size:34px}}
@@ -55,7 +55,7 @@ footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 .fp-vinyl { width: 250px; height: 250px; border-radius: 50%; background: repeating-radial-gradient(#111, #111 4px, #222 5px, #222 6px); display: flex; justify-content: center; align-items: center; box-shadow: 0 0 40px rgba(155, 92, 255, 0.3); position: relative; animation: spin 4s linear infinite; animation-play-state: paused; }
 .fp-vinyl.playing { animation-play-state: running; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
-.fp-art { width: 150px; height: 150px; border-radius: 50%; background: linear-gradient(135deg, var(--purple), var(--pink)); display: flex; justify-content: center; align-items: center; font-size: 60px; border: 4px solid #000; }
+.fp-art { width: 150px; height: 150px; border-radius: 50%; background: linear-gradient(135deg, var(--purple), var(--pink)); display: flex; justify-content: center; align-items: center; font-size: 60px; border: 4px solid #000; overflow:hidden; }
 .fp-art::after { content: ""; position: absolute; width: 15px; height: 15px; background: #000; border-radius: 50%; }
 .fp-details { text-align: center; margin: 30px 0 20px; width: 100%; }
 .fp-details h2 { margin: 0; font-size: 26px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -136,11 +136,24 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
   </div>
   <div class="dash-box">
     <h2 style="font-size:18px; margin-top:0;">Upload New Track</h2>
-    <p style="color:#aaa; font-size:12px; margin-bottom:10px;">Select an MP3. It will instantly upload to the cloud and go live!</p>
+    <p style="color:#aaa; font-size:12px; margin-bottom:10px;">Select an MP3 and Cover Image. It will instantly upload to the cloud!</p>
+    
     <input type="text" id="uploadTitle" class="dash-input" placeholder="Song Title" style="margin-bottom: 15px;">
     <select id="uploadGenre" class="dash-input" style="margin-bottom: 15px;"><option value="Afrobeats">Afrobeats</option><option value="Hip-Hop">Hip-Hop</option><option value="R&B">R&B</option><option value="Gospel">Gospel</option></select>
-    <input type="file" id="audioUpload" accept="audio/*" style="display:none;" onchange="handleCloudUpload(event)">
-    <button class="dash-btn" onclick="document.getElementById('audioUpload').click()">+ Select Audio File</button>
+    
+    <!-- Audio Upload -->
+    <input type="file" id="audioUpload" accept="audio/*" style="display:none;" onchange="document.getElementById('audioLabel').innerText = event.target.files[0].name;">
+    <button class="dash-btn" onclick="document.getElementById('audioUpload').click()" style="background: #211634; border: 1px solid var(--purple);">
+      <span id="audioLabel">🎵 Select Audio File (MP3)</span>
+    </button>
+
+    <!-- Image Upload -->
+    <input type="file" id="imageUpload" accept="image/*" style="display:none;" onchange="document.getElementById('imageLabel').innerText = event.target.files[0].name;">
+    <button class="dash-btn" onclick="document.getElementById('imageUpload').click()" style="background: #211634; border: 1px solid var(--purple);">
+      <span id="imageLabel">🖼️ Select Cover Image (JPG/PNG)</span>
+    </button>
+
+    <button class="dash-btn" onclick="handleCloudUpload()" style="margin-top: 15px;">🚀 Upload to VYRO</button>
     <div id="uploadStatus" style="color:#4b8dff; font-size:13px; margin-top:10px;"></div>
   </div>
   <button class="dash-btn dash-logout" onclick="artistLogout()">Log Out</button>
@@ -181,10 +194,10 @@ const CLOUDINARY_CLOUD_NAME = "ixay5wda";
 const CLOUDINARY_UPLOAD_PRESET = "qvk4xtky"; 
 
 const baseTracks = [
-  {id: '1', title:'Come', artist:'Ogunba Alex', emoji:'🌙', genre:'Afrobeats', src:'assets/Come [8a409715].mp3'},
-  {id: '2', title:'Your brother', artist:'Ogunba Alex', emoji:'☁️', genre:'Hip-Hop', src:'assets/Your brother [bf867660].mp3'},
-  {id: '3', title:'Loving', artist:'Alex_skiddo', emoji:'💫', genre:'R&B', src:'assets/Loving [947f2a25].mp3'},
-  {id: '4', title:'Tell Yur Mummy', artist:'Alex_skiddo', emoji:'✨', genre:'Gospel', src:'assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3'}
+  {id: '1', title:'Come', artist:'Ogunba Alex', emoji:'🌙', genre:'Afrobeats', src:'assets/Come [8a409715].mp3', cover:'https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg'}, // Demo cover for base tracks
+  {id: '2', title:'Your brother', artist:'Ogunba Alex', emoji:'☁️', genre:'Hip-Hop', src:'assets/Your brother [bf867660].mp3', cover:''},
+  {id: '3', title:'Loving', artist:'Alex_skiddo', emoji:'💫', genre:'R&B', src:'assets/Loving [947f2a25].mp3', cover:''},
+  {id: '4', title:'Tell Yur Mummy', artist:'Alex_skiddo', emoji:'✨', genre:'Gospel', src:'assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3', cover:''}
 ];
 
 let currentTrack = null; 
@@ -214,56 +227,83 @@ async function loadTracksFromCloud() {
 
 function renderApp() {
   const grid = document.getElementById('trackGrid');
-  grid.innerHTML = allTracks.map(t => `
-    <div class="music-card">
-      <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">🎵</div>
-      <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','🎵','${t.src}')">▶</button></div>
-      <div class="artist">${t.artist} · ${t.genre}</div>
-    </div>
-  `).join('');
+  grid.innerHTML = allTracks.map(t => {
+    // If a song has a cover image, show it. Otherwise, show the emoji/default gradient.
+    const coverContent = t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:1;">` : `🎵`;
+    return `
+      <div class="music-card">
+        <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">
+          ${coverContent}
+          <div style="position:absolute; z-index:2; font-size: 38px; display:${t.cover?'none':'block'}">🎵</div>
+        </div>
+        <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','🎵','${t.src}')">▶</button></div>
+        <div class="artist">${t.artist} · ${t.genre}</div>
+      </div>
+    `;
+  }).join('');
   renderExplore('All');
   renderSaved();
 }
 
-async function handleCloudUpload(event) {
-  const file = event.target.files[0];
-  if(!file) return;
-  
+// --- UPLOAD LOGIC WITH COVER IMAGE ---
+async function handleCloudUpload() {
+  const audioFile = document.getElementById('audioUpload').files[0];
+  const imageFile = document.getElementById('imageUpload').files[0];
   const title = document.getElementById('uploadTitle').value.trim();
   const genre = document.getElementById('uploadGenre').value;
   const currentArtist = localStorage.getItem('vyro_current_artist');
   
-  if(!title) { alert("Please enter a song title."); event.target.value = ''; return; }
+  if(!title) { alert("Please enter a song title."); return; }
+  if(!audioFile) { alert("Please select an MP3 audio file."); return; }
   
   const status = document.getElementById('uploadStatus');
-  status.innerHTML = "⏳ Uploading to Cloudinary... Please wait.";
-  
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-  
-  const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
+  status.innerHTML = "⏳ Uploading Audio... Please wait.";
 
   try {
-    const response = await fetch(uploadUrl, { method: 'POST', body: formData });
-    const data = await response.json();
-    if(!response.ok) throw new Error(data.error.message || "Upload failed");
-
-    const downloadURL = data.secure_url;
+    // 1. Upload Audio
+    const audioData = new FormData();
+    audioData.append('file', audioFile);
+    audioData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    audioData.append('resource_type', 'auto');
     
-    // THE TEST ALERT
-    alert("Cloudinary Success! Link: " + downloadURL); 
+    const audioRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`, {
+      method: 'POST', body: audioData
+    });
+    const audioJson = await audioRes.json();
+    if(!audioRes.ok) throw new Error(audioJson.error.message || "Audio upload failed");
+    
+    const downloadURL = audioJson.secure_url;
+    let coverURL = '';
 
-    const newTrack = { title: title, artist: currentArtist, genre: genre, src: downloadURL, createdAt: Date.now() };
+    // 2. Upload Image (if selected)
+    if (imageFile) {
+      status.innerHTML = "⏳ Uploading Cover Art... Please wait.";
+      const imageData = new FormData();
+      imageData.append('file', imageFile);
+      imageData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      
+      const imgRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+        method: 'POST', body: imageData
+      });
+      const imgJson = await imgRes.json();
+      if(imgRes.ok) coverURL = imgJson.secure_url;
+    }
+
+    // 3. Save to Database
+    const newTrack = { title: title, artist: currentArtist, genre: genre, src: downloadURL, cover: coverURL, createdAt: Date.now() };
     
     allTracks.push(newTrack);
-    status.innerHTML = "✅ Success! Uploading to global database...";
-    document.getElementById('uploadTitle').value = '';
-    event.target.value = '';
-    
     renderApp();
-    document.getElementById('uploadStatus').innerHTML = "✅ Success! Song is live!";
-
+    
+    // Clear inputs
+    document.getElementById('uploadTitle').value = '';
+    document.getElementById('audioUpload').value = '';
+    document.getElementById('imageUpload').value = '';
+    document.getElementById('audioLabel').innerText = "🎵 Select Audio File (MP3)";
+    document.getElementById('imageLabel').innerText = "🖼️ Select Cover Image (JPG/PNG)";
+    
+    status.innerHTML = "✅ Success! Song is live!";
+    
     const { db, collection, addDoc } = window.firebaseDB;
     await addDoc(collection(db, "tracks"), newTrack);
     
@@ -370,10 +410,25 @@ function playTrack(title,artist,emoji,src){
   document.getElementById('player').classList.add('show');
   document.getElementById('playerTitle').textContent = track.title;
   document.getElementById('playerArtist').textContent = track.artist;
-  document.getElementById('playerEmoji').textContent = '🎵';
+  
+  // Set Mini Player Cover
+  if (track.cover) {
+    document.getElementById('playerEmoji').innerHTML = `<img src="${track.cover}" style="width:100%; height:100%; object-fit:cover;">`;
+  } else {
+    document.getElementById('playerEmoji').innerHTML = '🎵';
+  }
+  
   document.getElementById('fpTitle').textContent = track.title;
   document.getElementById('fpArtist').textContent = track.artist;
-  document.getElementById('fpEmoji').textContent = '🎵';
+  
+  // Set Full Player Cover (Vinyl Center)
+  if (track.cover) {
+    document.getElementById('fpEmoji').innerHTML = `<img src="${track.cover}" style="width:100%; height:100%; object-fit:cover;">`;
+    document.getElementById('fpEmoji').style.fontSize = '0'; // Hide emoji
+  } else {
+    document.getElementById('fpEmoji').innerHTML = '🎵';
+    document.getElementById('fpEmoji').style.fontSize = '60px';
+  }
 
   const isSaved = saved.some(t=>t.title===track.title);
   document.getElementById('likeBtn').textContent = isSaved ? '♥' : '♡';
@@ -440,7 +495,7 @@ function renderSaved() {
   el.className = '';
   el.innerHTML = saved.map(t => `
     <div class="artist-row" onclick="playTrack('${t.title}','${t.artist}','🎵','${t.src}')">
-      <div class="artist-art">🎵</div>
+      <div class="artist-art">${t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '🎵'}</div>
       <div class="info-div"><strong>${t.title}</strong><small>${t.artist}</small></div>
       <button class="follow">▶ Play</button>
     </div>
@@ -453,13 +508,19 @@ function renderExplore(genre = 'All') {
   
   if(filtered.length === 0) { grid.innerHTML = '<p style="color:#aaa; padding: 20px;">No tracks in this genre yet.</p>'; return; }
 
-  grid.innerHTML = filtered.map(t => `
-    <div class="music-card">
-      <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">🎵</div>
-      <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','🎵','${t.src}')">▶</button></div>
-      <div class="artist">${t.artist} · ${t.genre}</div>
-    </div>
-  `).join('');
+  grid.innerHTML = filtered.map(t => {
+    const coverContent = t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:1;">` : `🎵`;
+    return `
+      <div class="music-card">
+        <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">
+          ${coverContent}
+          <div style="position:absolute; z-index:2; font-size: 38px; display:${t.cover?'none':'block'}">🎵</div>
+        </div>
+        <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${t.title}','${t.artist}','🎵','${t.src}')">▶</button></div>
+        <div class="artist">${t.artist} · ${t.genre}</div>
+      </div>
+    `;
+  }).join('');
 }
 
 function filterGenre(btn, g) {
@@ -473,7 +534,7 @@ function searchTracks(q){
   const matches=allTracks.filter(t=>(t.title+' '+t.artist+' '+t.genre).toLowerCase().includes(term));
   const msg=document.getElementById('searchMessage');
   if(msg){
-    msg.innerHTML=term?(matches.length?matches.map(t=>`<div class="artist-row" onclick="playTrack('${t.title}','${t.artist}','🎵','${t.src}')"><div class="artist-art">🎵</div><div class="info-div"><strong>${t.title}</strong><small>${t.artist} · ${t.genre}</small></div><button class="follow">▶ Play</button></div>`).join(''):'No results found. Try another search.'): 'Try searching for an artist or song.';
+    msg.innerHTML=term?(matches.length?matches.map(t=>`<div class="artist-row" onclick="playTrack('${t.title}','${t.artist}','🎵','${t.src}')"><div class="artist-art">${t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '🎵'}</div><div class="info-div"><strong>${t.title}</strong><small>${t.artist} · ${t.genre}</small></div><button class="follow">▶ Play</button></div>`).join(''):'No results found. Try another search.'): 'Try searching for an artist or song.';
   }
 }
 
@@ -485,4 +546,4 @@ function genrePick(btn,g){
 }
 </script>
 </body>
-    </html>
+</html>
