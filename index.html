@@ -43,14 +43,14 @@ h1{font-size:30px;line-height:1.1;margin:8px 0}h1 span{background:linear-gradien
 .hero:after{content:"♫";position:absolute;font-size:170px;right:12px;bottom:-46px;color:#ffffff20;transform:rotate(12deg)}.hero h2{font-size:27px;max-width:240px;margin:8px 0}.hero p{color:#f0dfff;font-size:13px;max-width:240px;line-height:1.5}.pill{display:inline-block;border:1px solid #ffffff6b;border-radius:30px;padding:6px 10px;font-size:10px;letter-spacing:1.3px;font-weight:800}
 button{cursor:pointer;border:0;color:white;font-weight:800}.primary{border-radius:30px;padding:12px 18px;background:white;color:#3c175f;margin-top:7px}
 .section-head{display:flex;justify-content:space-between;align-items:center;margin:25px 0 13px}.section-head h3{font-size:18px;margin:0}.section-head button{background:none;color:#c9a4ff;font-size:12px}
-.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.music-card{background:var(--panel);border:1px solid #2a213a;border-radius:17px;padding:10px;min-width:0}.cover{aspect-ratio:1.15;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:38px;position:relative;overflow:hidden}.cover:after{content:"";position:absolute;width:130px;height:130px;border:1px solid #ffffff38;border-radius:50%;right:-25px;top:-35px;box-shadow:0 0 0 15px #ffffff09,0 0 0 30px #ffffff06}.c1{background:linear-gradient(135deg,#3720a1,#e34fb8)}.c2{background:linear-gradient(135deg,#064b66,#7a5bff)}.c3{background:linear-gradient(135deg,#7e254e,#ff9d45)}.c4{background:linear-gradient(135deg,#171a45,#2fc7b2)}.track-title{font-size:14px;font-weight:800;margin:10px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.artist{font-size:12px;color:var(--muted)}.play-small{float:right;border-radius:50%;width:32px;height:32px;background:linear-gradient(135deg,var(--purple),var(--pink));margin-top:-7px}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.music-card{background:var(--panel);border:1px solid #2a213a;border-radius:17px;padding:10px;min-width:0}.cover{aspect-ratio:1.15;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:38px;position:relative;overflow:hidden}.cover:after{content:"";position:absolute;width:130px;height:130px;border:1px solid #ffffff38;border-radius:50%;right:-25px;top:-35px;box-shadow:0 0 0 15px #ffffff09,0 0 0 30px #ffffff06}.c1{background:linear-gradient(135deg,#3720a1,#e34fb8)}.c2{background:linear-gradient(135deg,#064b66,#7a5bff)}.c3{background:linear-gradient(135deg,#7e254e,#ff9d45)}.c4{background:linear-gradient(135deg,#171a45,#2fc7b2)}.track-title{font-size:14px;font-weight:800;margin:10px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:space-between;}.artist{font-size:12px;color:var(--muted)}.play-small{border-radius:50%;width:32px;height:32px;background:linear-gradient(135deg,var(--purple),var(--pink));flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .genres{display:flex;gap:8px;overflow:auto;padding-bottom:3px}.genre{white-space:nowrap;border-radius:22px;padding:10px 14px;background:#1a1527;border:1px solid #302440;font-size:12px;color:#d8cde8}.genre.active{background:linear-gradient(90deg,#793de2,#c53bb8);border:0;color:#fff}
 .artist-row{display:flex;gap:12px;align-items:center;background:#151122;border-radius:15px;padding:11px;margin-bottom:10px; cursor:pointer; transition: background 0.2s;}
 .artist-row:hover { background: #1f1832; }
 .artist-row .info-div { flex: 1; }
-.artist-art{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#6131bb,#f14cae);font-size:21px; overflow:hidden;}.artist-row strong{font-size:14px}.artist-row small{display:block;color:var(--muted);margin-top:4px}.follow{margin-left:auto;background:#2b2040;border:1px solid #60438a;border-radius:20px;padding:8px 12px;font-size:11px}
+.artist-art{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#6131bb,#f14cae);font-size:21px; overflow:hidden;flex-shrink:0;}.artist-row strong{font-size:14px}.artist-row small{display:block;color:var(--muted);margin-top:4px}.follow{margin-left:auto;background:#2b2040;border:1px solid #60438a;border-radius:20px;padding:8px 12px;font-size:11px}
 .nav{position:fixed;bottom:0;left:0;right:0;background:#100c1beF;border-top:1px solid #30243c;display:flex;justify-content:space-around;padding:12px 6px max(12px,env(safe-area-inset-bottom));backdrop-filter:blur(18px);z-index:8}.nav button{background:none;color:#9389a7;font-size:10px;display:flex;flex-direction:column;gap:5px;align-items:center;min-width:55px}.nav span{font-size:20px}.nav button.active{color:#d4a5ff}
-.player{position:fixed;bottom:69px;left:10px;right:10px;max-width:740px;margin:auto;background:linear-gradient(90deg,#24113c,#21142f);border:1px solid #59357c;border-radius:15px;padding:10px 12px;display:none;align-items:center;gap:10px;z-index:7;box-shadow:0 8px 30px #0008;cursor:pointer;transition:0.3s}.player.show{display:flex}.player-art{width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,#8d48e8,#f14fbe);display:grid;place-items:center;overflow:hidden}.player-info{min-width:0;flex:1}.player-info strong{font-size:12px;display:block}.player-info small{color:#bdb0cf;font-size:10px}.player button{background:none;font-size:20px}
+.player{position:fixed;bottom:69px;left:10px;right:10px;max-width:740px;margin:auto;background:linear-gradient(90deg,#24113c,#21142f);border:1px solid #59357c;border-radius:15px;padding:10px 12px;display:none;align-items:center;gap:10px;z-index:7;box-shadow:0 8px 30px #0008;cursor:pointer;transition:0.3s}.player.show{display:flex}.player-art{width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,#8d48e8,#f14fbe);display:grid;place-items:center;overflow:hidden;flex-shrink:0;}.player-info{min-width:0;flex:1}.player-info strong{font-size:12px;display:block}.player-info small{color:#bdb0cf;font-size:10px}.player button{background:none;font-size:20px}
 .view{display:none}.view.active{display:block}.empty{padding:25px;border:1px dashed #554169;border-radius:16px;color:#b8adc9;text-align:center;font-size:13px;line-height:1.6}
 footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 @media(min-width:600px){.cards{grid-template-columns:repeat(4,minmax(0,1fr))}.hero{padding:30px}.hero h2{font-size:34px}}
@@ -115,9 +115,18 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 .my-track-item small { color: var(--muted); font-size: 11px; }
 
 /* Pushes content up so the player doesn't hide the logout/withdraw buttons */
-#artistDashboard {
+#artistDashboard, #listenerDashboard {
   padding-bottom: 90px;
 }
+
+/* Role Selector Radio */
+.role-select { display: flex; gap: 10px; margin-bottom: 15px; }
+.role-select label { flex: 1; padding: 15px; background: #090711; border: 2px solid #302541; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s; }
+.role-select input[type="radio"] { display: none; }
+.role-select input[type="radio"]:checked + label { border-color: var(--pink); background: rgba(255, 79, 216, 0.1); box-shadow: 0 0 15px rgba(255, 79, 216, 0.2); }
+.role-select label span { display: block; font-size: 24px; margin-bottom: 5px; }
+.role-select label strong { display: block; font-size: 14px; }
+.role-select label small { display: block; font-size: 10px; color: var(--muted); margin-top: 3px; }
 </style>
 </head>
 <body>
@@ -154,7 +163,7 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
     
     <div class="dash-box" style="margin-top: 20px;">
       <h2 style="font-size: 20px; margin-top:0;">Welcome Back</h2>
-      <p style="color:#aaa; font-size:12px;">Log in to your artist account.</p>
+      <p style="color:#aaa; font-size:12px;">Log in to your account.</p>
       
       <input type="email" id="loginEmail" class="dash-input" placeholder="Email Address" style="margin-bottom: 15px;">
       
@@ -182,9 +191,26 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
         <h2 style="font-size: 20px; margin:0;">Create Account</h2>
         <button onclick="hideSignupPage()" style="background: none; color: var(--muted); font-size: 24px;">✕</button>
       </div>
-      <p style="color:#aaa; font-size:12px; margin-bottom: 15px;">Your email will be kept private. Only your stage name and profile picture will be shown to the public.</p>
       
-      <input type="text" id="signupName" class="dash-input" placeholder="Artist Name / Stage Name" style="margin-bottom: 15px;">
+      <!-- Role Selector -->
+      <p style="color:#fff; font-size:14px; font-weight:800; margin-bottom: 10px;">I am signing up as:</p>
+      <div class="role-select">
+        <input type="radio" name="userRole" id="roleArtist" value="artist" checked>
+        <label for="roleArtist">
+          <span>🎤</span>
+          <strong>Artist</strong>
+          <small>Upload music & earn</small>
+        </label>
+        
+        <input type="radio" name="userRole" id="roleListener" value="listener">
+        <label for="roleListener">
+          <span>🎧</span>
+          <strong>Listener</strong>
+          <small>Discover & save music</small>
+        </label>
+      </div>
+
+      <input type="text" id="signupName" class="dash-input" placeholder="Stage Name / Display Name" style="margin-bottom: 15px;">
       
       <input type="email" id="signupEmail" class="dash-input" placeholder="Email Address (Private)" style="margin-bottom: 15px;">
       
@@ -199,15 +225,14 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
         <span id="imgLabel">🖼️ Select Profile Picture</span>
       </button>
 
-      <button class="dash-btn" onclick="createArtistAccount()" style="background: linear-gradient(90deg, #4b8dff, #9b5cff);">Sign Up</button>
+      <button class="dash-btn" onclick="createAccount()" style="background: linear-gradient(90deg, #4b8dff, #9b5cff);">Sign Up</button>
       
       <div id="signupError" style="font-size: 13px; margin-top: 15px; text-align: center; font-weight: bold; line-height: 1.5;"></div>
     </div>
   </div>
 
-  <!-- DASHBOARD -->
+  <!-- ARTIST DASHBOARD -->
   <div id="artistDashboard" style="display: none;">
-    
     <!-- HEADER -->
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <div class="ap-art" id="dashAvatar" style="width:60px;height:60px;font-size:24px;margin:0;">A</div>
@@ -247,7 +272,7 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
       </div>
 
       <button class="dash-btn" onclick="requestWithdraw()" id="withdrawBtn">💸 Withdraw Funds</button>
-      <p style="text-align:center;color:var(--muted);font-size:11px;margin:8px 0 0;">Minimum withdrawal is ₦5,000</p>
+      <p style="text-align:center;color:var(--muted);font-size:11px;margin:8px 0 0;">Rate: ₦0.007000 / stream. Minimum: ₦5,000</p>
     </div>
 
     <!-- UPLOAD TRACK -->
@@ -285,6 +310,30 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
       </div>
     </div>
 
+    <button class="dash-btn dash-logout" onclick="artistLogout()">Log Out</button>
+  </div>
+
+  <!-- LISTENER DASHBOARD -->
+  <div id="listenerDashboard" style="display: none;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <div class="ap-art" id="listenerAvatar" style="width:60px;height:60px;font-size:24px;margin:0;">L</div>
+      <div style="flex:1;min-width:0;">
+        <h2 style="margin:0;font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="listenerName">Listener</h2>
+        <p style="margin:3px 0 0;color:var(--muted);font-size:12px;">Listener Account</p>
+      </div>
+    </div>
+    
+    <div class="dash-box" style="text-align:center; padding: 40px 20px;">
+      <h2 style="font-size: 24px; margin-bottom: 10px;">🎧 You are a Listener</h2>
+      <p style="color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
+        As a listener, you have full access to explore, stream, and save music to your library. You don't have an Artist Dashboard because you haven't signed up as an artist.
+      </p>
+      <div style="background: rgba(155, 92, 255, 0.1); border: 1px solid var(--purple); padding: 15px; border-radius: 12px;">
+        <p style="font-size: 13px; margin: 0; color: #ccc;">Want to upload music and earn money?</p>
+        <button class="dash-btn" onclick="upgradeToArtist()" style="margin-top: 10px; background: linear-gradient(90deg, var(--purple), var(--pink));">Upgrade to Artist</button>
+      </div>
+    </div>
+    
     <button class="dash-btn dash-logout" onclick="artistLogout()">Log Out</button>
   </div>
 </div>
@@ -341,7 +390,7 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <button onclick="showView('explore',this)"><span>◈</span>Explore</button>
 <button onclick="showView('search',this)"><span>⌕</span>Search</button>
 <button onclick="showView('library',this)"><span>♡</span>Library</button>
-<button onclick="showView('artist',this)"><span>♫</span>Artist Hub</button>
+<button onclick="showView('artist',this)"><span>♫</span>Profile</button>
 </nav>
 <audio id="vyro-player" style="width: 0; height: 0; opacity: 0; position: absolute;" controls preload="metadata"></audio>
 
@@ -409,32 +458,55 @@ window.addEventListener('firebaseReady', () => {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       currentUser = user;
+      
+      // Load user role
+      let role = localStorage.getItem('vyro_role_' + user.email) || 'artist'; // default to artist for older users
+      
       document.getElementById('artistLoggedOut').style.display = 'none';
       document.getElementById('artistSignupPage').style.display = 'none';
-      document.getElementById('artistDashboard').style.display = 'block';
       
       let savedArtistName = localStorage.getItem('vyro_artist_name_' + user.email);
       if(!savedArtistName) savedArtistName = user.displayName || user.email.split('@')[0];
       
-      document.getElementById('dashArtistName').textContent = savedArtistName;
-      
       let savedProfilePic = localStorage.getItem('vyro_profile_pic_' + user.email) || user.photoURL;
-      const dashAvatar = document.getElementById('dashAvatar');
       
-      if(savedProfilePic) {
-        dashAvatar.innerHTML = `<img src="${savedProfilePic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-        document.getElementById('userAvatar').innerHTML = `<img src="${savedProfilePic}" style="width:100%;height:100%;object-fit:cover;">`;
+      if (role === 'listener') {
+        document.getElementById('artistDashboard').style.display = 'none';
+        document.getElementById('listenerDashboard').style.display = 'block';
+        
+        document.getElementById('listenerName').textContent = savedArtistName;
+        
+        if(savedProfilePic) {
+          document.getElementById('listenerAvatar').innerHTML = `<img src="${savedProfilePic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+          document.getElementById('userAvatar').innerHTML = `<img src="${savedProfilePic}" style="width:100%;height:100%;object-fit:cover;">`;
+        } else {
+          document.getElementById('listenerAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
+          document.getElementById('userAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
+        }
+        
       } else {
-        dashAvatar.textContent = savedArtistName.charAt(0).toUpperCase();
-        document.getElementById('userAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
+        document.getElementById('listenerDashboard').style.display = 'none';
+        document.getElementById('artistDashboard').style.display = 'block';
+        
+        document.getElementById('dashArtistName').textContent = savedArtistName;
+        
+        if(savedProfilePic) {
+          document.getElementById('dashAvatar').innerHTML = `<img src="${savedProfilePic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+          document.getElementById('userAvatar').innerHTML = `<img src="${savedProfilePic}" style="width:100%;height:100%;object-fit:cover;">`;
+        } else {
+          document.getElementById('dashAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
+          document.getElementById('userAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
+        }
+        
+        loadArtistDashboard(savedArtistName);
       }
       
-      loadArtistDashboard(savedArtistName);
     } else {
       currentUser = null;
       document.getElementById('artistLoggedOut').style.display = 'block';
       document.getElementById('artistSignupPage').style.display = 'none';
       document.getElementById('artistDashboard').style.display = 'none';
+      document.getElementById('listenerDashboard').style.display = 'none';
       document.getElementById('userAvatar').textContent = 'V';
     }
   });
@@ -455,7 +527,7 @@ function hideSignupPage() {
   document.getElementById('artistSignupPage').style.display = 'none';
 }
 
-async function createArtistAccount() {
+async function createAccount() {
   if(!window.firebaseAuth) { alert("Cloud connection still loading. Please wait a second and try again."); return; }
   
   const { auth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } = window.firebaseAuth;
@@ -464,6 +536,7 @@ async function createArtistAccount() {
   const email = document.getElementById('signupEmail').value.trim();
   const pass = document.getElementById('signupPass').value.trim();
   const imageFile = document.getElementById('signupImage').files[0];
+  const role = document.querySelector('input[name="userRole"]:checked').value;
   const errorDiv = document.getElementById('signupError');
   errorDiv.innerHTML = "";
   
@@ -495,15 +568,19 @@ async function createArtistAccount() {
     });
 
     localStorage.setItem('vyro_artist_name_' + email, name);
+    localStorage.setItem('vyro_role_' + email, role);
+    
     if(profilePicURL) localStorage.setItem('vyro_profile_pic_' + email, profilePicURL);
 
     // New artists start with absolutely zero stats and earnings
-    const newArtistStatsKey = 'vyro_stats_' + name;
-    localStorage.setItem(newArtistStatsKey, JSON.stringify({
-      streams: 0,
-      followers: 0,
-      totalEarned: 0
-    }));
+    if (role === 'artist') {
+      const newArtistStatsKey = 'vyro_stats_' + name;
+      localStorage.setItem(newArtistStatsKey, JSON.stringify({
+        streams: 0,
+        followers: 0,
+        totalEarned: 0
+      }));
+    }
 
     await sendEmailVerification(userCredential.user);
     
@@ -580,6 +657,15 @@ function togglePasswordVisibility(inputId) {
   else { passInput.type = "password"; }
 }
 
+function upgradeToArtist() {
+  if(!currentUser) return;
+  localStorage.setItem('vyro_role_' + currentUser.email, 'artist');
+  alert("🎉 You are now an Artist! Your dashboard has been upgraded. You can now upload tracks and earn money.");
+  
+  // Refresh the page state
+  window.location.reload();
+}
+
 // ==========================================
 // 4. DASHBOARD FUNCTIONS
 // ==========================================
@@ -607,7 +693,8 @@ function loadArtistDashboard(artistName) {
   animateCount(followersEl, stats.followers || 0);
   animateCount(tracksEl, myTracks.length);
   
-  const balance = totalStreams * 0.05;
+  // New Pay Rate: ₦0.007000 per stream
+  const balance = totalStreams * 0.007000;
   const totalEarned = balance + (stats.totalEarned || 0);
   
   document.getElementById('dashBalance').textContent = '₦' + balance.toFixed(2);
@@ -652,7 +739,7 @@ function renderMyTracks(tracks) {
   }).join('');
 }
 
-// Paystack Withdrawal Simulation
+// International/Local Payout Simulation
 function requestWithdraw() {
   const balanceText = document.getElementById('dashBalance').textContent;
   const balance = parseFloat(balanceText.replace('₦', '').replace(/,/g, ''));
@@ -669,25 +756,45 @@ function requestWithdraw() {
   if (isNaN(amt) || amt < 5000) { alert("❌ Minimum withdrawal is ₦5,000"); return; }
   if (amt > balance) { alert("❌ Amount exceeds available balance"); return; }
 
-  // Simulate Paystack Transfer Flow
-  alert("🌍 Paystack Transfer\n\nIn production, this step requires a backend server to securely create a transfer recipient and initiate the payout via the Paystack API. Direct international transfers outside Paystack's operating countries (Nigeria, Ghana, Kenya, South Africa) are not supported.");
+  const method = prompt("Select Payout Method:\n\n1. Local Bank (NGN)\n2. International Bank Transfer (USD/EUR/GBP via Wise/Payoneer)");
   
-  const bankName = prompt("Enter your bank name (e.g., GTBank, Access Bank, Zenith Bank):");
-  if (!bankName) return;
-  
-  const accountNo = prompt("Enter your 10-digit account number:");
-  if (!accountNo || accountNo.length !== 10) { alert("❌ Invalid account number (must be 10 digits)"); return; }
-  
+  if (method === '1') {
+    const bankName = prompt("Enter your local bank name (e.g., GTBank, Access Bank):");
+    if (!bankName) return;
+    const accountNo = prompt("Enter your 10-digit account number:");
+    if (!accountNo || accountNo.length !== 10) { alert("❌ Invalid account number (must be 10 digits)"); return; }
+    
+    saveWithdrawal(amt, 'Local', bankName, accountNo);
+    
+  } else if (method === '2') {
+    const bankName = prompt("Enter your International Bank Name (e.g., Chase, Barclays):");
+    if (!bankName) return;
+    const swift = prompt("Enter your SWIFT/BIC Code (8 or 11 characters):");
+    if (!swift) return;
+    const iban = prompt("Enter your IBAN or Account Number:");
+    if (!iban) return;
+    
+    saveWithdrawal(amt, 'International', bankName, iban, swift);
+    
+  } else {
+    alert("Invalid selection.");
+  }
+}
+
+function saveWithdrawal(amt, type, bankName, account, swift = '') {
   const artistName = currentUser ? (localStorage.getItem('vyro_artist_name_' + currentUser.email) || currentUser.displayName) : 'Artist';
   const withdrawals = JSON.parse(localStorage.getItem('vyro_withdrawals_' + artistName)) || [];
+  
   withdrawals.push({
     amount: amt,
+    type: type,
     bank: bankName,
-    account: accountNo,
+    account: account,
+    swift: swift,
     date: new Date().toISOString(),
-    status: 'pending',
-    gateway: 'Paystack'
+    status: 'pending'
   });
+  
   localStorage.setItem('vyro_withdrawals_' + artistName, JSON.stringify(withdrawals));
   
   const statsKey = 'vyro_stats_' + artistName;
@@ -697,7 +804,7 @@ function requestWithdraw() {
   
   loadArtistDashboard(artistName);
   
-  alert(`✅ Withdrawal request submitted via Paystack simulation!\n\nAmount: ₦${amt.toFixed(2)}\nBank: ${bankName}\nAccount: ****${accountNo.slice(-4)}\n\nFunds will arrive in 3-5 business days (Simulation).`);
+  alert(`✅ ${type} Withdrawal Requested!\n\nAmount: ₦${amt.toFixed(2)}\nBank: ${bankName}\nAccount: ****${account.slice(-4)}\n\n${type === 'International' ? 'Note: International transfers are processed in 3-5 days and converted to your local currency by the receiving bank.' : 'Funds will arrive in 1-2 business days.'}`);
 }
 
 // ==========================================
@@ -718,8 +825,11 @@ async function loadTracksFromCloud() {
       allTracks = [...baseTracks, ...cloudTracks];
       renderApp();
       if (currentUser) {
-        const artistName = localStorage.getItem('vyro_artist_name_' + currentUser.email) || currentUser.displayName || currentUser.email.split('@')[0];
-        loadArtistDashboard(artistName);
+        const role = localStorage.getItem('vyro_role_' + currentUser.email);
+        if (role === 'artist') {
+          const artistName = localStorage.getItem('vyro_artist_name_' + currentUser.email) || currentUser.displayName || currentUser.email.split('@')[0];
+          loadArtistDashboard(artistName);
+        }
       }
     }
   } catch(e) {
@@ -729,6 +839,13 @@ async function loadTracksFromCloud() {
 
 async function handleCloudUpload() {
   if(!currentUser) return;
+  
+  const role = localStorage.getItem('vyro_role_' + currentUser.email) || 'artist';
+  if (role !== 'artist') {
+    alert("Only Artist accounts can upload tracks.");
+    return;
+  }
+
   const audioFile = document.getElementById('audioUpload').files[0];
   const imageFile = document.getElementById('imageUpload').files[0];
   const title = document.getElementById('uploadTitle').value.trim();
@@ -827,6 +944,20 @@ function closeFullPlayer() { document.getElementById('fullPlayer').classList.rem
 function seekAudio() { audio.currentTime = (document.getElementById('seekBar').value / 100) * audio.duration; }
 function seek(amount) { audio.currentTime += amount; }
 
+function formatStreams(streams) {
+  if (streams >= 1000000) return (streams / 1000000).toFixed(1) + 'M';
+  if (streams >= 1000) return (streams / 1000).toFixed(1) + 'K';
+  return streams.toString();
+}
+
+function getStreamDisplay(trackTitle) {
+  const ts = JSON.parse(localStorage.getItem('vyro_track_stats_' + trackTitle)) || { streams: 0 };
+  if (ts.streams >= 100) {
+    return `<span style="font-size:10px; color:var(--green); display:flex; align-items:center; gap:3px;"><span style="font-size:8px;">▶</span>${formatStreams(ts.streams)}</span>`;
+  }
+  return `<span style="font-size:9px; color:var(--muted); background:#ffffff15; padding:2px 6px; border-radius:10px;">NEW</span>`;
+}
+
 function playTrack(title, artist, emoji, src) {
   const trackData = allTracks.findIndex(t => t.title === title);
   if(trackData === -1) return;
@@ -867,6 +998,18 @@ function playTrack(title, artist, emoji, src) {
     const ts = JSON.parse(localStorage.getItem(tsKey)) || { streams: 0 };
     ts.streams++;
     localStorage.setItem(tsKey, JSON.stringify(ts));
+    
+    // Re-render to update stream counts
+    renderApp();
+    
+    // Update dashboard if the current user is the artist of this track
+    if (currentUser) {
+      const currentArtistName = localStorage.getItem('vyro_artist_name_' + currentUser.email) || currentUser.displayName;
+      if (currentArtistName === track.artist) {
+        loadArtistDashboard(currentArtistName);
+      }
+    }
+    
   }).catch(error => { alert("Playback error: " + error.message); });
   
   localStorage.setItem('vyro_last_played', JSON.stringify(track));
@@ -924,8 +1067,11 @@ function showView(id, btn) {
   if(id==='explore') renderExplore('All');
   if(id==='library') renderSaved();
   if(id==='artist' && currentUser) {
-    const artistName = localStorage.getItem('vyro_artist_name_' + currentUser.email) || currentUser.displayName || currentUser.email.split('@')[0];
-    loadArtistDashboard(artistName);
+    const role = localStorage.getItem('vyro_role_' + currentUser.email);
+    if (role === 'artist') {
+      const artistName = localStorage.getItem('vyro_artist_name_' + currentUser.email) || currentUser.displayName || currentUser.email.split('@')[0];
+      loadArtistDashboard(artistName);
+    }
   }
 }
 
@@ -940,7 +1086,13 @@ function renderApp() {
         <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">
           ${coverContent}
         </div>
-        <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${safeTitle}','${safeArtist}','🎵','${t.src}')">▶</button></div>
+        <div class="track-title">
+          <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:65%;">${t.title}</div>
+          <div style="display:flex; align-items:center; gap:8px;">
+             ${getStreamDisplay(t.title)}
+             <button class="play-small" onclick="playTrack('${safeTitle}','${safeArtist}','🎵','${t.src}')">▶</button>
+          </div>
+        </div>
         <div class="artist">${t.artist} · ${t.genre}</div>
       </div>
     `;
@@ -981,7 +1133,13 @@ function renderExplore(genre = 'All') {
         <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">
           ${coverContent}
         </div>
-        <div class="track-title">${t.title} <button class="play-small" onclick="playTrack('${safeTitle}','${safeArtist}','🎵','${t.src}')">▶</button></div>
+        <div class="track-title">
+          <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:65%;">${t.title}</div>
+          <div style="display:flex; align-items:center; gap:8px;">
+             ${getStreamDisplay(t.title)}
+             <button class="play-small" onclick="playTrack('${safeTitle}','${safeArtist}','🎵','${t.src}')">▶</button>
+          </div>
+        </div>
         <div class="artist">${t.artist} · ${t.genre}</div>
       </div>
     `;
@@ -1015,4 +1173,4 @@ function genrePick(btn,g){
 }
 </script>
 </body>
-        </html>
+                                                                                                   </html>
