@@ -497,6 +497,14 @@ async function createArtistAccount() {
     localStorage.setItem('vyro_artist_name_' + email, name);
     if(profilePicURL) localStorage.setItem('vyro_profile_pic_' + email, profilePicURL);
 
+    // New artists start with absolutely zero stats and earnings
+    const newArtistStatsKey = 'vyro_stats_' + name;
+    localStorage.setItem(newArtistStatsKey, JSON.stringify({
+      streams: 0,
+      followers: 0,
+      totalEarned: 0
+    }));
+
     await sendEmailVerification(userCredential.user);
     
     errorDiv.style.color = "#4b8dff";
@@ -578,26 +586,25 @@ function togglePasswordVisibility(inputId) {
 function loadArtistDashboard(artistName) {
   const statsKey = 'vyro_stats_' + artistName;
   const stats = JSON.parse(localStorage.getItem(statsKey)) || {
-    streams: Math.floor(Math.random() * 500) + 50,
-    followers: Math.floor(Math.random() * 100) + 5,
+    streams: 0,
+    followers: 0,
     totalEarned: 0
   };
   
   const myTracks = allTracks.filter(t => t.artist === artistName);
   
-  let totalStreams = 0;
+  let totalStreams = stats.streams || 0;
   myTracks.forEach(t => {
-    const trackStats = JSON.parse(localStorage.getItem('vyro_track_stats_' + t.title)) || { streams: Math.floor(Math.random() * 200) };
+    const trackStats = JSON.parse(localStorage.getItem('vyro_track_stats_' + t.title)) || { streams: 0 };
     totalStreams += trackStats.streams;
   });
-  totalStreams += stats.streams;
   
   const streamsEl = document.getElementById('statStreams');
   const followersEl = document.getElementById('statFollowers');
   const tracksEl = document.getElementById('statTracks');
   
   animateCount(streamsEl, totalStreams);
-  animateCount(followersEl, stats.followers);
+  animateCount(followersEl, stats.followers || 0);
   animateCount(tracksEl, myTracks.length);
   
   const balance = totalStreams * 0.05;
@@ -606,7 +613,7 @@ function loadArtistDashboard(artistName) {
   document.getElementById('dashBalance').textContent = '₦' + balance.toFixed(2);
   document.getElementById('dashTotalEarned').textContent = '₦' + totalEarned.toFixed(2);
   
-  localStorage.setItem(statsKey, JSON.stringify({ ...stats, streams: totalStreams, followers: stats.followers, totalEarned: stats.totalEarned || 0 }));
+  localStorage.setItem(statsKey, JSON.stringify({ streams: stats.streams || 0, followers: stats.followers || 0, totalEarned: stats.totalEarned || 0 }));
   
   renderMyTracks(myTracks);
 }
@@ -645,6 +652,7 @@ function renderMyTracks(tracks) {
   }).join('');
 }
 
+// Paystack Withdrawal Simulation
 function requestWithdraw() {
   const balanceText = document.getElementById('dashBalance').textContent;
   const balance = parseFloat(balanceText.replace('₦', '').replace(/,/g, ''));
@@ -660,11 +668,15 @@ function requestWithdraw() {
   const amt = parseFloat(amount);
   if (isNaN(amt) || amt < 5000) { alert("❌ Minimum withdrawal is ₦5,000"); return; }
   if (amt > balance) { alert("❌ Amount exceeds available balance"); return; }
+
+  // Simulate Paystack Transfer Flow
+  alert("🌍 Paystack Transfer\n\nIn production, this step requires a backend server to securely create a transfer recipient and initiate the payout via the Paystack API. Direct international transfers outside Paystack's operating countries (Nigeria, Ghana, Kenya, South Africa) are not supported.");
   
-  const bankName = prompt("Enter your bank name:");
+  const bankName = prompt("Enter your bank name (e.g., GTBank, Access Bank, Zenith Bank):");
   if (!bankName) return;
-  const accountNo = prompt("Enter your account number (10 digits):");
-  if (!accountNo || accountNo.length !== 10) { alert("❌ Invalid account number"); return; }
+  
+  const accountNo = prompt("Enter your 10-digit account number:");
+  if (!accountNo || accountNo.length !== 10) { alert("❌ Invalid account number (must be 10 digits)"); return; }
   
   const artistName = currentUser ? (localStorage.getItem('vyro_artist_name_' + currentUser.email) || currentUser.displayName) : 'Artist';
   const withdrawals = JSON.parse(localStorage.getItem('vyro_withdrawals_' + artistName)) || [];
@@ -673,7 +685,8 @@ function requestWithdraw() {
     bank: bankName,
     account: accountNo,
     date: new Date().toISOString(),
-    status: 'pending'
+    status: 'pending',
+    gateway: 'Paystack'
   });
   localStorage.setItem('vyro_withdrawals_' + artistName, JSON.stringify(withdrawals));
   
@@ -684,7 +697,7 @@ function requestWithdraw() {
   
   loadArtistDashboard(artistName);
   
-  alert(`✅ Withdrawal request submitted!\n\nAmount: ₦${amt.toFixed(2)}\nBank: ${bankName}\nAccount: ****${accountNo.slice(-4)}\n\nFunds will arrive in 3-5 business days.`);
+  alert(`✅ Withdrawal request submitted via Paystack simulation!\n\nAmount: ₦${amt.toFixed(2)}\nBank: ${bankName}\nAccount: ****${accountNo.slice(-4)}\n\nFunds will arrive in 3-5 business days (Simulation).`);
 }
 
 // ==========================================
@@ -1002,4 +1015,4 @@ function genrePick(btn,g){
 }
 </script>
 </body>
-</html>
+        </html>
