@@ -436,25 +436,26 @@ const baseTracks = [
 ];
 
 // 2. CURATED EXTERNAL TRACKS (Trending & New Releases)
-// You can add any online MP3 URL here. They will play and won't affect artist dashboards.
+// Notice the `isTrending: true` and `isNew: true` tags. The app uses these to sort them into the right sections.
 const externalTracks = [
-  // Trending
+  // Trending (Over 100 streams so they show the green stream count)
   {id: 'trend-1', title:'Summer Nights', artist:'Global Hitmaker', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', cover:'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=500&auto=format&fit=crop', streams: 15400, isTrending: true},
   {id: 'trend-2', title:'Neon Lights', artist:'The Weeknd', genre:'R&B', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', cover:'https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop', streams: 8900, isTrending: true},
   {id: 'trend-3', title:'Street Symphony', artist:'Kendrick L.', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', cover:'https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=500&auto=format&fit=crop', streams: 21000, isTrending: true},
   {id: 'trend-4', title:'Higher Power', artist:'Coldplay', genre:'Pop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', cover:'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=500&auto=format&fit=crop', streams: 6700, isTrending: true},
+  {id: 'trend-5', title:'Midnight City', artist:'M83', genre:'Electronic', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', cover:'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=500&auto=format&fit=crop', streams: 12500, isTrending: true},
 
-  // New Releases
-  {id: 'new-1', title:'Water', artist:'Tyla', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', cover:'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=500&auto=format&fit=crop', streams: 250, isNew: true},
-  {id: 'new-2', title:'Snooze', artist:'SZA', genre:'R&B', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', cover:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=500&auto=format&fit=crop', streams: 99, isNew: true},
-  {id: 'new-3', title:'Paint The Town Red', artist:'Doja Cat', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3', cover:'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop', streams: 0, isNew: true},
-  {id: 'new-4', title:'GOD DID', artist:'DJ Khaled', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3', cover:'https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop', streams: 150, isNew: true}
+  // New Releases (Some have under 100 streams to trigger the "NEW" badge)
+  {id: 'new-1', title:'Water', artist:'Tyla', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', cover:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=500&auto=format&fit=crop', streams: 250, isNew: true},
+  {id: 'new-2', title:'Snooze', artist:'SZA', genre:'R&B', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3', cover:'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop', streams: 99, isNew: true},
+  {id: 'new-3', title:'Paint The Town Red', artist:'Doja Cat', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3', cover:'https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop', streams: 0, isNew: true},
+  {id: 'new-4', title:'GOD DID', artist:'DJ Khaled', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3', cover:'https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=500&auto=format&fit=crop', streams: 150, isNew: true},
+  {id: 'new-5', title:'Flowers', artist:'Miley Cyrus', genre:'Pop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3', cover:'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=500&auto=format&fit=crop', streams: 45, isNew: true}
 ];
 
 let currentTrack = null; 
 let currentTrackIndex = 0;
 let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; 
-// Combine all tracks so the player and search can access them
 let allTracks = [...baseTracks, ...externalTracks];
 let currentUser = null; 
 let currentUserData = null;
@@ -857,7 +858,7 @@ async function loadTracksFromCloud() {
       cloudTracks.push({ id: doc.id, ...doc.data() }); 
     });
 
-    // Merge base tracks, external curated tracks, and user-uploaded Firestore tracks
+    // Combine all tracks together
     allTracks = [...baseTracks, ...externalTracks, ...cloudTracks];
     renderApp();
     
@@ -1026,7 +1027,7 @@ async function playTrack(title, artist, emoji, src) {
   audio.play().then(async () => { 
     updatePlayIcons(true); 
     
-    // Stream Logic: Only update Firestore if it's a real VYRO uploaded track (has 'artistId' and does NOT start with 'base-' or 'trend-' or 'new-')
+    // Only update Firestore if it's a real uploaded track (has artistId)
     if (track.id && !track.id.startsWith('base-') && !track.id.startsWith('trend-') && !track.id.startsWith('new-') && track.artistId) {
       const { db, doc, updateDoc, increment } = window.firebaseDB;
       
@@ -1050,7 +1051,7 @@ async function playTrack(title, artist, emoji, src) {
         console.error("Failed to update stream count:", error);
       }
     } else {
-      // Local logic for base/trending/new tracks
+      // Just update local UI for base/trending/new tracks
       track.streams = (track.streams || 0) + 1;
       renderApp();
     }
@@ -1118,7 +1119,6 @@ function showView(id, btn) {
   }
 }
 
-// Generate the Spotify-like music card
 function createMusicCard(t) {
   const coverContent = t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:1;">` : `<div style="position:absolute; z-index:2; font-size: 38px; display:block;">🎵</div>`;
   const safeTitle = t.title.replace(/'/g, "\\'");
