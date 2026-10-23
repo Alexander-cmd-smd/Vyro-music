@@ -151,17 +151,11 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <div class="search">⌕ <input id="searchInput" placeholder="Search songs, artists, moods..." oninput="searchTracks(this.value)"></div>
 <section class="hero"><span class="pill">VYRO SPOTLIGHT</span><h2>Fresh sounds.<br>New energy.</h2><p>Discover your next favourite artist, from local gems to sounds around the world.</p><button class="primary" onclick="showView('explore')">Explore music ↗</button></section>
 
-<!-- Trending Section -->
 <div class="section-head"><h3>🔥 Trending Now</h3><button onclick="showView('explore')">See all</button></div>
-<div class="horizontal-scroll" id="trendingGrid">
-  <!-- Rendered via JS -->
-</div>
+<div class="horizontal-scroll" id="trendingGrid"></div>
 
-<!-- New Releases Section -->
 <div class="section-head"><h3>✨ New Releases</h3><button onclick="showView('explore')">See all</button></div>
-<div class="horizontal-scroll" id="newReleasesGrid">
-  <!-- Rendered via JS -->
-</div>
+<div class="horizontal-scroll" id="newReleasesGrid"></div>
 
 <div class="section-head"><h3>Made for your mood</h3><button onclick="showView('explore')">See all</button></div>
 <div class="genres"><button class="genre active" onclick="genrePick(this,'All')">For you</button><button class="genre" onclick="genrePick(this,'Afrobeats')">Afrobeats</button><button class="genre" onclick="genrePick(this,'Hip-Hop')">Hip-Hop</button><button class="genre" onclick="genrePick(this,'R&B')">R&B</button><button class="genre" onclick="genrePick(this,'Gospel')">Gospel</button></div>
@@ -322,7 +316,7 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
       <label for="imageUpload" id="imageLabel" class="upload-label">🖼️ Select Cover Image (Optional)</label>
 
       <button class="dash-btn" onclick="handleCloudUpload()">🚀 Upload to VYRO</button>
-      <div id="uploadStatus" style="text-align:center;font-size:12px;margin-top:10px;min-height:16px;"></div>
+      <div id="uploadStatus" style="text-align:center;font-size:13px; font-weight:bold; margin-top:10px;min-height:20px; color:var(--blue);"></div>
     </div>
 
     <div class="dash-box">
@@ -488,12 +482,9 @@ window.addEventListener('firebaseReady', () => {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUser = user;
-      
-      // 1. Immediately hide login screens so you aren't stuck
       document.getElementById('artistLoggedOut').style.display = 'none';
       document.getElementById('artistSignupPage').style.display = 'none';
       
-      // 2. Try to fetch from Firestore
       try {
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
@@ -501,17 +492,14 @@ window.addEventListener('firebaseReady', () => {
         if (userSnap.exists()) {
           currentUserData = userSnap.data();
         } else {
-          // If the doc doesn't exist (e.g. you signed up before Firestore was connected)
           currentUserData = { role: 'artist', displayName: user.displayName || user.email.split('@')[0], photoURL: user.photoURL || '' };
           await setDoc(userRef, currentUserData);
         }
       } catch (error) {
-        // 3. SAFETY NET: If Firestore throws a permission error, don't lock the user out!
         console.error("Firestore Error: ", error);
         currentUserData = { role: 'artist', displayName: user.displayName || user.email.split('@')[0], photoURL: user.photoURL || '' };
       }
       
-      // 4. Render the Dashboard UI using whatever data we got
       let savedArtistName = currentUserData.displayName || 'Artist';
       let savedProfilePic = currentUserData.photoURL;
       
@@ -545,7 +533,6 @@ window.addEventListener('firebaseReady', () => {
       }
       
     } else {
-      // Logged Out UI
       currentUser = null;
       currentUserData = null;
       document.getElementById('artistLoggedOut').style.display = 'block';
@@ -659,7 +646,6 @@ function artistLogin() {
         errorDiv.style.color = "#4b8dff";
         errorDiv.innerHTML = "✅ Login Successful! Loading...";
       } else {
-        // If your email isn't verified, we allow the login but warn you
         errorDiv.style.color = "#ffb84d";
         errorDiv.innerHTML = "⚠️ Note: Your email is not verified yet.";
       }
@@ -874,6 +860,29 @@ async function loadTracksFromCloud() {
   }
 }
 
+// XMLHttpRequest to track upload progress
+function uploadWithProgress(url, formData, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const percentComplete = (e.loaded / e.total) * 100;
+        onProgress(percentComplete);
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        resolve(JSON.parse(xhr.responseText));
+      } else {
+        reject(new Error("Upload failed"));
+      }
+    };
+    xhr.onerror = () => reject(new Error("Network error during upload"));
+    xhr.send(formData);
+  });
+}
+
 async function handleCloudUpload() {
   if(!currentUser || !currentUserData) return;
   
@@ -889,9 +898,14 @@ async function handleCloudUpload() {
   
   if(!title) { alert("Please enter song title."); return; }
   if(!audioFile) { alert("Please select an MP3 audio file."); return; }
+
+  if (audioFile.size > 15 * 1024 * 1024) {
+    if (!confirm("This audio file is larger than 15MB. It may take a long time to upload. Continue?")) return;
+  }
   
   const status = document.getElementById('uploadStatus');
-  status.innerHTML = "⏳ Uploading Audio... Please wait.";
+  status.style.color = "var(--blue)";
+  status.innerHTML = "⏳ Uploading Audio... 0%";
 
   try {
     const audioData = new FormData();
@@ -899,29 +913,34 @@ async function handleCloudUpload() {
     audioData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
     audioData.append('resource_type', 'auto');
     
-    const audioRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`, {
-      method: 'POST', body: audioData
+    const audioUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
+    
+    // Upload with Progress
+    const audioJson = await uploadWithProgress(audioUrl, audioData, (percent) => {
+      status.innerHTML = `⏳ Uploading Audio... ${Math.round(percent)}%`;
     });
-    const audioJson = await audioRes.json();
-    if(!audioRes.ok) throw new Error(audioJson.error.message || "Audio upload failed");
     
     const downloadURL = audioJson.secure_url;
     let coverURL = '';
 
     if (imageFile) {
-      status.innerHTML = "⏳ Uploading Cover Art... Please wait.";
+      status.innerHTML = "⏳ Uploading Cover Art... 0%";
       const imageData = new FormData();
       imageData.append('file', imageFile);
       imageData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
       
-      const imgRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-        method: 'POST', body: imageData
+      const imgUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+      
+      // Upload image with progress
+      const imgJson = await uploadWithProgress(imgUrl, imageData, (percent) => {
+        status.innerHTML = `⏳ Uploading Cover Art... ${Math.round(percent)}%`;
       });
-      const imgJson = await imgRes.json();
-      if(imgRes.ok) coverURL = imgJson.secure_url;
+      coverURL = imgJson.secure_url;
     } else {
       coverURL = defaultAIcovers[Math.floor(Math.random() * defaultAIcovers.length)];
     }
+
+    status.innerHTML = "⏳ Saving to Cloud...";
 
     const newTrack = { 
       title: title, 
@@ -945,11 +964,13 @@ async function handleCloudUpload() {
     document.getElementById('audioLabel').innerText = "🎵 Select Audio File (MP3)";
     document.getElementById('imageLabel').innerText = "🖼️ Select Cover Image (Optional)";
     
+    status.style.color = "var(--green)";
     status.innerHTML = "✅ Success! Song is live!";
     loadArtistDashboard(currentUser.uid);
     
   } catch (error) {
     console.error(error);
+    status.style.color = "var(--pink)";
     status.innerHTML = "❌ Error: " + error.message;
   }
 }
@@ -1212,4 +1233,4 @@ function genrePick(btn,g){
 renderApp();
 </script>
 </body>
-          </html>
+  </html>
