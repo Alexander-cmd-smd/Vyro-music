@@ -9,7 +9,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { 
     getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, 
-    updateDoc, increment, query, where, onSnapshot, deleteDoc
+    updateDoc, increment, query, where, onSnapshot 
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
@@ -28,7 +28,7 @@
   const auth = getAuth(app);
   
   window.firebaseDB = { 
-    db, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, increment, query, where, onSnapshot, deleteDoc 
+    db, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, increment, query, where, onSnapshot 
   };
   window.firebaseAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, updateProfile };
   
@@ -49,7 +49,10 @@ h1{font-size:30px;line-height:1.1;margin:8px 0}h1 span{background:linear-gradien
 button{cursor:pointer;border:0;color:white;font-weight:800}.primary{border-radius:30px;padding:12px 18px;background:white;color:#3c175f;margin-top:7px}
 .section-head{display:flex;justify-content:space-between;align-items:center;margin:25px 0 13px}.section-head h3{font-size:18px;margin:0}.section-head button{background:none;color:#c9a4ff;font-size:12px}
 
+/* Standard Grid */
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+
+/* Horizontal Scroll Grid (Spotify Style) */
 .horizontal-scroll { display: flex; gap: 13px; overflow-x: auto; padding-bottom: 10px; scroll-snap-type: x mandatory; }
 .horizontal-scroll::-webkit-scrollbar { display: none; }
 .horizontal-scroll .music-card { min-width: 140px; width: 140px; scroll-snap-align: start; flex-shrink: 0; }
@@ -66,6 +69,7 @@ button{cursor:pointer;border:0;color:white;font-weight:800}.primary{border-radiu
 footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 @media(min-width:600px){.cards{grid-template-columns:repeat(4,minmax(0,1fr))}.horizontal-scroll .music-card { min-width: 160px; width: 160px; }.hero{padding:30px}.hero h2{font-size:34px}}
 
+/* Full Player */
 #fullPlayer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #1a0b2e, #090711); z-index: 100; display: flex; flex-direction: column; padding: 20px; transform: translateY(100%); transition: transform 0.4s ease; }
 #fullPlayer.show { transform: translateY(0); }
 .fp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -86,6 +90,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cur
 input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radius: 50%; background: var(--pink); cursor: pointer; -webkit-appearance: none; margin-top: -5px; box-shadow: 0 0 10px var(--pink); }
 .fp-time { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: -5px; }
 
+/* Custom CSS Controls instead of Emojis */
 .fp-controls { display: flex; justify-content: center; align-items: center; gap: 30px; margin-bottom: 40px; }
 .fp-controls button { background: none; font-size: 30px; color: white; transition: 0.2s; display: grid; place-items: center; }
 .fp-controls button:active { transform: scale(0.9); }
@@ -112,6 +117,7 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 .dash-logout { background: transparent; border: 1px solid #ff4f4f; color: #ff4f4f; }
 .forgot-link { color: var(--pink); font-size: 12px; text-align: right; display: block; margin-bottom: 15px; cursor: pointer; }
 
+/* Dashboard Stats */
 .stat-card { background: var(--panel); border: 1px solid #2a213a; border-radius: 14px; padding: 14px 8px; text-align: center; }
 .stat-value { font-size: 22px; font-weight: 950; background: linear-gradient(90deg, var(--purple), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
@@ -142,10 +148,22 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <div class="search">⌕ <input id="searchInput" placeholder="Search songs, artists, moods..." oninput="searchTracks(this.value)"></div>
 <section class="hero"><span class="pill">VYRO SPOTLIGHT</span><h2>Fresh sounds.<br>New energy.</h2><p>Discover your next favourite artist, from local gems to sounds around the world.</p><button class="primary" onclick="showView('explore')">Explore music ↗</button></section>
 
-<div class="section-head"><h3>🔥 Trending Now</h3><button onclick="showView('explore')">See all</button></div>
+<div class="section-head">
+  <div>
+    <h3>🔥 Trending Now</h3>
+    <small id="trendingDate" style="color:var(--muted); font-size:10px;"></small>
+  </div>
+  <button onclick="showView('explore')">See all</button>
+</div>
 <div class="horizontal-scroll" id="trendingGrid"></div>
 
-<div class="section-head"><h3>✨ New Releases</h3><button onclick="showView('explore')">See all</button></div>
+<div class="section-head">
+  <div>
+    <h3>✨ Latest Release</h3>
+    <small id="latestDate" style="color:var(--muted); font-size:10px;"></small>
+  </div>
+  <button onclick="showView('explore')">See all</button>
+</div>
 <div class="horizontal-scroll" id="newReleasesGrid"></div>
 
 <div class="section-head"><h3>Made for your mood</h3><button onclick="showView('explore')">See all</button></div>
@@ -415,19 +433,87 @@ const baseTracks = [
   {id: 'base-4', title:'Tell Yur Mummy', artist:'Alex_skiddo', emoji:'✨', genre:'Gospel', src:'assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3', cover:defaultAIcovers[3], streams: 0}
 ];
 
-const externalTracks = [
-  {id: 'trend-1', title:'Summer Nights', artist:'Global Hitmaker', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', cover:'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=500&auto=format&fit=crop', streams: 15400, isTrending: true},
-  {id: 'trend-2', title:'Neon Lights', artist:'The Weeknd', genre:'R&B', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', cover:'https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop', streams: 8900, isTrending: true},
-  {id: 'trend-3', title:'Street Symphony', artist:'Kendrick L.', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', cover:'https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=500&auto=format&fit=crop', streams: 21000, isTrending: true},
-  {id: 'trend-4', title:'Higher Power', artist:'Coldplay', genre:'Pop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', cover:'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=500&auto=format&fit=crop', streams: 6700, isTrending: true},
-  {id: 'trend-5', title:'Midnight City', artist:'M83', genre:'Electronic', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', cover:'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=500&auto=format&fit=crop', streams: 12500, isTrending: true},
-  {id: 'new-1', title:'Water', artist:'Tyla', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', cover:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=500&auto=format&fit=crop', streams: 250, isNew: true},
-  {id: 'new-2', title:'Snooze', artist:'SZA', genre:'R&B', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3', cover:'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop', streams: 99, isNew: true},
-  {id: 'new-3', title:'Paint The Town Red', artist:'Doja Cat', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3', cover:'https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop', streams: 0, isNew: true},
-  {id: 'new-4', title:'GOD DID', artist:'DJ Khaled', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3', cover:'https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=500&auto=format&fit=crop', streams: 150, isNew: true},
-  {id: 'new-5', title:'Flowers', artist:'Miley Cyrus', genre:'Pop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3', cover:'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=500&auto=format&fit=crop', streams: 45, isNew: true}
+// ==========================================
+// 🔥 FRIDAY ROTATION ENGINE 
+// ==========================================
+// Every Friday at 12:00am, the app calculates the new week number
+// and picks a brand new pool of tracks.
+function getWeeklyRotationIndex() {
+  const now = new Date();
+  // Calculate days since epoch
+  const diffTime = Math.abs(now - new Date(2024, 0, 1)); 
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  // Return the current week number
+  return Math.floor(diffDays / 7);
+}
+
+function getNextFridayDate() {
+  const now = new Date();
+  const day = now.getDay();
+  const distanceToFriday = (5 - day + 7) % 7 || 7; // If today is Friday, go to next Friday
+  const nextFriday = new Date(now);
+  nextFriday.setDate(now.getDate() + distanceToFriday);
+  nextFriday.setHours(0,0,0,0);
+  
+  const options = { weekday: 'long', month: 'short', day: 'numeric' };
+  return nextFriday.toLocaleDateString('en-US', options);
+}
+
+// The Pools of Tracks (Mixing Nigeria, UK, US)
+const trendingPools = [
+  // Week Pool 1
+  [
+    {id: 't1-1', title:'City Boys', artist:'Burna Boy (NG)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', cover:'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=500&auto=format&fit=crop', streams: 45000, isTrending: true},
+    {id: 't1-2', title:'Sprinter', artist:'Central Cee (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', cover:'https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop', streams: 38000, isTrending: true},
+    {id: 't1-3', title:'Meltdown', artist:'Travis Scott (US)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', cover:'https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=500&auto=format&fit=crop', streams: 52000, isTrending: true},
+    {id: 't1-4', title:'Me & U', artist:'Tems (NG)', genre:'R&B', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', cover:'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=500&auto=format&fit=crop', streams: 29000, isTrending: true},
+    {id: 't1-5', title:'Starlight', artist:'Dave (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', cover:'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=500&auto=format&fit=crop', streams: 31000, isTrending: true}
+  ],
+  // Week Pool 2
+  [
+    {id: 't2-1', title:'Essence', artist:'Wizkid (NG)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', cover:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=500&auto=format&fit=crop', streams: 60000, isTrending: true},
+    {id: 't2-2', title:'Toxic Trait', artist:'Stormzy (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3', cover:'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop', streams: 41000, isTrending: true},
+    {id: 't2-3', title:'First Person Shooter', artist:'Drake (US)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3', cover:'https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop', streams: 70000, isTrending: true},
+    {id: 't2-4', title:'Calm Down', artist:'Rema (NG)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3', cover:'https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=500&auto=format&fit=crop', streams: 55000, isTrending: true},
+    {id: 't2-5', title:'Who Told You', artist:'J Hus (UK)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3', cover:'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=500&auto=format&fit=crop', streams: 33000, isTrending: true}
+  ]
 ];
 
+const latestPools = [
+  // Week Pool 1
+  [
+    {id: 'l1-1', title:'Lonely At The Top', artist:'Asake (NG)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3', cover:'https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop', streams: 150, isNew: true},
+    {id: 'l1-2', title:'Little Things', artist:'Jorja Smith (UK)', genre:'R&B', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3', cover:'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop', streams: 45, isNew: true},
+    {id: 'l1-3', title:'Snooze', artist:'SZA (US)', genre:'R&B', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3', cover:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=500&auto=format&fit=crop', streams: 300, isNew: true},
+    {id: 'l1-4', title:'reason', artist:'Omah Lay (NG)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3', cover:'https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=500&auto=format&fit=crop', streams: 99, isNew: true},
+    {id: 'l1-5', title:'Can't Play Myself', artist:'Skepta (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3', cover:'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=500&auto=format&fit=crop', streams: 0, isNew: true}
+  ],
+  // Week Pool 2
+  [
+    {id: 'l2-1', title:'Peru', artist:'Fireboy DML (NG)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3', cover:'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=500&auto=format&fit=crop', streams: 250, isNew: true},
+    {id: 'l2-2', title:'50s', artist:'Headie One (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3', cover:'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=500&auto=format&fit=crop', streams: 80, isNew: true},
+    {id: 'l2-3', title:'Popular', artist:'The Weeknd (US)', genre:'Pop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-18.mp3', cover:'https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop', streams: 400, isNew: true},
+    {id: 'l2-4', title:'Rush', artist:'Ayra Starr (NG)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-19.mp3', cover:'https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=500&auto=format&fit=crop', streams: 120, isNew: true},
+    {id: 'l2-5', title:'Gorilla', artist:'Little Simz (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-20.mp3', cover:'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop', streams: 35, isNew: true}
+  ]
+];
+
+// Determine current tracks based on week
+const currentWeek = getWeeklyRotationIndex();
+const activeTrending = trendingPools[currentWeek % trendingPools.length];
+const activeLatest = latestPools[currentWeek % latestPools.length];
+const externalTracks = [...activeTrending, ...activeLatest];
+
+// Set the UI text for next update
+document.addEventListener("DOMContentLoaded", () => {
+  const nextUpdateText = "Updates: " + getNextFridayDate();
+  document.getElementById("trendingDate").textContent = nextUpdateText;
+  document.getElementById("latestDate").textContent = nextUpdateText;
+});
+
+// ==========================================
+// CORE APP LOGIC
+// ==========================================
 let currentTrack = null; 
 let currentTrackIndex = 0;
 let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; 
@@ -934,7 +1020,6 @@ async function handleCloudUpload() {
 
     status.innerHTML = "⏳ Saving to Cloud...";
 
-    // Use setDoc with a pre-generated ID for absolute reliability
     const { db, collection, doc, setDoc } = window.firebaseDB;
     const newTrackRef = doc(collection(db, "tracks"));
     
@@ -950,7 +1035,6 @@ async function handleCloudUpload() {
       createdAt: new Date().toISOString()
     };
     
-    // Await the exact database write. If it fails, it will throw an error immediately.
     await setDoc(newTrackRef, newTrack);
     
     document.getElementById('uploadTitle').value = '';
@@ -1047,7 +1131,7 @@ async function playTrack(title, artist, emoji, src) {
   audio.play().then(async () => { 
     updatePlayIcons(true); 
     
-    if (track.id && !track.id.startsWith('base-') && !track.id.startsWith('trend-') && !track.id.startsWith('new-') && track.artistId) {
+    if (track.id && !track.id.startsWith('base-') && !track.id.startsWith('t1-') && !track.id.startsWith('t2-') && !track.id.startsWith('l1-') && !track.id.startsWith('l2-') && track.artistId) {
       const { db, doc, updateDoc, increment } = window.firebaseDB;
       
       try {
@@ -1221,4 +1305,4 @@ function genrePick(btn,g){
 renderApp();
 </script>
 </body>
-        </html>
+          </html>
