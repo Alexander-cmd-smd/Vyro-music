@@ -848,6 +848,9 @@ function loadTracksFromCloud() {
 
       allTracks = [...baseTracks, ...externalTracks, ...cloudTracks];
       renderApp();
+    }, (error) => {
+      console.error("Live listener error:", error);
+      alert("Database Read Error: " + error.message + "\n\nPlease check your Firestore rules.");
     });
   } catch(e) {
     console.error("Cloud fetch failed:", e);
@@ -954,8 +957,16 @@ async function handleCloudUpload() {
     
     const { db, collection, addDoc } = window.firebaseDB;
     
-    // Direct save - no timeouts!
-    await addDoc(collection(db, "tracks"), newTrack);
+    // The critical step. If the rules are wrong, it throws an error immediately.
+    try {
+      await addDoc(collection(db, "tracks"), newTrack);
+    } catch (dbError) {
+      console.error("Database Error:", dbError);
+      alert("Failed to save to database! Error: " + dbError.message + "\n\nPlease check your Firestore rules in the Firebase Console.");
+      status.style.color = "var(--pink)";
+      status.innerHTML = "❌ Database Error: " + dbError.message;
+      return; // Stop execution
+    }
     
     document.getElementById('uploadTitle').value = '';
     document.getElementById('audioUpload').value = '';
