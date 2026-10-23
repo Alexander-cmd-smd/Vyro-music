@@ -31,8 +31,6 @@
     db, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, increment, query, where, onSnapshot 
   };
   window.firebaseAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, updateProfile };
-  
-  window.dispatchEvent(new Event('firebaseReady'));
 </script>
 
 <style>
@@ -533,7 +531,15 @@ if (lastPlayed) {
   document.getElementById('fpPlayPauseBtn').textContent = "▶";
 }
 
-window.addEventListener('firebaseReady', () => {
+// ==========================================
+// 🔥 THE FIX: Wait for Firebase to actually load (No Race Condition)
+// ==========================================
+function initApp() {
+  if (!window.firebaseAuth || !window.firebaseDB) {
+    setTimeout(initApp, 100); // Check again in 100ms if not ready
+    return;
+  }
+
   const { auth, onAuthStateChanged, signOut } = window.firebaseAuth;
   const { db, doc, getDoc, setDoc } = window.firebaseDB;
   
@@ -605,8 +611,14 @@ window.addEventListener('firebaseReady', () => {
   });
 
   loadTracksFromCloud();
-});
+}
 
+// Start the app
+initApp();
+
+// ==========================================
+// OTHER APP FUNCTIONS
+// ==========================================
 function showSignupPage() {
   document.getElementById('artistLoggedOut').style.display = 'none';
   document.getElementById('artistSignupPage').style.display = 'block';
@@ -916,7 +928,7 @@ function uploadWithProgress(url, formData, onProgress) {
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
         try { resolve(JSON.parse(xhr.responseText)); } 
-        catch (e) { reject(new Error("Invalid response format")); }
+        catch (e) { reject(new Error("Invalid response format from Cloudinary")); }
       } else {
         let msg = "Upload failed";
         try {
@@ -969,7 +981,7 @@ async function handleCloudUpload() {
     });
     
     if (!audioJson.secure_url) {
-      throw new Error("Cloudinary upload failed. Check your upload preset settings.");
+      throw new Error("Cloudinary audio upload failed. Check your upload preset settings.");
     }
 
     const downloadURL = audioJson.secure_url;
@@ -993,11 +1005,9 @@ async function handleCloudUpload() {
 
     status.innerHTML = "⏳ Saving to Cloud...";
 
-    const { db, collection, doc, setDoc } = window.firebaseDB;
-    const newTrackRef = doc(collection(db, "tracks"));
+    const { db, collection, addDoc } = window.firebaseDB;
     
     const newTrack = { 
-      id: newTrackRef.id,
       title: title, 
       artist: currentUserData.displayName || currentUser.email.split('@')[0], 
       artistId: currentUser.uid,
@@ -1007,8 +1017,13 @@ async function handleCloudUpload() {
       streams: 0,
       createdAt: new Date().toISOString()
     };
-    
-    await setDoc(newTrackRef, newTrack);
+
+    try {
+      const docRef = await addDoc(collection(db, "tracks"), newTrack);
+      console.log("Document written with ID: ", docRef.id);
+    } catch (dbError) {
+      throw new Error("Firebase Database Error: " + dbError.message);
+    }
     
     document.getElementById('uploadTitle').value = '';
     document.getElementById('audioUpload').value = '';
@@ -1182,9 +1197,10 @@ function showView(id, btn) {
 }
 
 function createMusicCard(t) {
+  if (!t || !t.title) return ''; // Safety check for corrupted data
   const coverContent = t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:1;">` : `<div style="position:absolute; z-index:2; font-size: 38px; display:block;">🎵</div>`;
   const safeTitle = t.title.replace(/'/g, "\\'");
-  const safeArtist = t.artist.replace(/'/g, "\\'");
+  const safeArtist = t.artist ? t.artist.replace(/'/g, "\\'") : 'Unknown';
   return `
     <div class="music-card">
       <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">
@@ -1267,9 +1283,6 @@ function genrePick(btn,g){
   renderApp();
   document.querySelectorAll('#trackGrid .music-card').forEach(c=>c.style.display=g==='All'||c.dataset.genre===g?'':'none');
 }
-
-// Initialize the App
-renderApp();
 </script>
 </body>
   </html>
