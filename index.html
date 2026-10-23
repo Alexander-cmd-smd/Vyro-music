@@ -9,7 +9,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { 
     getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, 
-    updateDoc, increment, query, where, onSnapshot 
+    updateDoc, increment, query, where, onSnapshot, deleteDoc
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
@@ -28,7 +28,7 @@
   const auth = getAuth(app);
   
   window.firebaseDB = { 
-    db, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, increment, query, where, onSnapshot 
+    db, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, increment, query, where, onSnapshot, deleteDoc 
   };
   window.firebaseAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, updateProfile };
   
@@ -49,10 +49,7 @@ h1{font-size:30px;line-height:1.1;margin:8px 0}h1 span{background:linear-gradien
 button{cursor:pointer;border:0;color:white;font-weight:800}.primary{border-radius:30px;padding:12px 18px;background:white;color:#3c175f;margin-top:7px}
 .section-head{display:flex;justify-content:space-between;align-items:center;margin:25px 0 13px}.section-head h3{font-size:18px;margin:0}.section-head button{background:none;color:#c9a4ff;font-size:12px}
 
-/* Standard Grid */
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
-
-/* Horizontal Scroll Grid (Spotify Style) */
 .horizontal-scroll { display: flex; gap: 13px; overflow-x: auto; padding-bottom: 10px; scroll-snap-type: x mandatory; }
 .horizontal-scroll::-webkit-scrollbar { display: none; }
 .horizontal-scroll .music-card { min-width: 140px; width: 140px; scroll-snap-align: start; flex-shrink: 0; }
@@ -69,7 +66,6 @@ button{cursor:pointer;border:0;color:white;font-weight:800}.primary{border-radiu
 footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 @media(min-width:600px){.cards{grid-template-columns:repeat(4,minmax(0,1fr))}.horizontal-scroll .music-card { min-width: 160px; width: 160px; }.hero{padding:30px}.hero h2{font-size:34px}}
 
-/* Full Player */
 #fullPlayer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #1a0b2e, #090711); z-index: 100; display: flex; flex-direction: column; padding: 20px; transform: translateY(100%); transition: transform 0.4s ease; }
 #fullPlayer.show { transform: translateY(0); }
 .fp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -90,7 +86,6 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cur
 input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radius: 50%; background: var(--pink); cursor: pointer; -webkit-appearance: none; margin-top: -5px; box-shadow: 0 0 10px var(--pink); }
 .fp-time { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: -5px; }
 
-/* Custom CSS Controls instead of Emojis */
 .fp-controls { display: flex; justify-content: center; align-items: center; gap: 30px; margin-bottom: 40px; }
 .fp-controls button { background: none; font-size: 30px; color: white; transition: 0.2s; display: grid; place-items: center; }
 .fp-controls button:active { transform: scale(0.9); }
@@ -117,7 +112,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 .dash-logout { background: transparent; border: 1px solid #ff4f4f; color: #ff4f4f; }
 .forgot-link { color: var(--pink); font-size: 12px; text-align: right; display: block; margin-bottom: 15px; cursor: pointer; }
 
-/* Dashboard Stats */
 .stat-card { background: var(--panel); border: 1px solid #2a213a; border-radius: 14px; padding: 14px 8px; text-align: center; }
 .stat-value { font-size: 22px; font-weight: 950; background: linear-gradient(90deg, var(--purple), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
@@ -128,11 +122,8 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 .my-track-item strong { font-size: 13px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .my-track-item small { color: var(--muted); font-size: 11px; }
 
-#artistDashboard, #listenerDashboard {
-  padding-bottom: 90px;
-}
+#artistDashboard, #listenerDashboard { padding-bottom: 90px; }
 
-/* Role Selector Radio */
 .role-select { display: flex; gap: 10px; margin-bottom: 15px; }
 .role-select label { flex: 1; padding: 15px; background: #090711; border: 2px solid #302541; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s; }
 .role-select input[type="radio"] { display: none; }
@@ -179,7 +170,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <div class="view" id="artist">
   <div class="eyebrow">For the next generation</div><h1>Artist <span>Hub.</span></h1>
   
-  <!-- LOGIN PAGE -->
   <div id="artistLoggedOut">
     <section class="hero"><span class="pill">INDEPENDENT ARTISTS</span><h2>Your sound deserves a stage.</h2><p>Build your profile, introduce your music and connect with listeners around the world.</p></section>
     
@@ -206,7 +196,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
     </div>
   </div>
 
-  <!-- SIGN UP PAGE -->
   <div id="artistSignupPage" style="display: none;">
     <div class="dash-box" style="margin-top: 20px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -232,7 +221,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
       </div>
 
       <input type="text" id="signupName" class="dash-input" placeholder="Stage Name / Display Name" style="margin-bottom: 15px;">
-      
       <input type="email" id="signupEmail" class="dash-input" placeholder="Email Address (Private)" style="margin-bottom: 15px;">
       
       <div class="dash-input-group">
@@ -247,7 +235,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
       </button>
 
       <button class="dash-btn" onclick="createAccount()" style="background: linear-gradient(90deg, #4b8dff, #9b5cff);">Sign Up</button>
-      
       <div id="signupError" style="font-size: 13px; margin-top: 15px; text-align: center; font-weight: bold; line-height: 1.5;"></div>
     </div>
   </div>
@@ -850,7 +837,6 @@ function loadTracksFromCloud() {
       renderApp();
     }, (error) => {
       console.error("Live listener error:", error);
-      alert("Database Read Error: " + error.message + "\n\nPlease check your Firestore rules.");
     });
   } catch(e) {
     console.error("Cloud fetch failed:", e);
@@ -923,6 +909,10 @@ async function handleCloudUpload() {
       status.innerHTML = `⏳ Uploading Audio... ${Math.round(percent)}%`;
     });
     
+    if (!audioJson.secure_url) {
+      throw new Error("Cloudinary upload failed. Check your upload preset settings.");
+    }
+
     const downloadURL = audioJson.secure_url;
     let coverURL = '';
 
@@ -944,7 +934,12 @@ async function handleCloudUpload() {
 
     status.innerHTML = "⏳ Saving to Cloud...";
 
+    // Use setDoc with a pre-generated ID for absolute reliability
+    const { db, collection, doc, setDoc } = window.firebaseDB;
+    const newTrackRef = doc(collection(db, "tracks"));
+    
     const newTrack = { 
+      id: newTrackRef.id,
       title: title, 
       artist: currentUserData.displayName || currentUser.email.split('@')[0], 
       artistId: currentUser.uid,
@@ -955,18 +950,8 @@ async function handleCloudUpload() {
       createdAt: new Date().toISOString()
     };
     
-    const { db, collection, addDoc } = window.firebaseDB;
-    
-    // The critical step. If the rules are wrong, it throws an error immediately.
-    try {
-      await addDoc(collection(db, "tracks"), newTrack);
-    } catch (dbError) {
-      console.error("Database Error:", dbError);
-      alert("Failed to save to database! Error: " + dbError.message + "\n\nPlease check your Firestore rules in the Firebase Console.");
-      status.style.color = "var(--pink)";
-      status.innerHTML = "❌ Database Error: " + dbError.message;
-      return; // Stop execution
-    }
+    // Await the exact database write. If it fails, it will throw an error immediately.
+    await setDoc(newTrackRef, newTrack);
     
     document.getElementById('uploadTitle').value = '';
     document.getElementById('audioUpload').value = '';
@@ -978,9 +963,10 @@ async function handleCloudUpload() {
     status.innerHTML = "✅ Success! Song is live!";
     
   } catch (error) {
-    console.error(error);
+    console.error("Upload Error:", error);
     status.style.color = "var(--pink)";
-    status.innerHTML = "❌ Error: " + error.message;
+    status.innerHTML = "❌ Failed: " + error.message;
+    alert("UPLOAD FAILED!\n\n" + error.message + "\n\nIf this says 'Missing or insufficient permissions', you MUST update your Firestore rules in the Firebase Console and click Publish.");
   }
 }
 
@@ -1235,4 +1221,4 @@ function genrePick(btn,g){
 renderApp();
 </script>
 </body>
-</html>
+        </html>
