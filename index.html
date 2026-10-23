@@ -27,7 +27,6 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
   
-  // Add onSnapshot to the exposed window object
   window.firebaseDB = { 
     db, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, increment, query, where, onSnapshot 
   };
@@ -448,9 +447,9 @@ let saved = JSON.parse(localStorage.getItem('vyro_saved')) || [];
 let allTracks = [...baseTracks, ...externalTracks];
 let currentUser = null; 
 let currentUserData = null;
-let unsubUserStats = null; // Real-time listener for dashboard
-let unsubUserTracks = null; // Real-time listener for user tracks
-let unsubAllTracks = null;  // Real-time listener for home page
+let unsubUserStats = null; 
+let unsubUserTracks = null; 
+let unsubAllTracks = null;  
 
 const audio = document.getElementById("vyro-player");
 
@@ -545,13 +544,11 @@ window.addEventListener('firebaseReady', () => {
       document.getElementById('listenerDashboard').style.display = 'none';
       document.getElementById('userAvatar').textContent = 'V';
       
-      // Cleanup listeners when logging out
       if(unsubUserStats) unsubUserStats();
       if(unsubUserTracks) unsubUserTracks();
     }
   });
 
-  // Live updates for the home page
   loadTracksFromCloud();
 });
 
@@ -718,24 +715,20 @@ async function upgradeToArtist() {
 function loadArtistDashboard(userId) {
   const { db, collection, query, where, doc, onSnapshot } = window.firebaseDB;
   
-  // Clean up old listeners if they exist
   if(unsubUserStats) unsubUserStats();
   if(unsubUserTracks) unsubUserTracks();
 
   try {
-    // 1. LIVE User Stats (Streams, Followers, Balance)
     unsubUserStats = onSnapshot(doc(db, "users", userId), (userSnap) => {
       if (!userSnap.exists()) return;
       const userData = userSnap.data();
       
-      // Update numbers on screen instantly
       document.getElementById('statStreams').textContent = (userData.totalStreams || 0).toLocaleString();
       document.getElementById('statFollowers').textContent = (userData.followers || 0).toLocaleString();
       document.getElementById('dashBalance').textContent = '₦' + (userData.availableBalance || 0).toFixed(2);
       document.getElementById('dashTotalEarned').textContent = '₦' + (userData.totalEarned || 0).toFixed(2);
     });
 
-    // 2. LIVE Tracks List
     const q = query(collection(db, "tracks"), where("artistId", "==", userId));
     unsubUserTracks = onSnapshot(q, (trackSnaps) => {
       let myTracks = [];
@@ -844,10 +837,9 @@ function loadTracksFromCloud() {
   if(!window.firebaseDB) return;
   const { db, collection, onSnapshot } = window.firebaseDB;
   
-  if(unsubAllTracks) unsubAllTracks(); // Cleanup old listener
+  if(unsubAllTracks) unsubAllTracks();
   
   try {
-    // LIVE Home Page Tracks
     unsubAllTracks = onSnapshot(collection(db, "tracks"), (querySnapshot) => {
       let cloudTracks = [];
       querySnapshot.forEach((doc) => { 
@@ -962,12 +954,8 @@ async function handleCloudUpload() {
     
     const { db, collection, addDoc } = window.firebaseDB;
     
-    const savePromise = addDoc(collection(db, "tracks"), newTrack);
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error("Database connection timed out. Please check your Firestore rules.")), 10000)
-    );
-    
-    await Promise.race([savePromise, timeoutPromise]);
+    // Direct save - no timeouts!
+    await addDoc(collection(db, "tracks"), newTrack);
     
     document.getElementById('uploadTitle').value = '';
     document.getElementById('audioUpload').value = '';
@@ -1074,7 +1062,6 @@ async function playTrack(title, artist, emoji, src) {
           totalEarned: increment(0.007)
         });
         
-        // Track object will be updated automatically by the onSnapshot listener
       } catch (error) {
         console.error("Failed to update stream count:", error);
       }
@@ -1237,4 +1224,4 @@ function genrePick(btn,g){
 renderApp();
 </script>
 </body>
-  </html>
+</html>
