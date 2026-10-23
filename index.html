@@ -7,7 +7,10 @@
 <title>VYRO — Feel the Sound</title>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { 
+    getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, 
+    updateDoc, increment, query, where 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -24,7 +27,9 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
   
-  window.firebaseDB = { db, collection, addDoc, getDocs };
+  window.firebaseDB = { 
+    db, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, increment, query, where 
+  };
   window.firebaseAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, updateProfile };
   
   window.dispatchEvent(new Event('firebaseReady'));
@@ -43,7 +48,16 @@ h1{font-size:30px;line-height:1.1;margin:8px 0}h1 span{background:linear-gradien
 .hero:after{content:"♫";position:absolute;font-size:170px;right:12px;bottom:-46px;color:#ffffff20;transform:rotate(12deg)}.hero h2{font-size:27px;max-width:240px;margin:8px 0}.hero p{color:#f0dfff;font-size:13px;max-width:240px;line-height:1.5}.pill{display:inline-block;border:1px solid #ffffff6b;border-radius:30px;padding:6px 10px;font-size:10px;letter-spacing:1.3px;font-weight:800}
 button{cursor:pointer;border:0;color:white;font-weight:800}.primary{border-radius:30px;padding:12px 18px;background:white;color:#3c175f;margin-top:7px}
 .section-head{display:flex;justify-content:space-between;align-items:center;margin:25px 0 13px}.section-head h3{font-size:18px;margin:0}.section-head button{background:none;color:#c9a4ff;font-size:12px}
-.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.music-card{background:var(--panel);border:1px solid #2a213a;border-radius:17px;padding:10px;min-width:0}.cover{aspect-ratio:1.15;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:38px;position:relative;overflow:hidden}.cover:after{content:"";position:absolute;width:130px;height:130px;border:1px solid #ffffff38;border-radius:50%;right:-25px;top:-35px;box-shadow:0 0 0 15px #ffffff09,0 0 0 30px #ffffff06}.c1{background:linear-gradient(135deg,#3720a1,#e34fb8)}.c2{background:linear-gradient(135deg,#064b66,#7a5bff)}.c3{background:linear-gradient(135deg,#7e254e,#ff9d45)}.c4{background:linear-gradient(135deg,#171a45,#2fc7b2)}.track-title{font-size:14px;font-weight:800;margin:10px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:space-between;}.artist{font-size:12px;color:var(--muted)}.play-small{border-radius:50%;width:32px;height:32px;background:linear-gradient(135deg,var(--purple),var(--pink));flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+
+/* Standard Grid */
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+
+/* Horizontal Scroll Grid (Spotify Style) */
+.horizontal-scroll { display: flex; gap: 13px; overflow-x: auto; padding-bottom: 10px; scroll-snap-type: x mandatory; }
+.horizontal-scroll::-webkit-scrollbar { display: none; }
+.horizontal-scroll .music-card { min-width: 140px; width: 140px; scroll-snap-align: start; flex-shrink: 0; }
+
+.music-card{background:var(--panel);border:1px solid #2a213a;border-radius:17px;padding:10px;min-width:0}.cover{aspect-ratio:1.15;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:38px;position:relative;overflow:hidden}.cover:after{content:"";position:absolute;width:130px;height:130px;border:1px solid #ffffff38;border-radius:50%;right:-25px;top:-35px;box-shadow:0 0 0 15px #ffffff09,0 0 0 30px #ffffff06}.c1{background:linear-gradient(135deg,#3720a1,#e34fb8)}.c2{background:linear-gradient(135deg,#064b66,#7a5bff)}.c3{background:linear-gradient(135deg,#7e254e,#ff9d45)}.c4{background:linear-gradient(135deg,#171a45,#2fc7b2)}.track-title{font-size:14px;font-weight:800;margin:10px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:space-between;}.artist{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.play-small{border-radius:50%;width:32px;height:32px;background:linear-gradient(135deg,var(--purple),var(--pink));flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .genres{display:flex;gap:8px;overflow:auto;padding-bottom:3px}.genre{white-space:nowrap;border-radius:22px;padding:10px 14px;background:#1a1527;border:1px solid #302440;font-size:12px;color:#d8cde8}.genre.active{background:linear-gradient(90deg,#793de2,#c53bb8);border:0;color:#fff}
 .artist-row{display:flex;gap:12px;align-items:center;background:#151122;border-radius:15px;padding:11px;margin-bottom:10px; cursor:pointer; transition: background 0.2s;}
 .artist-row:hover { background: #1f1832; }
@@ -53,7 +67,7 @@ button{cursor:pointer;border:0;color:white;font-weight:800}.primary{border-radiu
 .player{position:fixed;bottom:69px;left:10px;right:10px;max-width:740px;margin:auto;background:linear-gradient(90deg,#24113c,#21142f);border:1px solid #59357c;border-radius:15px;padding:10px 12px;display:none;align-items:center;gap:10px;z-index:7;box-shadow:0 8px 30px #0008;cursor:pointer;transition:0.3s}.player.show{display:flex}.player-art{width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,#8d48e8,#f14fbe);display:grid;place-items:center;overflow:hidden;flex-shrink:0;}.player-info{min-width:0;flex:1}.player-info strong{font-size:12px;display:block}.player-info small{color:#bdb0cf;font-size:10px}.player button{background:none;font-size:20px}
 .view{display:none}.view.active{display:block}.empty{padding:25px;border:1px dashed #554169;border-radius:16px;color:#b8adc9;text-align:center;font-size:13px;line-height:1.6}
 footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
-@media(min-width:600px){.cards{grid-template-columns:repeat(4,minmax(0,1fr))}.hero{padding:30px}.hero h2{font-size:34px}}
+@media(min-width:600px){.cards{grid-template-columns:repeat(4,minmax(0,1fr))}.horizontal-scroll .music-card { min-width: 160px; width: 160px; }.hero{padding:30px}.hero h2{font-size:34px}}
 
 /* Full Player */
 #fullPlayer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #1a0b2e, #090711); z-index: 100; display: flex; flex-direction: column; padding: 20px; transform: translateY(100%); transition: transform 0.4s ease; }
@@ -114,7 +128,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 .my-track-item strong { font-size: 13px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .my-track-item small { color: var(--muted); font-size: 11px; }
 
-/* Pushes content up so the player doesn't hide the logout/withdraw buttons */
 #artistDashboard, #listenerDashboard {
   padding-bottom: 90px;
 }
@@ -137,6 +150,19 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <div class="eyebrow">Your sound. Your world.</div><h1>Feel something<br><span>different.</span></h1>
 <div class="search">⌕ <input id="searchInput" placeholder="Search songs, artists, moods..." oninput="searchTracks(this.value)"></div>
 <section class="hero"><span class="pill">VYRO SPOTLIGHT</span><h2>Fresh sounds.<br>New energy.</h2><p>Discover your next favourite artist, from local gems to sounds around the world.</p><button class="primary" onclick="showView('explore')">Explore music ↗</button></section>
+
+<!-- Trending Section -->
+<div class="section-head"><h3>🔥 Trending Now</h3><button onclick="showView('explore')">See all</button></div>
+<div class="horizontal-scroll" id="trendingGrid">
+  <!-- Rendered via JS -->
+</div>
+
+<!-- New Releases Section -->
+<div class="section-head"><h3>✨ New Releases</h3><button onclick="showView('explore')">See all</button></div>
+<div class="horizontal-scroll" id="newReleasesGrid">
+  <!-- Rendered via JS -->
+</div>
+
 <div class="section-head"><h3>Made for your mood</h3><button onclick="showView('explore')">See all</button></div>
 <div class="genres"><button class="genre active" onclick="genrePick(this,'All')">For you</button><button class="genre" onclick="genrePick(this,'Afrobeats')">Afrobeats</button><button class="genre" onclick="genrePick(this,'Hip-Hop')">Hip-Hop</button><button class="genre" onclick="genrePick(this,'R&B')">R&B</button><button class="genre" onclick="genrePick(this,'Gospel')">Gospel</button></div>
 <div class="section-head"><h3>Discover picks (Cloud)</h3><button onclick="showView('explore')">More music</button></div>
@@ -144,12 +170,14 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <p style="color: #aaa; text-align: center; grid-column: span 2;">Connecting to VYRO Cloud...</p>
 </div>
 </div>
+
 <div class="view" id="explore"><div class="eyebrow">Open your ears</div><h1>Explore <span>sounds.</span></h1><p style="color:var(--muted);font-size:13px;line-height:1.6">A world of independent voices, new releases and unexpected favourites.</p>
 <div class="section-head"><h3>Popular genres</h3></div>
 <div class="genres" style="flex-wrap:wrap"><button class="genre" onclick="filterGenre(this,'Afrobeats')">Afrobeats</button><button class="genre" onclick="filterGenre(this,'Hip-Hop')">Hip-Hop</button><button class="genre" onclick="filterGenre(this,'R&B')">R&B</button><button class="genre" onclick="filterGenre(this,'Gospel')">Gospel</button></div>
 <div class="section-head"><h3>All tracks</h3></div>
 <div class="cards" id="exploreGrid"></div>
 </div>
+
 <div class="view" id="search"><div class="eyebrow">Find your next favourite</div><h1>Search <span>VYRO.</span></h1><div class="search">⌕ <input placeholder="Type a song or artist..." oninput="searchTracks(this.value)"></div><div id="searchMessage" class="empty">Try searching for an artist or song.</div></div>
 <div class="view" id="library"><div class="eyebrow">Your personal space</div><h1>Your <span>Library.</span></h1><p style="color:var(--muted);font-size:13px">Your saved tracks will appear here on this device.</p><div id="savedTracks" class="empty">No saved tracks yet.<br>Tap ♡ on a track to add it to your library.</div></div>
 
@@ -192,7 +220,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
         <button onclick="hideSignupPage()" style="background: none; color: var(--muted); font-size: 24px;">✕</button>
       </div>
       
-      <!-- Role Selector -->
       <p style="color:#fff; font-size:14px; font-weight:800; margin-bottom: 10px;">I am signing up as:</p>
       <div class="role-select">
         <input type="radio" name="userRole" id="roleArtist" value="artist" checked>
@@ -233,7 +260,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 
   <!-- ARTIST DASHBOARD -->
   <div id="artistDashboard" style="display: none;">
-    <!-- HEADER -->
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <div class="ap-art" id="dashAvatar" style="width:60px;height:60px;font-size:24px;margin:0;">A</div>
       <div style="flex:1;min-width:0;">
@@ -242,7 +268,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
       </div>
     </div>
 
-    <!-- STATS CARDS -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
       <div class="stat-card">
         <div class="stat-value" id="statStreams">0</div>
@@ -258,7 +283,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
       </div>
     </div>
 
-    <!-- EARNINGS & PAYMENT -->
     <div class="dash-box">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
         <h3 style="margin:0;font-size:16px;">Earnings & Payment</h3>
@@ -275,7 +299,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
       <p style="text-align:center;color:var(--muted);font-size:11px;margin:8px 0 0;">Rate: ₦0.007000 / stream. Minimum: ₦5,000</p>
     </div>
 
-    <!-- UPLOAD TRACK -->
     <div class="dash-box">
       <h3 style="margin:0 0 15px;font-size:16px;">Upload New Track</h3>
       
@@ -302,11 +325,10 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
       <div id="uploadStatus" style="text-align:center;font-size:12px;margin-top:10px;min-height:16px;"></div>
     </div>
 
-    <!-- MY TRACKS -->
     <div class="dash-box">
       <h3 style="margin:0 0 15px;font-size:16px;">My Tracks</h3>
       <div id="myTracksList">
-        <div class="empty" style="padding:15px;font-size:12px;">No tracks yet. Upload your first song above.</div>
+        <div class="empty" style="padding:15px;font-size:12px;">Loading...</div>
       </div>
     </div>
 
@@ -373,7 +395,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
     <div class="fp-time"><span id="currentTime">0:00</span><span id="totalTime">0:00</span></div>
   </div>
   
-  <!-- CUSTOM CONTROLS -->
   <div class="fp-controls">
     <button onclick="seek(-10)" style="font-size: 24px; color: var(--muted);">-10s</button>
     <button class="play-btn" onclick="togglePlay()" id="fpPlayPauseBtn" style="font-size: 28px; font-weight: 900;">▶</button>
@@ -395,9 +416,6 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <audio id="vyro-player" style="width: 0; height: 0; opacity: 0; position: absolute;" controls preload="metadata"></audio>
 
 <script>
-// ==========================================
-// 1. INITIAL STATE & DATA
-// ==========================================
 const CLOUDINARY_CLOUD_NAME = "ixay5wda"; 
 const CLOUDINARY_UPLOAD_PRESET = "qvk4xtky"; 
 
@@ -409,19 +427,37 @@ const defaultAIcovers = [
   "https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop"
 ];
 
+// 1. BASE TRACKS (Your original app tracks)
 const baseTracks = [
-  {id: '1', title:'Come', artist:'Ogunba Alex', emoji:'🌙', genre:'Afrobeats', src:'assets/Come [8a409715].mp3', cover:defaultAIcovers[0]},
-  {id: '2', title:'Your brother', artist:'Ogunba Alex', emoji:'☁️', genre:'Hip-Hop', src:'assets/Your brother [bf867660].mp3', cover:defaultAIcovers[1]},
-  {id: '3', title:'Loving', artist:'Alex_skiddo', emoji:'💫', genre:'R&B', src:'assets/Loving [947f2a25].mp3', cover:defaultAIcovers[2]},
-  {id: '4', title:'Tell Yur Mummy', artist:'Alex_skiddo', emoji:'✨', genre:'Gospel', src:'assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3', cover:defaultAIcovers[3]}
+  {id: 'base-1', title:'Come', artist:'Ogunba Alex', emoji:'🌙', genre:'Afrobeats', src:'assets/Come [8a409715].mp3', cover:defaultAIcovers[0], streams: 0},
+  {id: 'base-2', title:'Your brother', artist:'Ogunba Alex', emoji:'☁️', genre:'Hip-Hop', src:'assets/Your brother [bf867660].mp3', cover:defaultAIcovers[1], streams: 0},
+  {id: 'base-3', title:'Loving', artist:'Alex_skiddo', emoji:'💫', genre:'R&B', src:'assets/Loving [947f2a25].mp3', cover:defaultAIcovers[2], streams: 0},
+  {id: 'base-4', title:'Tell Yur Mummy', artist:'Alex_skiddo', emoji:'✨', genre:'Gospel', src:'assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3', cover:defaultAIcovers[3], streams: 0}
+];
+
+// 2. CURATED EXTERNAL TRACKS (Trending & New Releases)
+// You can add any online MP3 URL here. They will play and won't affect artist dashboards.
+const externalTracks = [
+  // Trending
+  {id: 'trend-1', title:'Summer Nights', artist:'Global Hitmaker', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', cover:'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=500&auto=format&fit=crop', streams: 15400, isTrending: true},
+  {id: 'trend-2', title:'Neon Lights', artist:'The Weeknd', genre:'R&B', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', cover:'https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop', streams: 8900, isTrending: true},
+  {id: 'trend-3', title:'Street Symphony', artist:'Kendrick L.', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', cover:'https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=500&auto=format&fit=crop', streams: 21000, isTrending: true},
+  {id: 'trend-4', title:'Higher Power', artist:'Coldplay', genre:'Pop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', cover:'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=500&auto=format&fit=crop', streams: 6700, isTrending: true},
+
+  // New Releases
+  {id: 'new-1', title:'Water', artist:'Tyla', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', cover:'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=500&auto=format&fit=crop', streams: 250, isNew: true},
+  {id: 'new-2', title:'Snooze', artist:'SZA', genre:'R&B', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', cover:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=500&auto=format&fit=crop', streams: 99, isNew: true},
+  {id: 'new-3', title:'Paint The Town Red', artist:'Doja Cat', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3', cover:'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop', streams: 0, isNew: true},
+  {id: 'new-4', title:'GOD DID', artist:'DJ Khaled', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3', cover:'https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop', streams: 150, isNew: true}
 ];
 
 let currentTrack = null; 
 let currentTrackIndex = 0;
 let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; 
-let cachedCloudTracks = JSON.parse(localStorage.getItem('vyro_cloud_cache')) || [];
-let allTracks = [...baseTracks, ...cachedCloudTracks];
+// Combine all tracks so the player and search can access them
+let allTracks = [...baseTracks, ...externalTracks];
 let currentUser = null; 
+let currentUserData = null;
 
 const audio = document.getElementById("vyro-player");
 
@@ -447,62 +483,69 @@ if (lastPlayed) {
   document.getElementById('fpPlayPauseBtn').textContent = "▶";
 }
 
-renderApp(); 
-
 // ==========================================
-// 2. FIREBASE INITIALIZATION HANDLING
+// 2. FIREBASE INITIALIZATION & REAL-TIME DATA
 // ==========================================
 window.addEventListener('firebaseReady', () => {
-  const { auth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateProfile } = window.firebaseAuth;
+  const { auth, onAuthStateChanged, signOut } = window.firebaseAuth;
+  const { db, doc, getDoc, setDoc } = window.firebaseDB;
   
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUser = user;
       
-      // Load user role
-      let role = localStorage.getItem('vyro_role_' + user.email) || 'artist'; // default to artist for older users
-      
-      document.getElementById('artistLoggedOut').style.display = 'none';
-      document.getElementById('artistSignupPage').style.display = 'none';
-      
-      let savedArtistName = localStorage.getItem('vyro_artist_name_' + user.email);
-      if(!savedArtistName) savedArtistName = user.displayName || user.email.split('@')[0];
-      
-      let savedProfilePic = localStorage.getItem('vyro_profile_pic_' + user.email) || user.photoURL;
-      
-      if (role === 'listener') {
-        document.getElementById('artistDashboard').style.display = 'none';
-        document.getElementById('listenerDashboard').style.display = 'block';
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
         
-        document.getElementById('listenerName').textContent = savedArtistName;
-        
-        if(savedProfilePic) {
-          document.getElementById('listenerAvatar').innerHTML = `<img src="${savedProfilePic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-          document.getElementById('userAvatar').innerHTML = `<img src="${savedProfilePic}" style="width:100%;height:100%;object-fit:cover;">`;
+        if (userSnap.exists()) {
+          currentUserData = userSnap.data();
         } else {
-          document.getElementById('listenerAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
-          document.getElementById('userAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
+          currentUserData = { role: 'artist', displayName: user.displayName || user.email.split('@')[0], photoURL: user.photoURL };
+          await setDoc(userRef, currentUserData);
         }
         
-      } else {
-        document.getElementById('listenerDashboard').style.display = 'none';
-        document.getElementById('artistDashboard').style.display = 'block';
+        document.getElementById('artistLoggedOut').style.display = 'none';
+        document.getElementById('artistSignupPage').style.display = 'none';
         
-        document.getElementById('dashArtistName').textContent = savedArtistName;
+        let savedArtistName = currentUserData.displayName;
+        let savedProfilePic = currentUserData.photoURL;
         
-        if(savedProfilePic) {
-          document.getElementById('dashAvatar').innerHTML = `<img src="${savedProfilePic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-          document.getElementById('userAvatar').innerHTML = `<img src="${savedProfilePic}" style="width:100%;height:100%;object-fit:cover;">`;
+        if (currentUserData.role === 'listener') {
+          document.getElementById('artistDashboard').style.display = 'none';
+          document.getElementById('listenerDashboard').style.display = 'block';
+          document.getElementById('listenerName').textContent = savedArtistName;
+          
+          if(savedProfilePic) {
+            document.getElementById('listenerAvatar').innerHTML = `<img src="${savedProfilePic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+            document.getElementById('userAvatar').innerHTML = `<img src="${savedProfilePic}" style="width:100%;height:100%;object-fit:cover;">`;
+          } else {
+            document.getElementById('listenerAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
+            document.getElementById('userAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
+          }
+          
         } else {
-          document.getElementById('dashAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
-          document.getElementById('userAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
+          document.getElementById('listenerDashboard').style.display = 'none';
+          document.getElementById('artistDashboard').style.display = 'block';
+          document.getElementById('dashArtistName').textContent = savedArtistName;
+          
+          if(savedProfilePic) {
+            document.getElementById('dashAvatar').innerHTML = `<img src="${savedProfilePic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+            document.getElementById('userAvatar').innerHTML = `<img src="${savedProfilePic}" style="width:100%;height:100%;object-fit:cover;">`;
+          } else {
+            document.getElementById('dashAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
+            document.getElementById('userAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
+          }
+          
+          loadArtistDashboard(user.uid);
         }
-        
-        loadArtistDashboard(savedArtistName);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
       }
       
     } else {
       currentUser = null;
+      currentUserData = null;
       document.getElementById('artistLoggedOut').style.display = 'block';
       document.getElementById('artistSignupPage').style.display = 'none';
       document.getElementById('artistDashboard').style.display = 'none';
@@ -531,6 +574,7 @@ async function createAccount() {
   if(!window.firebaseAuth) { alert("Cloud connection still loading. Please wait a second and try again."); return; }
   
   const { auth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } = window.firebaseAuth;
+  const { db, doc, setDoc } = window.firebaseDB;
 
   const name = document.getElementById('signupName').value.trim();
   const email = document.getElementById('signupEmail').value.trim();
@@ -567,20 +611,17 @@ async function createAccount() {
       photoURL: profilePicURL
     });
 
-    localStorage.setItem('vyro_artist_name_' + email, name);
-    localStorage.setItem('vyro_role_' + email, role);
-    
-    if(profilePicURL) localStorage.setItem('vyro_profile_pic_' + email, profilePicURL);
-
-    // New artists start with absolutely zero stats and earnings
-    if (role === 'artist') {
-      const newArtistStatsKey = 'vyro_stats_' + name;
-      localStorage.setItem(newArtistStatsKey, JSON.stringify({
-        streams: 0,
-        followers: 0,
-        totalEarned: 0
-      }));
-    }
+    await setDoc(doc(db, "users", userCredential.user.uid), {
+      email: email,
+      displayName: name,
+      role: role,
+      photoURL: profilePicURL || '',
+      totalStreams: 0,
+      followers: 0,
+      availableBalance: 0,
+      totalEarned: 0,
+      createdAt: new Date().toISOString()
+    });
 
     await sendEmailVerification(userCredential.user);
     
@@ -657,52 +698,51 @@ function togglePasswordVisibility(inputId) {
   else { passInput.type = "password"; }
 }
 
-function upgradeToArtist() {
+async function upgradeToArtist() {
   if(!currentUser) return;
-  localStorage.setItem('vyro_role_' + currentUser.email, 'artist');
-  alert("🎉 You are now an Artist! Your dashboard has been upgraded. You can now upload tracks and earn money.");
+  const { db, doc, updateDoc } = window.firebaseDB;
   
-  // Refresh the page state
-  window.location.reload();
+  try {
+    await updateDoc(doc(db, "users", currentUser.uid), { role: 'artist' });
+    alert("🎉 You are now an Artist! Your dashboard has been upgraded. You can now upload tracks and earn money.");
+    window.location.reload();
+  } catch (e) {
+    alert("Error upgrading account: " + e.message);
+  }
 }
 
 // ==========================================
-// 4. DASHBOARD FUNCTIONS
+// 4. DASHBOARD FUNCTIONS (REAL FIRESTORE DATA)
 // ==========================================
-function loadArtistDashboard(artistName) {
-  const statsKey = 'vyro_stats_' + artistName;
-  const stats = JSON.parse(localStorage.getItem(statsKey)) || {
-    streams: 0,
-    followers: 0,
-    totalEarned: 0
-  };
+async function loadArtistDashboard(userId) {
+  const { db, collection, query, where, getDocs, doc, getDoc } = window.firebaseDB;
   
-  const myTracks = allTracks.filter(t => t.artist === artistName);
-  
-  let totalStreams = stats.streams || 0;
-  myTracks.forEach(t => {
-    const trackStats = JSON.parse(localStorage.getItem('vyro_track_stats_' + t.title)) || { streams: 0 };
-    totalStreams += trackStats.streams;
-  });
-  
-  const streamsEl = document.getElementById('statStreams');
-  const followersEl = document.getElementById('statFollowers');
-  const tracksEl = document.getElementById('statTracks');
-  
-  animateCount(streamsEl, totalStreams);
-  animateCount(followersEl, stats.followers || 0);
-  animateCount(tracksEl, myTracks.length);
-  
-  // New Pay Rate: ₦0.007000 per stream
-  const balance = totalStreams * 0.007000;
-  const totalEarned = balance + (stats.totalEarned || 0);
-  
-  document.getElementById('dashBalance').textContent = '₦' + balance.toFixed(2);
-  document.getElementById('dashTotalEarned').textContent = '₦' + totalEarned.toFixed(2);
-  
-  localStorage.setItem(statsKey, JSON.stringify({ streams: stats.streams || 0, followers: stats.followers || 0, totalEarned: stats.totalEarned || 0 }));
-  
-  renderMyTracks(myTracks);
+  try {
+    const userSnap = await getDoc(doc(db, "users", userId));
+    if (!userSnap.exists()) return;
+    const userData = userSnap.data();
+    
+    const q = query(collection(db, "tracks"), where("artistId", "==", userId));
+    const trackSnaps = await getDocs(q);
+    let myTracks = [];
+    trackSnaps.forEach(d => myTracks.push({ id: d.id, ...d.data() }));
+    
+    const streamsEl = document.getElementById('statStreams');
+    const followersEl = document.getElementById('statFollowers');
+    const tracksEl = document.getElementById('statTracks');
+    
+    animateCount(streamsEl, userData.totalStreams || 0);
+    animateCount(followersEl, userData.followers || 0);
+    animateCount(tracksEl, myTracks.length);
+    
+    document.getElementById('dashBalance').textContent = '₦' + (userData.availableBalance || 0).toFixed(2);
+    document.getElementById('dashTotalEarned').textContent = '₦' + (userData.totalEarned || 0).toFixed(2);
+    
+    renderMyTracks(myTracks);
+    
+  } catch (error) {
+    console.error("Error loading dashboard:", error);
+  }
 }
 
 function animateCount(el, target) {
@@ -730,7 +770,7 @@ function renderMyTracks(tracks) {
         <div class="artist-art" style="width:40px;height:40px;border-radius:8px;font-size:16px;">${cover}</div>
         <div class="mt-info">
           <strong>${t.title}</strong>
-          <small>${t.genre} · ${t.artist}</small>
+          <small>${t.streams} Streams · ${t.genre}</small>
         </div>
         <button onclick="playTrack('${safeTitle}', '${safeArtist}', '🎵', '${t.src}')" 
           style="background:linear-gradient(135deg,var(--purple),var(--pink));width:32px;height:32px;border-radius:50%;">▶</button>
@@ -739,8 +779,7 @@ function renderMyTracks(tracks) {
   }).join('');
 }
 
-// International/Local Payout Simulation
-function requestWithdraw() {
+async function requestWithdraw() {
   const balanceText = document.getElementById('dashBalance').textContent;
   const balance = parseFloat(balanceText.replace('₦', '').replace(/,/g, ''));
   
@@ -756,55 +795,52 @@ function requestWithdraw() {
   if (isNaN(amt) || amt < 5000) { alert("❌ Minimum withdrawal is ₦5,000"); return; }
   if (amt > balance) { alert("❌ Amount exceeds available balance"); return; }
 
-  const method = prompt("Select Payout Method:\n\n1. Local Bank (NGN)\n2. International Bank Transfer (USD/EUR/GBP via Wise/Payoneer)");
+  const method = prompt("Select Payout Method:\n\n1. Local Bank (NGN)\n2. International Bank Transfer (USD/EUR/GBP)");
+  
+  let type, bankName, account, swift = '';
   
   if (method === '1') {
-    const bankName = prompt("Enter your local bank name (e.g., GTBank, Access Bank):");
+    bankName = prompt("Enter your local bank name:");
     if (!bankName) return;
-    const accountNo = prompt("Enter your 10-digit account number:");
-    if (!accountNo || accountNo.length !== 10) { alert("❌ Invalid account number (must be 10 digits)"); return; }
-    
-    saveWithdrawal(amt, 'Local', bankName, accountNo);
-    
+    account = prompt("Enter your 10-digit account number:");
+    if (!account || account.length !== 10) { alert("❌ Invalid account number"); return; }
+    type = 'Local';
   } else if (method === '2') {
-    const bankName = prompt("Enter your International Bank Name (e.g., Chase, Barclays):");
+    bankName = prompt("Enter your International Bank Name:");
     if (!bankName) return;
-    const swift = prompt("Enter your SWIFT/BIC Code (8 or 11 characters):");
+    swift = prompt("Enter your SWIFT/BIC Code:");
     if (!swift) return;
-    const iban = prompt("Enter your IBAN or Account Number:");
-    if (!iban) return;
-    
-    saveWithdrawal(amt, 'International', bankName, iban, swift);
-    
+    account = prompt("Enter your IBAN or Account Number:");
+    if (!account) return;
+    type = 'International';
   } else {
-    alert("Invalid selection.");
+    return;
   }
-}
 
-function saveWithdrawal(amt, type, bankName, account, swift = '') {
-  const artistName = currentUser ? (localStorage.getItem('vyro_artist_name_' + currentUser.email) || currentUser.displayName) : 'Artist';
-  const withdrawals = JSON.parse(localStorage.getItem('vyro_withdrawals_' + artistName)) || [];
+  const { db, doc, updateDoc, collection, addDoc, increment } = window.firebaseDB;
   
-  withdrawals.push({
-    amount: amt,
-    type: type,
-    bank: bankName,
-    account: account,
-    swift: swift,
-    date: new Date().toISOString(),
-    status: 'pending'
-  });
-  
-  localStorage.setItem('vyro_withdrawals_' + artistName, JSON.stringify(withdrawals));
-  
-  const statsKey = 'vyro_stats_' + artistName;
-  const stats = JSON.parse(localStorage.getItem(statsKey)) || { totalEarned: 0 };
-  stats.totalEarned = (stats.totalEarned || 0) + amt;
-  localStorage.setItem(statsKey, JSON.stringify(stats));
-  
-  loadArtistDashboard(artistName);
-  
-  alert(`✅ ${type} Withdrawal Requested!\n\nAmount: ₦${amt.toFixed(2)}\nBank: ${bankName}\nAccount: ****${account.slice(-4)}\n\n${type === 'International' ? 'Note: International transfers are processed in 3-5 days and converted to your local currency by the receiving bank.' : 'Funds will arrive in 1-2 business days.'}`);
+  try {
+    await addDoc(collection(db, "withdrawals"), {
+      userId: currentUser.uid,
+      amount: amt,
+      type: type,
+      bank: bankName,
+      account: account,
+      swift: swift,
+      date: new Date().toISOString(),
+      status: 'pending'
+    });
+    
+    await updateDoc(doc(db, "users", currentUser.uid), {
+      availableBalance: increment(-amt)
+    });
+    
+    loadArtistDashboard(currentUser.uid);
+    alert(`✅ ${type} Withdrawal Requested!\n\nAmount: ₦${amt.toFixed(2)}\nBank: ${bankName}\nAccount: ****${account.slice(-4)}\n\nFunds will arrive in 3-5 business days.`);
+    
+  } catch (error) {
+    alert("Error requesting withdrawal: " + error.message);
+  }
 }
 
 // ==========================================
@@ -817,31 +853,26 @@ async function loadTracksFromCloud() {
   try {
     const querySnapshot = await getDocs(collection(db, "tracks"));
     let cloudTracks = [];
-    querySnapshot.forEach((doc) => { cloudTracks.push(doc.data()); });
+    querySnapshot.forEach((doc) => { 
+      cloudTracks.push({ id: doc.id, ...doc.data() }); 
+    });
 
-    if (cloudTracks.length > 0) {
-      cachedCloudTracks = cloudTracks;
-      localStorage.setItem('vyro_cloud_cache', JSON.stringify(cloudTracks));
-      allTracks = [...baseTracks, ...cloudTracks];
-      renderApp();
-      if (currentUser) {
-        const role = localStorage.getItem('vyro_role_' + currentUser.email);
-        if (role === 'artist') {
-          const artistName = localStorage.getItem('vyro_artist_name_' + currentUser.email) || currentUser.displayName || currentUser.email.split('@')[0];
-          loadArtistDashboard(artistName);
-        }
-      }
+    // Merge base tracks, external curated tracks, and user-uploaded Firestore tracks
+    allTracks = [...baseTracks, ...externalTracks, ...cloudTracks];
+    renderApp();
+    
+    if (currentUser && currentUserData && currentUserData.role === 'artist') {
+      loadArtistDashboard(currentUser.uid);
     }
   } catch(e) {
-    console.error("Cloud fetch failed, using cache:", e);
+    console.error("Cloud fetch failed:", e);
   }
 }
 
 async function handleCloudUpload() {
-  if(!currentUser) return;
+  if(!currentUser || !currentUserData) return;
   
-  const role = localStorage.getItem('vyro_role_' + currentUser.email) || 'artist';
-  if (role !== 'artist') {
+  if (currentUserData.role !== 'artist') {
     alert("Only Artist accounts can upload tracks.");
     return;
   }
@@ -850,9 +881,6 @@ async function handleCloudUpload() {
   const imageFile = document.getElementById('imageUpload').files[0];
   const title = document.getElementById('uploadTitle').value.trim();
   const genre = document.getElementById('uploadGenre').value;
-  
-  const currentArtistEmail = currentUser.email;
-  const artistName = localStorage.getItem('vyro_artist_name_' + currentArtistEmail) || currentUser.displayName || currentArtistEmail.split('@')[0];
   
   if(!title) { alert("Please enter song title."); return; }
   if(!audioFile) { alert("Please select an MP3 audio file."); return; }
@@ -890,13 +918,21 @@ async function handleCloudUpload() {
       coverURL = defaultAIcovers[Math.floor(Math.random() * defaultAIcovers.length)];
     }
 
-    const newTrack = { title: title, artist: artistName, genre: genre, src: downloadURL, cover: coverURL };
+    const newTrack = { 
+      title: title, 
+      artist: currentUserData.displayName, 
+      artistId: currentUser.uid,
+      genre: genre, 
+      src: downloadURL, 
+      cover: coverURL,
+      streams: 0,
+      createdAt: new Date().toISOString()
+    };
     
-    cachedCloudTracks.push(newTrack);
-    localStorage.setItem('vyro_cloud_cache', JSON.stringify(cachedCloudTracks));
-    localStorage.setItem('vyro_track_stats_' + title, JSON.stringify({ streams: 0 }));
-    allTracks = [...baseTracks, ...cachedCloudTracks];
-    renderApp();
+    const { db, collection, addDoc } = window.firebaseDB;
+    await addDoc(collection(db, "tracks"), newTrack);
+    
+    await loadTracksFromCloud();
     
     document.getElementById('uploadTitle').value = '';
     document.getElementById('audioUpload').value = '';
@@ -905,11 +941,7 @@ async function handleCloudUpload() {
     document.getElementById('imageLabel').innerText = "🖼️ Select Cover Image (Optional)";
     
     status.innerHTML = "✅ Success! Song is live!";
-    
-    const { db, collection, addDoc } = window.firebaseDB;
-    await addDoc(collection(db, "tracks"), newTrack);
-    
-    loadArtistDashboard(artistName);
+    loadArtistDashboard(currentUser.uid);
     
   } catch (error) {
     console.error(error);
@@ -918,7 +950,7 @@ async function handleCloudUpload() {
 }
 
 // ==========================================
-// 6. PLAYER FUNCTIONS
+// 6. PLAYER FUNCTIONS & REAL STREAM TRACKING
 // ==========================================
 audio.addEventListener('ended', () => { nextTrack(); });
 audio.addEventListener('timeupdate', () => {
@@ -950,15 +982,14 @@ function formatStreams(streams) {
   return streams.toString();
 }
 
-function getStreamDisplay(trackTitle) {
-  const ts = JSON.parse(localStorage.getItem('vyro_track_stats_' + trackTitle)) || { streams: 0 };
-  if (ts.streams >= 100) {
-    return `<span style="font-size:10px; color:var(--green); display:flex; align-items:center; gap:3px;"><span style="font-size:8px;">▶</span>${formatStreams(ts.streams)}</span>`;
+function getStreamDisplay(track) {
+  if (track.streams >= 100) {
+    return `<span style="font-size:10px; color:var(--green); display:flex; align-items:center; gap:3px;"><span style="font-size:8px;">▶</span>${formatStreams(track.streams)}</span>`;
   }
   return `<span style="font-size:9px; color:var(--muted); background:#ffffff15; padding:2px 6px; border-radius:10px;">NEW</span>`;
 }
 
-function playTrack(title, artist, emoji, src) {
+async function playTrack(title, artist, emoji, src) {
   const trackData = allTracks.findIndex(t => t.title === title);
   if(trackData === -1) return;
 
@@ -992,22 +1023,36 @@ function playTrack(title, artist, emoji, src) {
   document.getElementById('fpLikeBtn').textContent = isSaved ? '♥' : '♡';
 
   audio.src = track.src; 
-  audio.play().then(() => { 
+  audio.play().then(async () => { 
     updatePlayIcons(true); 
-    const tsKey = 'vyro_track_stats_' + track.title;
-    const ts = JSON.parse(localStorage.getItem(tsKey)) || { streams: 0 };
-    ts.streams++;
-    localStorage.setItem(tsKey, JSON.stringify(ts));
     
-    // Re-render to update stream counts
-    renderApp();
-    
-    // Update dashboard if the current user is the artist of this track
-    if (currentUser) {
-      const currentArtistName = localStorage.getItem('vyro_artist_name_' + currentUser.email) || currentUser.displayName;
-      if (currentArtistName === track.artist) {
-        loadArtistDashboard(currentArtistName);
+    // Stream Logic: Only update Firestore if it's a real VYRO uploaded track (has 'artistId' and does NOT start with 'base-' or 'trend-' or 'new-')
+    if (track.id && !track.id.startsWith('base-') && !track.id.startsWith('trend-') && !track.id.startsWith('new-') && track.artistId) {
+      const { db, doc, updateDoc, increment } = window.firebaseDB;
+      
+      try {
+        await updateDoc(doc(db, "tracks", track.id), { streams: increment(1) });
+        
+        await updateDoc(doc(db, "users", track.artistId), {
+          totalStreams: increment(1),
+          availableBalance: increment(0.007),
+          totalEarned: increment(0.007)
+        });
+        
+        track.streams++;
+        renderApp();
+        
+        if (currentUser && currentUserData && currentUserData.role === 'artist' && currentUser.uid === track.artistId) {
+          loadArtistDashboard(currentUser.uid);
+        }
+        
+      } catch (error) {
+        console.error("Failed to update stream count:", error);
       }
+    } else {
+      // Local logic for base/trending/new tracks
+      track.streams = (track.streams || 0) + 1;
+      renderApp();
     }
     
   }).catch(error => { alert("Playback error: " + error.message); });
@@ -1066,37 +1111,48 @@ function showView(id, btn) {
   if(btn) btn.classList.add('active');
   if(id==='explore') renderExplore('All');
   if(id==='library') renderSaved();
-  if(id==='artist' && currentUser) {
-    const role = localStorage.getItem('vyro_role_' + currentUser.email);
-    if (role === 'artist') {
-      const artistName = localStorage.getItem('vyro_artist_name_' + currentUser.email) || currentUser.displayName || currentUser.email.split('@')[0];
-      loadArtistDashboard(artistName);
+  if(id==='artist' && currentUser && currentUserData) {
+    if (currentUserData.role === 'artist') {
+      loadArtistDashboard(currentUser.uid);
     }
   }
 }
 
-function renderApp() {
-  const grid = document.getElementById('trackGrid');
-  grid.innerHTML = allTracks.map(t => {
-    const coverContent = t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:1;">` : `<div style="position:absolute; z-index:2; font-size: 38px; display:block;">🎵</div>`;
-    const safeTitle = t.title.replace(/'/g, "\\'");
-    const safeArtist = t.artist.replace(/'/g, "\\'");
-    return `
-      <div class="music-card">
-        <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">
-          ${coverContent}
-        </div>
-        <div class="track-title">
-          <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:65%;">${t.title}</div>
-          <div style="display:flex; align-items:center; gap:8px;">
-             ${getStreamDisplay(t.title)}
-             <button class="play-small" onclick="playTrack('${safeTitle}','${safeArtist}','🎵','${t.src}')">▶</button>
-          </div>
-        </div>
-        <div class="artist">${t.artist} · ${t.genre}</div>
+// Generate the Spotify-like music card
+function createMusicCard(t) {
+  const coverContent = t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:1;">` : `<div style="position:absolute; z-index:2; font-size: 38px; display:block;">🎵</div>`;
+  const safeTitle = t.title.replace(/'/g, "\\'");
+  const safeArtist = t.artist.replace(/'/g, "\\'");
+  return `
+    <div class="music-card">
+      <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">
+        ${coverContent}
       </div>
-    `;
-  }).join('');
+      <div class="track-title">
+        <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:65%;">${t.title}</div>
+        <div style="display:flex; align-items:center; gap:8px;">
+           ${getStreamDisplay(t)}
+           <button class="play-small" onclick="playTrack('${safeTitle}','${safeArtist}','🎵','${t.src}')">▶</button>
+        </div>
+      </div>
+      <div class="artist">${t.artist} · ${t.genre}</div>
+    </div>
+  `;
+}
+
+function renderApp() {
+  // Render Trending
+  const trending = allTracks.filter(t => t.isTrending).slice(0, 5);
+  document.getElementById('trendingGrid').innerHTML = trending.map(createMusicCard).join('');
+  
+  // Render New Releases
+  const newReleases = allTracks.filter(t => t.isNew).slice(0, 5);
+  document.getElementById('newReleasesGrid').innerHTML = newReleases.map(createMusicCard).join('');
+
+  // Render Main Grid (Base + Cloud)
+  const mainGrid = allTracks.filter(t => !t.isTrending && !t.isNew);
+  document.getElementById('trackGrid').innerHTML = mainGrid.map(createMusicCard).join('');
+  
   renderExplore('All');
   renderSaved();
 }
@@ -1124,26 +1180,7 @@ function renderExplore(genre = 'All') {
   
   if(filtered.length === 0) { grid.innerHTML = '<p style="color:#aaa; padding: 20px;">No tracks in this genre yet.</p>'; return; }
 
-  grid.innerHTML = filtered.map(t => {
-    const coverContent = t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:1;">` : `<div style="position:absolute; z-index:2; font-size: 38px; display:block;">🎵</div>`;
-    const safeTitle = t.title.replace(/'/g, "\\'");
-    const safeArtist = t.artist.replace(/'/g, "\\'");
-    return `
-      <div class="music-card">
-        <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">
-          ${coverContent}
-        </div>
-        <div class="track-title">
-          <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:65%;">${t.title}</div>
-          <div style="display:flex; align-items:center; gap:8px;">
-             ${getStreamDisplay(t.title)}
-             <button class="play-small" onclick="playTrack('${safeTitle}','${safeArtist}','🎵','${t.src}')">▶</button>
-          </div>
-        </div>
-        <div class="artist">${t.artist} · ${t.genre}</div>
-      </div>
-    `;
-  }).join('');
+  grid.innerHTML = filtered.map(createMusicCard).join('');
 }
 
 function filterGenre(btn, g) {
@@ -1171,6 +1208,9 @@ function genrePick(btn,g){
   renderApp();
   document.querySelectorAll('#trackGrid .music-card').forEach(c=>c.style.display=g==='All'||c.dataset.genre===g?'':'none');
 }
+
+// Initialize the App
+renderApp();
 </script>
 </body>
-                                                                                                   </html>
+  </html>
