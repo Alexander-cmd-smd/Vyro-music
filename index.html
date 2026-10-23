@@ -32,8 +32,6 @@
   };
   window.firebaseAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, updateProfile };
   
-  // Signal that Firebase is ready
-  window.firebaseReady = true;
   window.dispatchEvent(new Event('firebaseReady'));
 </script>
 
@@ -51,7 +49,10 @@ h1{font-size:30px;line-height:1.1;margin:8px 0}h1 span{background:linear-gradien
 button{cursor:pointer;border:0;color:white;font-weight:800}.primary{border-radius:30px;padding:12px 18px;background:white;color:#3c175f;margin-top:7px}
 .section-head{display:flex;justify-content:space-between;align-items:center;margin:25px 0 13px}.section-head h3{font-size:18px;margin:0}.section-head button{background:none;color:#c9a4ff;font-size:12px}
 
+/* Standard Grid */
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+
+/* Horizontal Scroll Grid (Spotify Style) */
 .horizontal-scroll { display: flex; gap: 13px; overflow-x: auto; padding-bottom: 10px; scroll-snap-type: x mandatory; }
 .horizontal-scroll::-webkit-scrollbar { display: none; }
 .horizontal-scroll .music-card { min-width: 140px; width: 140px; scroll-snap-align: start; flex-shrink: 0; }
@@ -68,6 +69,7 @@ button{cursor:pointer;border:0;color:white;font-weight:800}.primary{border-radiu
 footer{text-align:center;color:#786e8c;font-size:10px;margin:30px 0 15px}
 @media(min-width:600px){.cards{grid-template-columns:repeat(4,minmax(0,1fr))}.horizontal-scroll .music-card { min-width: 160px; width: 160px; }.hero{padding:30px}.hero h2{font-size:34px}}
 
+/* Full Player */
 #fullPlayer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #1a0b2e, #090711); z-index: 100; display: flex; flex-direction: column; padding: 20px; transform: translateY(100%); transition: transform 0.4s ease; }
 #fullPlayer.show { transform: translateY(0); }
 .fp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -88,6 +90,7 @@ input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cur
 input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radius: 50%; background: var(--pink); cursor: pointer; -webkit-appearance: none; margin-top: -5px; box-shadow: 0 0 10px var(--pink); }
 .fp-time { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: -5px; }
 
+/* Custom CSS Controls instead of Emojis */
 .fp-controls { display: flex; justify-content: center; align-items: center; gap: 30px; margin-bottom: 40px; }
 .fp-controls button { background: none; font-size: 30px; color: white; transition: 0.2s; display: grid; place-items: center; }
 .fp-controls button:active { transform: scale(0.9); }
@@ -114,6 +117,7 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 .dash-logout { background: transparent; border: 1px solid #ff4f4f; color: #ff4f4f; }
 .forgot-link { color: var(--pink); font-size: 12px; text-align: right; display: block; margin-bottom: 15px; cursor: pointer; }
 
+/* Dashboard Stats */
 .stat-card { background: var(--panel); border: 1px solid #2a213a; border-radius: 14px; padding: 14px 8px; text-align: center; }
 .stat-value { font-size: 22px; font-weight: 950; background: linear-gradient(90deg, var(--purple), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
@@ -166,7 +170,7 @@ input[type=range]::-webkit-slider-thumb { height: 16px; width: 16px; border-radi
 <div class="genres"><button class="genre active" onclick="genrePick(this,'All')">For you</button><button class="genre" onclick="genrePick(this,'Afrobeats')">Afrobeats</button><button class="genre" onclick="genrePick(this,'Hip-Hop')">Hip-Hop</button><button class="genre" onclick="genrePick(this,'R&B')">R&B</button><button class="genre" onclick="genrePick(this,'Gospel')">Gospel</button></div>
 <div class="section-head"><h3>Discover picks (Cloud)</h3><button onclick="showView('explore')">More music</button></div>
 <div class="cards" id="trackGrid">
-<p style="color: #aaa; text-align: center; grid-column: span 2;">Loading music...</p>
+<p style="color: #aaa; text-align: center; grid-column: span 2;">Connecting to VYRO Cloud...</p>
 </div>
 </div>
 
@@ -429,26 +433,35 @@ const baseTracks = [
   {id: 'base-4', title:'Tell Yur Mummy', artist:'Alex_skiddo', emoji:'✨', genre:'Gospel', src:'assets/Alex-skiddo-TELL-YUR-MUMMY (1).mp3', cover:defaultAIcovers[3], streams: 0}
 ];
 
-// Weekly rotation
+// ==========================================
+// 🔥 FRIDAY ROTATION ENGINE 
+// ==========================================
+// Every Friday at 12:00am, the app calculates the new week number
+// and picks a brand new pool of tracks.
 function getWeeklyRotationIndex() {
   const now = new Date();
+  // Calculate days since epoch
   const diffTime = Math.abs(now - new Date(2024, 0, 1)); 
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  // Return the current week number
   return Math.floor(diffDays / 7);
 }
 
 function getNextFridayDate() {
   const now = new Date();
   const day = now.getDay();
-  const distanceToFriday = (5 - day + 7) % 7 || 7;
+  const distanceToFriday = (5 - day + 7) % 7 || 7; // If today is Friday, go to next Friday
   const nextFriday = new Date(now);
   nextFriday.setDate(now.getDate() + distanceToFriday);
   nextFriday.setHours(0,0,0,0);
+  
   const options = { weekday: 'long', month: 'short', day: 'numeric' };
   return nextFriday.toLocaleDateString('en-US', options);
 }
 
+// The Pools of Tracks (Mixing Nigeria, UK, US)
 const trendingPools = [
+  // Week Pool 1
   [
     {id: 't1-1', title:'City Boys', artist:'Burna Boy (NG)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', cover:'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=500&auto=format&fit=crop', streams: 45000, isTrending: true},
     {id: 't1-2', title:'Sprinter', artist:'Central Cee (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', cover:'https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop', streams: 38000, isTrending: true},
@@ -456,6 +469,7 @@ const trendingPools = [
     {id: 't1-4', title:'Me & U', artist:'Tems (NG)', genre:'R&B', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', cover:'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=500&auto=format&fit=crop', streams: 29000, isTrending: true},
     {id: 't1-5', title:'Starlight', artist:'Dave (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', cover:'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=500&auto=format&fit=crop', streams: 31000, isTrending: true}
   ],
+  // Week Pool 2
   [
     {id: 't2-1', title:'Essence', artist:'Wizkid (NG)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', cover:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=500&auto=format&fit=crop', streams: 60000, isTrending: true},
     {id: 't2-2', title:'Toxic Trait', artist:'Stormzy (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3', cover:'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop', streams: 41000, isTrending: true},
@@ -466,13 +480,15 @@ const trendingPools = [
 ];
 
 const latestPools = [
+  // Week Pool 1
   [
     {id: 'l1-1', title:'Lonely At The Top', artist:'Asake (NG)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3', cover:'https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop', streams: 150, isNew: true},
     {id: 'l1-2', title:'Little Things', artist:'Jorja Smith (UK)', genre:'R&B', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3', cover:'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop', streams: 45, isNew: true},
     {id: 'l1-3', title:'Snooze', artist:'SZA (US)', genre:'R&B', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3', cover:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=500&auto=format&fit=crop', streams: 300, isNew: true},
     {id: 'l1-4', title:'reason', artist:'Omah Lay (NG)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3', cover:'https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=500&auto=format&fit=crop', streams: 99, isNew: true},
-    {id: 'l1-5', title:'Can\'t Play Myself', artist:'Skepta (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3', cover:'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=500&auto=format&fit=crop', streams: 0, isNew: true}
+    {id: 'l1-5', title:'Can't Play Myself', artist:'Skepta (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3', cover:'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=500&auto=format&fit=crop', streams: 0, isNew: true}
   ],
+  // Week Pool 2
   [
     {id: 'l2-1', title:'Peru', artist:'Fireboy DML (NG)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3', cover:'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=500&auto=format&fit=crop', streams: 250, isNew: true},
     {id: 'l2-2', title:'50s', artist:'Headie One (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3', cover:'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=500&auto=format&fit=crop', streams: 80, isNew: true},
@@ -482,12 +498,22 @@ const latestPools = [
   ]
 ];
 
+// Determine current tracks based on week
 const currentWeek = getWeeklyRotationIndex();
 const activeTrending = trendingPools[currentWeek % trendingPools.length];
 const activeLatest = latestPools[currentWeek % latestPools.length];
 const externalTracks = [...activeTrending, ...activeLatest];
 
-// Core state
+// Set the UI text for next update
+document.addEventListener("DOMContentLoaded", () => {
+  const nextUpdateText = "Updates: " + getNextFridayDate();
+  document.getElementById("trendingDate").textContent = nextUpdateText;
+  document.getElementById("latestDate").textContent = nextUpdateText;
+});
+
+// ==========================================
+// CORE APP LOGIC
+// ==========================================
 let currentTrack = null; 
 let currentTrackIndex = 0;
 let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; 
@@ -523,15 +549,10 @@ if (lastPlayed) {
 }
 
 // ==========================================
-// FIXED: Robust Firebase initialization
+// 2. FIREBASE INITIALIZATION & REAL-TIME DATA
 // ==========================================
-function initFirebaseApp() {
-  if (!window.firebaseAuth || !window.firebaseDB) {
-    console.error("Firebase not ready yet");
-    return;
-  }
-
-  const { auth, onAuthStateChanged } = window.firebaseAuth;
+window.addEventListener('firebaseReady', () => {
+  const { auth, onAuthStateChanged, signOut } = window.firebaseAuth;
   const { db, doc, getDoc, setDoc } = window.firebaseDB;
   
   onAuthStateChanged(auth, async (user) => {
@@ -547,24 +568,16 @@ function initFirebaseApp() {
         if (userSnap.exists()) {
           currentUserData = userSnap.data();
         } else {
-          currentUserData = { 
-            role: 'artist', 
-            displayName: user.displayName || user.email.split('@')[0], 
-            photoURL: user.photoURL || '' 
-          };
+          currentUserData = { role: 'artist', displayName: user.displayName || user.email.split('@')[0], photoURL: user.photoURL || '' };
           await setDoc(userRef, currentUserData);
         }
       } catch (error) {
-        console.error("Firestore user error:", error);
-        currentUserData = { 
-          role: 'artist', 
-          displayName: user.displayName || user.email.split('@')[0], 
-          photoURL: user.photoURL || '' 
-        };
+        console.error("Firestore Error: ", error);
+        currentUserData = { role: 'artist', displayName: user.displayName || user.email.split('@')[0], photoURL: user.photoURL || '' };
       }
       
-      const savedArtistName = currentUserData.displayName || 'Artist';
-      const savedProfilePic = currentUserData.photoURL;
+      let savedArtistName = currentUserData.displayName || 'Artist';
+      let savedProfilePic = currentUserData.photoURL;
       
       if (currentUserData.role === 'listener') {
         document.getElementById('artistDashboard').style.display = 'none';
@@ -578,6 +591,7 @@ function initFirebaseApp() {
           document.getElementById('listenerAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
           document.getElementById('userAvatar').textContent = savedArtistName.charAt(0).toUpperCase();
         }
+        
       } else {
         document.getElementById('listenerDashboard').style.display = 'none';
         document.getElementById('artistDashboard').style.display = 'block';
@@ -608,26 +622,11 @@ function initFirebaseApp() {
     }
   });
 
-  // Start listening for tracks
   loadTracksFromCloud();
-}
-
-// Start Firebase as soon as possible
-if (window.firebaseReady) {
-  initFirebaseApp();
-} else {
-  window.addEventListener('firebaseReady', initFirebaseApp);
-}
-
-// Also try again after a short delay in case of race
-setTimeout(() => {
-  if (window.firebaseDB && !unsubAllTracks) {
-    initFirebaseApp();
-  }
-}, 1500);
+});
 
 // ==========================================
-// AUTH FUNCTIONS
+// 3. AUTHENTICATION FUNCTIONS
 // ==========================================
 function showSignupPage() {
   document.getElementById('artistLoggedOut').style.display = 'none';
@@ -640,10 +639,7 @@ function hideSignupPage() {
 }
 
 async function createAccount() {
-  if(!window.firebaseAuth) { 
-    alert("Cloud connection still loading. Please wait a second and try again."); 
-    return; 
-  }
+  if(!window.firebaseAuth) { alert("Cloud connection still loading. Please wait a second and try again."); return; }
   
   const { auth, createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } = window.firebaseAuth;
   const { db, doc, setDoc } = window.firebaseDB;
@@ -656,16 +652,8 @@ async function createAccount() {
   const errorDiv = document.getElementById('signupError');
   errorDiv.innerHTML = "";
   
-  if(!name || !email || !pass) { 
-    errorDiv.style.color = "#ff4f4f"; 
-    errorDiv.innerHTML = "Please fill in all fields."; 
-    return; 
-  }
-  if(pass.length < 6) { 
-    errorDiv.style.color = "#ff4f4f"; 
-    errorDiv.innerHTML = "Password must be at least 6 characters."; 
-    return; 
-  }
+  if(!name || !email || !pass) { errorDiv.style.color = "#ff4f4f"; errorDiv.innerHTML = "Please fill in all fields."; return; }
+  if(pass.length < 6) { errorDiv.style.color = "#ff4f4f"; errorDiv.innerHTML = "Password must be at least 6 characters."; return; }
   
   errorDiv.style.color = "#4b8dff"; 
   errorDiv.innerHTML = "Creating account... Please wait.";
@@ -721,22 +709,15 @@ async function createAccount() {
 }
 
 function artistLogin() {
-  if(!window.firebaseAuth) { 
-    alert("Cloud connection still loading. Please wait a second and try again."); 
-    return; 
-  }
-  const { auth, signInWithEmailAndPassword } = window.firebaseAuth;
+  if(!window.firebaseAuth) { alert("Cloud connection still loading. Please wait a second and try again."); return; }
+  const { auth, signInWithEmailAndPassword, signOut } = window.firebaseAuth;
 
   const email = document.getElementById('loginEmail').value.trim();
   const pass = document.getElementById('loginPass').value.trim();
   const errorDiv = document.getElementById('loginError');
   errorDiv.innerHTML = "";
   
-  if(!email || !pass) { 
-    errorDiv.style.color = "#ff4f4f"; 
-    errorDiv.innerHTML = "Please enter email and password."; 
-    return; 
-  }
+  if(!email || !pass) { errorDiv.style.color = "#ff4f4f"; errorDiv.innerHTML = "Please enter email and password."; return; }
   
   signInWithEmailAndPassword(auth, email, pass)
     .then((userCredential) => {
@@ -769,11 +750,7 @@ function forgotPassword() {
 
   const email = document.getElementById('loginEmail').value.trim();
   const errorDiv = document.getElementById('loginError');
-  if(!email) { 
-    errorDiv.style.color = "#ff4f4f"; 
-    errorDiv.innerHTML = "Type your email first."; 
-    return; 
-  }
+  if(!email) { errorDiv.style.color = "#ff4f4f"; errorDiv.innerHTML = "Type your email first."; return; }
   
   sendPasswordResetEmail(auth, email)
     .then(() => {
@@ -788,11 +765,8 @@ function forgotPassword() {
 
 function togglePasswordVisibility(inputId) {
   const passInput = document.getElementById(inputId);
-  if (passInput.type === "password") { 
-    passInput.type = "text"; 
-  } else { 
-    passInput.type = "password"; 
-  }
+  if (passInput.type === "password") { passInput.type = "text"; } 
+  else { passInput.type = "password"; }
 }
 
 async function upgradeToArtist() {
@@ -801,7 +775,7 @@ async function upgradeToArtist() {
   
   try {
     await updateDoc(doc(db, "users", currentUser.uid), { role: 'artist' });
-    alert("🎉 You are now an Artist! Your dashboard has been upgraded.");
+    alert("🎉 You are now an Artist! Your dashboard has been upgraded. You can now upload tracks and earn money.");
     window.location.reload();
   } catch (e) {
     alert("Error upgrading account: " + e.message);
@@ -809,7 +783,7 @@ async function upgradeToArtist() {
 }
 
 // ==========================================
-// DASHBOARD
+// 4. LIVE DASHBOARD FUNCTIONS (REAL-TIME DATA)
 // ==========================================
 function loadArtistDashboard(userId) {
   const { db, collection, query, where, doc, onSnapshot } = window.firebaseDB;
@@ -835,9 +809,6 @@ function loadArtistDashboard(userId) {
       
       document.getElementById('statTracks').textContent = myTracks.length;
       renderMyTracks(myTracks);
-    }, (err) => {
-      console.error("My tracks listener error:", err);
-      document.getElementById('myTracksList').innerHTML = '<div class="empty" style="padding:15px;font-size:12px;">Could not load your tracks.</div>';
     });
     
   } catch (error) {
@@ -853,16 +824,16 @@ function renderMyTracks(tracks) {
   }
   list.innerHTML = tracks.map((t) => {
     const cover = t.cover ? `<img src="${t.cover}" style="width:100%;height:100%;object-fit:cover;">` : '🎵';
-    const safeTitle = (t.title || '').replace(/'/g, "\\'");
-    const safeArtist = (t.artist || '').replace(/'/g, "\\'");
+    const safeTitle = t.title.replace(/'/g, "\\'");
+    const safeArtist = t.artist.replace(/'/g, "\\'");
     return `
       <div class="my-track-item">
         <div class="artist-art" style="width:40px;height:40px;border-radius:8px;font-size:16px;">${cover}</div>
         <div class="mt-info">
           <strong>${t.title}</strong>
-          <small>${t.streams || 0} Streams · ${t.genre}</small>
+          <small>${t.streams} Streams · ${t.genre}</small>
         </div>
-        <button onclick="playTrack('\( {safeTitle}', ' \){safeArtist}', '🎵', '${t.src}')" 
+        <button onclick="playTrack('${safeTitle}', '${safeArtist}', '🎵', '${t.src}')" 
           style="background:linear-gradient(135deg,var(--purple),var(--pink));width:32px;height:32px;border-radius:50%;">▶</button>
       </div>
     `;
@@ -874,7 +845,7 @@ async function requestWithdraw() {
   const balance = parseFloat(balanceText.replace('₦', '').replace(/,/g, ''));
   
   if (balance < 5000) {
-    alert(`⚠️ Minimum withdrawal is ₦5,000.\n\nYour current balance: ${balanceText}`);
+    alert(`⚠️ Minimum withdrawal is ₦5,000.\n\nYour current balance: ${balanceText}\n\nKeep uploading and sharing your music to earn more!`);
     return;
   }
   
@@ -925,7 +896,7 @@ async function requestWithdraw() {
       availableBalance: increment(-amt)
     });
     
-    alert(`✅ \( {type} Withdrawal Requested!\n\nAmount: ₦ \){amt.toFixed(2)}\nBank: \( {bankName}\nAccount: **** \){account.slice(-4)}`);
+    alert(`✅ ${type} Withdrawal Requested!\n\nAmount: ₦${amt.toFixed(2)}\nBank: ${bankName}\nAccount: ****${account.slice(-4)}\n\nFunds will arrive in 3-5 business days.`);
     
   } catch (error) {
     alert("Error requesting withdrawal: " + error.message);
@@ -933,15 +904,10 @@ async function requestWithdraw() {
 }
 
 // ==========================================
-// FIXED: Track loading + Upload
+// 5. LIVE DATA & UPLOAD FUNCTIONS
 // ==========================================
 function loadTracksFromCloud() {
-  if(!window.firebaseDB) {
-    console.warn("Firebase DB not ready");
-    renderApp(); // still show base tracks
-    return;
-  }
-  
+  if(!window.firebaseDB) return;
   const { db, collection, onSnapshot } = window.firebaseDB;
   
   if(unsubAllTracks) unsubAllTracks();
@@ -953,19 +919,13 @@ function loadTracksFromCloud() {
         cloudTracks.push({ id: doc.id, ...doc.data() }); 
       });
 
-      console.log("Loaded cloud tracks:", cloudTracks.length);
       allTracks = [...baseTracks, ...externalTracks, ...cloudTracks];
       renderApp();
     }, (error) => {
       console.error("Live listener error:", error);
-      // Still show local tracks
-      allTracks = [...baseTracks, ...externalTracks];
-      renderApp();
     });
   } catch(e) {
     console.error("Cloud fetch failed:", e);
-    allTracks = [...baseTracks, ...externalTracks];
-    renderApp();
   }
 }
 
@@ -973,7 +933,7 @@ function uploadWithProgress(url, formData, onProgress) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', url, true);
-    xhr.timeout = 90000;
+    xhr.timeout = 60000;
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) {
         const percentComplete = (e.loaded / e.total) * 100;
@@ -982,11 +942,8 @@ function uploadWithProgress(url, formData, onProgress) {
     };
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
-        try { 
-          resolve(JSON.parse(xhr.responseText)); 
-        } catch (e) { 
-          reject(new Error("Invalid response format")); 
-        }
+        try { resolve(JSON.parse(xhr.responseText)); } 
+        catch (e) { reject(new Error("Invalid response format")); }
       } else {
         let msg = "Upload failed";
         try {
@@ -997,16 +954,13 @@ function uploadWithProgress(url, formData, onProgress) {
       }
     };
     xhr.onerror = () => reject(new Error("Network error during upload"));
-    xhr.ontimeout = () => reject(new Error("Upload timed out. File may be too large."));
+    xhr.ontimeout = () => reject(new Error("Upload timed out. The file might be too large."));
     xhr.send(formData);
   });
 }
 
 async function handleCloudUpload() {
-  if(!currentUser || !currentUserData) {
-    alert("Please log in first.");
-    return;
-  }
+  if(!currentUser || !currentUserData) return;
   
   if (currentUserData.role !== 'artist') {
     alert("Only Artist accounts can upload tracks.");
@@ -1021,8 +975,8 @@ async function handleCloudUpload() {
   if(!title) { alert("Please enter song title."); return; }
   if(!audioFile) { alert("Please select an MP3 audio file."); return; }
 
-  if (audioFile.size > 20 * 1024 * 1024) {
-    if (!confirm("This audio file is larger than 20MB. Continue?")) return;
+  if (audioFile.size > 15 * 1024 * 1024) {
+    if (!confirm("This audio file is larger than 15MB. It might fail or take a long time. Continue?")) return;
   }
   
   const status = document.getElementById('uploadStatus');
@@ -1030,7 +984,6 @@ async function handleCloudUpload() {
   status.innerHTML = "⏳ Uploading Audio... 0%";
 
   try {
-    // 1. Upload audio
     const audioData = new FormData();
     audioData.append('file', audioFile);
     audioData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
@@ -1043,13 +996,12 @@ async function handleCloudUpload() {
     });
     
     if (!audioJson.secure_url) {
-      throw new Error("Cloudinary audio upload failed.");
+      throw new Error("Cloudinary upload failed. Check your upload preset settings.");
     }
 
     const downloadURL = audioJson.secure_url;
     let coverURL = '';
 
-    // 2. Upload cover (optional)
     if (imageFile) {
       status.innerHTML = "⏳ Uploading Cover Art... 0%";
       const imageData = new FormData();
@@ -1061,12 +1013,11 @@ async function handleCloudUpload() {
       const imgJson = await uploadWithProgress(imgUrl, imageData, (percent) => {
         status.innerHTML = `⏳ Uploading Cover Art... ${Math.round(percent)}%`;
       });
-      coverURL = imgJson.secure_url || '';
+      coverURL = imgJson.secure_url;
     } else {
       coverURL = defaultAIcovers[Math.floor(Math.random() * defaultAIcovers.length)];
     }
 
-    // 3. Save to Firestore
     status.innerHTML = "⏳ Saving to Cloud...";
 
     const { db, collection, doc, setDoc } = window.firebaseDB;
@@ -1086,9 +1037,6 @@ async function handleCloudUpload() {
     
     await setDoc(newTrackRef, newTrack);
     
-    console.log("Track saved successfully:", newTrack.id);
-    
-    // Clear form
     document.getElementById('uploadTitle').value = '';
     document.getElementById('audioUpload').value = '';
     document.getElementById('imageUpload').value = '';
@@ -1102,12 +1050,12 @@ async function handleCloudUpload() {
     console.error("Upload Error:", error);
     status.style.color = "var(--pink)";
     status.innerHTML = "❌ Failed: " + error.message;
-    alert("UPLOAD FAILED!\n\n" + error.message);
+    alert("UPLOAD FAILED!\n\n" + error.message + "\n\nIf this says 'Missing or insufficient permissions', you MUST update your Firestore rules in the Firebase Console and click Publish.");
   }
 }
 
 // ==========================================
-// PLAYER
+// 6. PLAYER FUNCTIONS & REAL STREAM TRACKING
 // ==========================================
 audio.addEventListener('ended', () => { nextTrack(); });
 audio.addEventListener('timeupdate', () => {
@@ -1124,9 +1072,8 @@ audio.addEventListener('timeupdate', () => {
 
 function formatTime(seconds) {
   if (isNaN(seconds)) return "0:00";
-  const min = Math.floor(seconds / 60); 
-  const sec = Math.floor(seconds % 60);
-  return `\( {min}: \){sec < 10 ? '0' : ''}${sec}`;
+  const min = Math.floor(seconds / 60); const sec = Math.floor(seconds % 60);
+  return `${min}:${sec < 10 ? '0' : ''}${sec}`;
 }
 
 function openFullPlayer() { document.getElementById('fullPlayer').classList.add('show'); }
@@ -1176,7 +1123,7 @@ async function playTrack(title, artist, emoji, src) {
     document.getElementById('fpEmoji').style.fontSize = '60px';
   }
 
-  const isSaved = saved.some(t => t.title === track.title);
+  const isSaved = saved.some(t=>t.title===track.title);
   document.getElementById('likeBtn').textContent = isSaved ? '♥' : '♡';
   document.getElementById('fpLikeBtn').textContent = isSaved ? '♥' : '♡';
 
@@ -1184,7 +1131,6 @@ async function playTrack(title, artist, emoji, src) {
   audio.play().then(async () => { 
     updatePlayIcons(true); 
     
-    // Only count streams for real cloud tracks
     if (track.id && !track.id.startsWith('base-') && !track.id.startsWith('t1-') && !track.id.startsWith('t2-') && !track.id.startsWith('l1-') && !track.id.startsWith('l2-') && track.artistId) {
       const { db, doc, updateDoc, increment } = window.firebaseDB;
       
@@ -1205,30 +1151,21 @@ async function playTrack(title, artist, emoji, src) {
       renderApp();
     }
     
-  }).catch(error => { 
-    alert("Playback error: " + error.message); 
-  });
+  }).catch(error => { alert("Playback error: " + error.message); });
   
   localStorage.setItem('vyro_last_played', JSON.stringify(track));
 }
 
 function togglePlay() {
-  if (audio.paused) { 
-    audio.play().then(() => { updatePlayIcons(true); }); 
-  } else { 
-    audio.pause(); 
-    updatePlayIcons(false); 
-  }
+  if (audio.paused) { audio.play().then(() => { updatePlayIcons(true); }); } 
+  else { audio.pause(); updatePlayIcons(false); }
 }
 
 function updatePlayIcons(isPlaying) {
   document.getElementById('playPauseBtn').textContent = isPlaying ? "⏸" : "▶";
   document.getElementById('fpPlayPauseBtn').textContent = isPlaying ? "⏸" : "▶";
-  if(isPlaying) { 
-    document.getElementById('fpVinyl').classList.add('playing'); 
-  } else { 
-    document.getElementById('fpVinyl').classList.remove('playing'); 
-  }
+  if(isPlaying) { document.getElementById('fpVinyl').classList.add('playing'); } 
+  else { document.getElementById('fpVinyl').classList.remove('playing'); }
 }
 
 function nextTrack() {
@@ -1239,9 +1176,8 @@ function nextTrack() {
 }
 
 function prevTrack() {
-  if (audio.currentTime > 3) { 
-    audio.currentTime = 0; 
-  } else {
+  if (audio.currentTime > 3) { audio.currentTime = 0; } 
+  else {
     currentTrackIndex--;
     if (currentTrackIndex < 0) { currentTrackIndex = allTracks.length - 1; } 
     const prev = allTracks[currentTrackIndex];
@@ -1252,13 +1188,8 @@ function prevTrack() {
 function toggleLike() {
   if (!currentTrack) return;
   let i = saved.findIndex(t => t.title === currentTrack.title);
-  if(i >= 0) { 
-    saved.splice(i,1); 
-    alert("Removed from Library"); 
-  } else { 
-    saved.push(currentTrack); 
-    alert("Saved to Library! ❤️"); 
-  }
+  if(i >= 0) { saved.splice(i,1); alert("Removed from Library"); } 
+  else { saved.push(currentTrack); alert("Saved to Library! ❤️"); }
   localStorage.setItem('vyro_saved', JSON.stringify(saved));
   const isSaved = i < 0;
   document.getElementById('likeBtn').textContent = isSaved ? '♥' : '♡';
@@ -1267,16 +1198,16 @@ function toggleLike() {
 }
 
 // ==========================================
-// RENDER
+// 7. RENDERING & VIEWS
 // ==========================================
 function showView(id, btn) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  if(id === 'explore') renderExplore('All');
-  if(id === 'library') renderSaved();
-  if(id === 'artist' && currentUser && currentUserData) {
+  if(id==='explore') renderExplore('All');
+  if(id==='library') renderSaved();
+  if(id==='artist' && currentUser && currentUserData) {
     if (currentUserData.role === 'artist') {
       loadArtistDashboard(currentUser.uid);
     }
@@ -1285,8 +1216,8 @@ function showView(id, btn) {
 
 function createMusicCard(t) {
   const coverContent = t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index:1;">` : `<div style="position:absolute; z-index:2; font-size: 38px; display:block;">🎵</div>`;
-  const safeTitle = (t.title || '').replace(/'/g, "\\'");
-  const safeArtist = (t.artist || '').replace(/'/g, "\\'");
+  const safeTitle = t.title.replace(/'/g, "\\'");
+  const safeArtist = t.artist.replace(/'/g, "\\'");
   return `
     <div class="music-card">
       <div class="cover ${t.genre==='Afrobeats'?'c1':t.genre==='Hip-Hop'?'c2':t.genre==='R&B'?'c3':'c4'}">
@@ -1296,7 +1227,7 @@ function createMusicCard(t) {
         <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:65%;">${t.title}</div>
         <div style="display:flex; align-items:center; gap:8px;">
            ${getStreamDisplay(t)}
-           <button class="play-small" onclick="playTrack('\( {safeTitle}',' \){safeArtist}','🎵','${t.src}')">▶</button>
+           <button class="play-small" onclick="playTrack('${safeTitle}','${safeArtist}','🎵','${t.src}')">▶</button>
         </div>
       </div>
       <div class="artist">${t.artist} · ${t.genre}</div>
@@ -1305,38 +1236,30 @@ function createMusicCard(t) {
 }
 
 function renderApp() {
-  try {
-    const trending = allTracks.filter(t => t.isTrending).slice(0, 5);
-    document.getElementById('trendingGrid').innerHTML = trending.map(createMusicCard).join('') || '<p style="color:#aaa;padding:10px;">No trending tracks</p>';
-    
-    const newReleases = allTracks.filter(t => t.isNew).slice(0, 5);
-    document.getElementById('newReleasesGrid').innerHTML = newReleases.map(createMusicCard).join('') || '<p style="color:#aaa;padding:10px;">No new releases</p>';
+  const trending = allTracks.filter(t => t.isTrending).slice(0, 5);
+  document.getElementById('trendingGrid').innerHTML = trending.map(createMusicCard).join('');
+  
+  const newReleases = allTracks.filter(t => t.isNew).slice(0, 5);
+  document.getElementById('newReleasesGrid').innerHTML = newReleases.map(createMusicCard).join('');
 
-    const mainGrid = allTracks.filter(t => !t.isTrending && !t.isNew);
-    document.getElementById('trackGrid').innerHTML = mainGrid.map(createMusicCard).join('') || '<p style="color:#aaa;text-align:center;grid-column:span 2;">No cloud tracks yet. Upload some!</p>';
-    
-    renderExplore('All');
-    renderSaved();
-  } catch (e) {
-    console.error("Render error:", e);
-  }
+  const mainGrid = allTracks.filter(t => !t.isTrending && !t.isNew);
+  document.getElementById('trackGrid').innerHTML = mainGrid.map(createMusicCard).join('');
+  
+  renderExplore('All');
+  renderSaved();
 }
 
 function renderSaved() {
   const el = document.getElementById('savedTracks');
-  if(!saved.length){ 
-    el.innerHTML = 'No saved tracks yet.<br>Tap ♡ on a track to add it to your library.'; 
-    el.className = 'empty'; 
-    return; 
-  }
+  if(!saved.length){ el.innerHTML = 'No saved tracks yet.<br>Tap ♡ on a track to add it to your library.'; el.className = 'empty'; return; }
   el.className = '';
   el.innerHTML = saved.map(t => {
-    const safeTitle = (t.title || '').replace(/'/g, "\\'");
-    const safeArtist = (t.artist || '').replace(/'/g, "\\'");
+    const safeTitle = t.title.replace(/'/g, "\\'");
+    const safeArtist = t.artist.replace(/'/g, "\\'");
     return `
-    <div class="artist-row" onclick="playTrack('\( {safeTitle}',' \){safeArtist}','🎵','${t.src}')">
-      <div class="artist-art">\( {t.cover ? `<img src=" \){t.cover}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '🎵'}</div>
-      <div class="info-div"><strong>\( {t.title}</strong><small> \){t.artist}</small></div>
+    <div class="artist-row" onclick="playTrack('${safeTitle}','${safeArtist}','🎵','${t.src}')">
+      <div class="artist-art">${t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '🎵'}</div>
+      <div class="info-div"><strong>${t.title}</strong><small>${t.artist}</small></div>
       <button class="follow">▶ Play</button>
     </div>
   `;
@@ -1347,10 +1270,7 @@ function renderExplore(genre = 'All') {
   const grid = document.getElementById('exploreGrid');
   const filtered = genre === 'All' ? allTracks : allTracks.filter(t => t.genre === genre);
   
-  if(filtered.length === 0) { 
-    grid.innerHTML = '<p style="color:#aaa; padding: 20px;">No tracks in this genre yet.</p>'; 
-    return; 
-  }
+  if(filtered.length === 0) { grid.innerHTML = '<p style="color:#aaa; padding: 20px;">No tracks in this genre yet.</p>'; return; }
 
   grid.innerHTML = filtered.map(createMusicCard).join('');
 }
@@ -1362,34 +1282,26 @@ function filterGenre(btn, g) {
 }
 
 function searchTracks(q){
-  const term = q.toLowerCase().trim();
-  const matches = allTracks.filter(t => (t.title + ' ' + t.artist + ' ' + t.genre).toLowerCase().includes(term));
-  const msg = document.getElementById('searchMessage');
+  const term=q.toLowerCase().trim();
+  const matches=allTracks.filter(t=>(t.title+' '+t.artist+' '+t.genre).toLowerCase().includes(term));
+  const msg=document.getElementById('searchMessage');
   if(msg){
-    msg.innerHTML = term ? (matches.length ? matches.map(t => {
-      const safeTitle = (t.title || '').replace(/'/g, "\\'");
-      const safeArtist = (t.artist || '').replace(/'/g, "\\'");
-      return `<div class="artist-row" onclick="playTrack('\( {safeTitle}',' \){safeArtist}','🎵','\( {t.src}')"><div class="artist-art"> \){t.cover ? `<img src="\( {t.cover}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '🎵'}</div><div class="info-div"><strong> \){t.title}</strong><small>${t.artist} · ${t.genre}</small></div><button class="follow">▶ Play</button></div>`;
-    }).join('') : 'No results found. Try another search.') : 'Try searching for an artist or song.';
+    msg.innerHTML=term?(matches.length?matches.map(t=>{
+      const safeTitle = t.title.replace(/'/g, "\\'");
+      const safeArtist = t.artist.replace(/'/g, "\\'");
+      return `<div class="artist-row" onclick="playTrack('${safeTitle}','${safeArtist}','🎵','${t.src}')"><div class="artist-art">${t.cover ? `<img src="${t.cover}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : '🎵'}</div><div class="info-div"><strong>${t.title}</strong><small>${t.artist} · ${t.genre}</small></div><button class="follow">▶ Play</button></div>`;
+    }).join(''):'No results found. Try another search.'): 'Try searching for an artist or song.';
   }
 }
 
-function genrePick(btn, g){
-  document.querySelectorAll('.genre').forEach(b => b.classList.remove('active'));
+function genrePick(btn,g){
+  document.querySelectorAll('.genre').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderApp();
+  document.querySelectorAll('#trackGrid .music-card').forEach(c=>c.style.display=g==='All'||c.dataset.genre===g?'':'none');
 }
 
-// Initialize dates + first render
-document.addEventListener("DOMContentLoaded", () => {
-  const nextUpdateText = "Updates: " + getNextFridayDate();
-  const tDate = document.getElementById("trendingDate");
-  const lDate = document.getElementById("latestDate");
-  if (tDate) tDate.textContent = nextUpdateText;
-  if (lDate) lDate.textContent = nextUpdateText;
-});
-
-// Always show base tracks immediately
+// Initialize the App
 renderApp();
 </script>
 </body>
