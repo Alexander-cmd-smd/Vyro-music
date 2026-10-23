@@ -9,7 +9,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { 
     getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, 
-    updateDoc, increment, query, where 
+    updateDoc, increment, query, where, onSnapshot 
   } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
@@ -27,8 +27,9 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
   
+  // Add onSnapshot to the exposed window object
   window.firebaseDB = { 
-    db, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, increment, query, where 
+    db, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, increment, query, where, onSnapshot 
   };
   window.firebaseAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, updateProfile };
   
@@ -447,6 +448,9 @@ let saved = JSON.parse(localStorage.getItem('vyro_saved')) || [];
 let allTracks = [...baseTracks, ...externalTracks];
 let currentUser = null; 
 let currentUserData = null;
+let unsubUserStats = null; // Real-time listener for dashboard
+let unsubUserTracks = null; // Real-time listener for user tracks
+let unsubAllTracks = null;  // Real-time listener for home page
 
 const audio = document.getElementById("vyro-player");
 
@@ -540,9 +544,14 @@ window.addEventListener('firebaseReady', () => {
       document.getElementById('artistDashboard').style.display = 'none';
       document.getElementById('listenerDashboard').style.display = 'none';
       document.getElementById('userAvatar').textContent = 'V';
+      
+      // Cleanup listeners when logging out
+      if(unsubUserStats) unsubUserStats();
+      if(unsubUserTracks) unsubUserTracks();
     }
   });
 
+  // Live updates for the home page
   loadTracksFromCloud();
 });
 
@@ -704,47 +713,41 @@ async function upgradeToArtist() {
 }
 
 // ==========================================
-// 4. DASHBOARD FUNCTIONS (REAL FIRESTORE DATA)
+// 4. LIVE DASHBOARD FUNCTIONS (REAL-TIME DATA)
 // ==========================================
-async function loadArtistDashboard(userId) {
-  const { db, collection, query, where, getDocs, doc, getDoc } = window.firebaseDB;
+function loadArtistDashboard(userId) {
+  const { db, collection, query, where, doc, onSnapshot } = window.firebaseDB;
   
+  // Clean up old listeners if they exist
+  if(unsubUserStats) unsubUserStats();
+  if(unsubUserTracks) unsubUserTracks();
+
   try {
-    const userSnap = await getDoc(doc(db, "users", userId));
-    if (!userSnap.exists()) return;
-    const userData = userSnap.data();
-    
+    // 1. LIVE User Stats (Streams, Followers, Balance)
+    unsubUserStats = onSnapshot(doc(db, "users", userId), (userSnap) => {
+      if (!userSnap.exists()) return;
+      const userData = userSnap.data();
+      
+      // Update numbers on screen instantly
+      document.getElementById('statStreams').textContent = (userData.totalStreams || 0).toLocaleString();
+      document.getElementById('statFollowers').textContent = (userData.followers || 0).toLocaleString();
+      document.getElementById('dashBalance').textContent = '₦' + (userData.availableBalance || 0).toFixed(2);
+      document.getElementById('dashTotalEarned').textContent = '₦' + (userData.totalEarned || 0).toFixed(2);
+    });
+
+    // 2. LIVE Tracks List
     const q = query(collection(db, "tracks"), where("artistId", "==", userId));
-    const trackSnaps = await getDocs(q);
-    let myTracks = [];
-    trackSnaps.forEach(d => myTracks.push({ id: d.id, ...d.data() }));
-    
-    const streamsEl = document.getElementById('statStreams');
-    const followersEl = document.getElementById('statFollowers');
-    const tracksEl = document.getElementById('statTracks');
-    
-    animateCount(streamsEl, userData.totalStreams || 0);
-    animateCount(followersEl, userData.followers || 0);
-    animateCount(tracksEl, myTracks.length);
-    
-    document.getElementById('dashBalance').textContent = '₦' + (userData.availableBalance || 0).toFixed(2);
-    document.getElementById('dashTotalEarned').textContent = '₦' + (userData.totalEarned || 0).toFixed(2);
-    
-    renderMyTracks(myTracks);
+    unsubUserTracks = onSnapshot(q, (trackSnaps) => {
+      let myTracks = [];
+      trackSnaps.forEach(d => myTracks.push({ id: d.id, ...d.data() }));
+      
+      document.getElementById('statTracks').textContent = myTracks.length;
+      renderMyTracks(myTracks);
+    });
     
   } catch (error) {
-    console.error("Error loading dashboard:", error);
+    console.error("Error setting up live dashboard:", error);
   }
-}
-
-function animateCount(el, target) {
-  let current = 0;
-  const step = Math.max(1, Math.floor(target / 30));
-  const timer = setInterval(() => {
-    current += step;
-    if (current >= target) { current = target; clearInterval(timer); }
-    el.textContent = current.toLocaleString();
-  }, 30);
 }
 
 function renderMyTracks(tracks) {
@@ -827,7 +830,6 @@ async function requestWithdraw() {
       availableBalance: increment(-amt)
     });
     
-    loadArtistDashboard(currentUser.uid);
     alert(`✅ ${type} Withdrawal Requested!\n\nAmount: ₦${amt.toFixed(2)}\nBank: ${bankName}\nAccount: ****${account.slice(-4)}\n\nFunds will arrive in 3-5 business days.`);
     
   } catch (error) {
@@ -836,35 +838,35 @@ async function requestWithdraw() {
 }
 
 // ==========================================
-// 5. DATA & UPLOAD FUNCTIONS
+// 5. LIVE DATA & UPLOAD FUNCTIONS
 // ==========================================
-async function loadTracksFromCloud() {
+function loadTracksFromCloud() {
   if(!window.firebaseDB) return;
-  const { db, collection, getDocs } = window.firebaseDB;
+  const { db, collection, onSnapshot } = window.firebaseDB;
+  
+  if(unsubAllTracks) unsubAllTracks(); // Cleanup old listener
   
   try {
-    const querySnapshot = await getDocs(collection(db, "tracks"));
-    let cloudTracks = [];
-    querySnapshot.forEach((doc) => { 
-      cloudTracks.push({ id: doc.id, ...doc.data() }); 
-    });
+    // LIVE Home Page Tracks
+    unsubAllTracks = onSnapshot(collection(db, "tracks"), (querySnapshot) => {
+      let cloudTracks = [];
+      querySnapshot.forEach((doc) => { 
+        cloudTracks.push({ id: doc.id, ...doc.data() }); 
+      });
 
-    allTracks = [...baseTracks, ...externalTracks, ...cloudTracks];
-    renderApp();
-    
-    if (currentUser && currentUserData && currentUserData.role === 'artist') {
-      loadArtistDashboard(currentUser.uid);
-    }
+      allTracks = [...baseTracks, ...externalTracks, ...cloudTracks];
+      renderApp();
+    });
   } catch(e) {
     console.error("Cloud fetch failed:", e);
   }
 }
 
-// XMLHttpRequest to track upload progress
 function uploadWithProgress(url, formData, onProgress) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', url, true);
+    xhr.timeout = 60000;
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) {
         const percentComplete = (e.loaded / e.total) * 100;
@@ -872,13 +874,20 @@ function uploadWithProgress(url, formData, onProgress) {
       }
     };
     xhr.onload = () => {
-      if (xhr.status === 200) {
-        resolve(JSON.parse(xhr.responseText));
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try { resolve(JSON.parse(xhr.responseText)); } 
+        catch (e) { reject(new Error("Invalid response format")); }
       } else {
-        reject(new Error("Upload failed"));
+        let msg = "Upload failed";
+        try {
+          const resp = JSON.parse(xhr.responseText);
+          if (resp.error && resp.error.message) msg = resp.error.message;
+        } catch(e) {}
+        reject(new Error(msg));
       }
     };
     xhr.onerror = () => reject(new Error("Network error during upload"));
+    xhr.ontimeout = () => reject(new Error("Upload timed out. The file might be too large."));
     xhr.send(formData);
   });
 }
@@ -900,7 +909,7 @@ async function handleCloudUpload() {
   if(!audioFile) { alert("Please select an MP3 audio file."); return; }
 
   if (audioFile.size > 15 * 1024 * 1024) {
-    if (!confirm("This audio file is larger than 15MB. It may take a long time to upload. Continue?")) return;
+    if (!confirm("This audio file is larger than 15MB. It might fail or take a long time. Continue?")) return;
   }
   
   const status = document.getElementById('uploadStatus');
@@ -915,7 +924,6 @@ async function handleCloudUpload() {
     
     const audioUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
     
-    // Upload with Progress
     const audioJson = await uploadWithProgress(audioUrl, audioData, (percent) => {
       status.innerHTML = `⏳ Uploading Audio... ${Math.round(percent)}%`;
     });
@@ -931,7 +939,6 @@ async function handleCloudUpload() {
       
       const imgUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
       
-      // Upload image with progress
       const imgJson = await uploadWithProgress(imgUrl, imageData, (percent) => {
         status.innerHTML = `⏳ Uploading Cover Art... ${Math.round(percent)}%`;
       });
@@ -944,7 +951,7 @@ async function handleCloudUpload() {
 
     const newTrack = { 
       title: title, 
-      artist: currentUserData.displayName, 
+      artist: currentUserData.displayName || currentUser.email.split('@')[0], 
       artistId: currentUser.uid,
       genre: genre, 
       src: downloadURL, 
@@ -954,9 +961,13 @@ async function handleCloudUpload() {
     };
     
     const { db, collection, addDoc } = window.firebaseDB;
-    await addDoc(collection(db, "tracks"), newTrack);
     
-    await loadTracksFromCloud();
+    const savePromise = addDoc(collection(db, "tracks"), newTrack);
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("Database connection timed out. Please check your Firestore rules.")), 10000)
+    );
+    
+    await Promise.race([savePromise, timeoutPromise]);
     
     document.getElementById('uploadTitle').value = '';
     document.getElementById('audioUpload').value = '';
@@ -966,7 +977,6 @@ async function handleCloudUpload() {
     
     status.style.color = "var(--green)";
     status.innerHTML = "✅ Success! Song is live!";
-    loadArtistDashboard(currentUser.uid);
     
   } catch (error) {
     console.error(error);
@@ -1064,13 +1074,7 @@ async function playTrack(title, artist, emoji, src) {
           totalEarned: increment(0.007)
         });
         
-        track.streams++;
-        renderApp();
-        
-        if (currentUser && currentUserData && currentUserData.role === 'artist' && currentUser.uid === track.artistId) {
-          loadArtistDashboard(currentUser.uid);
-        }
-        
+        // Track object will be updated automatically by the onSnapshot listener
       } catch (error) {
         console.error("Failed to update stream count:", error);
       }
@@ -1233,4 +1237,4 @@ function genrePick(btn,g){
 renderApp();
 </script>
 </body>
-          </html>
+  </html>
