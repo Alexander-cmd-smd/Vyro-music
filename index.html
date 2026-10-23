@@ -436,21 +436,17 @@ const baseTracks = [
 // ==========================================
 // 🔥 FRIDAY ROTATION ENGINE 
 // ==========================================
-// Every Friday at 12:00am, the app calculates the new week number
-// and picks a brand new pool of tracks.
 function getWeeklyRotationIndex() {
   const now = new Date();
-  // Calculate days since epoch
   const diffTime = Math.abs(now - new Date(2024, 0, 1)); 
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  // Return the current week number
   return Math.floor(diffDays / 7);
 }
 
 function getNextFridayDate() {
   const now = new Date();
   const day = now.getDay();
-  const distanceToFriday = (5 - day + 7) % 7 || 7; // If today is Friday, go to next Friday
+  const distanceToFriday = (5 - day + 7) % 7 || 7; 
   const nextFriday = new Date(now);
   nextFriday.setDate(now.getDate() + distanceToFriday);
   nextFriday.setHours(0,0,0,0);
@@ -459,9 +455,7 @@ function getNextFridayDate() {
   return nextFriday.toLocaleDateString('en-US', options);
 }
 
-// The Pools of Tracks (Mixing Nigeria, UK, US)
 const trendingPools = [
-  // Week Pool 1
   [
     {id: 't1-1', title:'City Boys', artist:'Burna Boy (NG)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', cover:'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=500&auto=format&fit=crop', streams: 45000, isTrending: true},
     {id: 't1-2', title:'Sprinter', artist:'Central Cee (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', cover:'https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop', streams: 38000, isTrending: true},
@@ -469,7 +463,6 @@ const trendingPools = [
     {id: 't1-4', title:'Me & U', artist:'Tems (NG)', genre:'R&B', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', cover:'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=500&auto=format&fit=crop', streams: 29000, isTrending: true},
     {id: 't1-5', title:'Starlight', artist:'Dave (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', cover:'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=500&auto=format&fit=crop', streams: 31000, isTrending: true}
   ],
-  // Week Pool 2
   [
     {id: 't2-1', title:'Essence', artist:'Wizkid (NG)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', cover:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=500&auto=format&fit=crop', streams: 60000, isTrending: true},
     {id: 't2-2', title:'Toxic Trait', artist:'Stormzy (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3', cover:'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop', streams: 41000, isTrending: true},
@@ -480,15 +473,13 @@ const trendingPools = [
 ];
 
 const latestPools = [
-  // Week Pool 1
   [
     {id: 'l1-1', title:'Lonely At The Top', artist:'Asake (NG)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3', cover:'https://images.unsplash.com/photo-1493225457124-a1a2a57e0eb9?q=80&w=500&auto=format&fit=crop', streams: 150, isNew: true},
     {id: 'l1-2', title:'Little Things', artist:'Jorja Smith (UK)', genre:'R&B', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3', cover:'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop', streams: 45, isNew: true},
     {id: 'l1-3', title:'Snooze', artist:'SZA (US)', genre:'R&B', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3', cover:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=500&auto=format&fit=crop', streams: 300, isNew: true},
     {id: 'l1-4', title:'reason', artist:'Omah Lay (NG)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3', cover:'https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=500&auto=format&fit=crop', streams: 99, isNew: true},
-    {id: 'l1-5', title:'Can't Play Myself', artist:'Skepta (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3', cover:'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=500&auto=format&fit=crop', streams: 0, isNew: true}
+    {id: 'l1-5', title:"Can't Play Myself", artist:'Skepta (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3', cover:'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=500&auto=format&fit=crop', streams: 0, isNew: true}
   ],
-  // Week Pool 2
   [
     {id: 'l2-1', title:'Peru', artist:'Fireboy DML (NG)', genre:'Afrobeats', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3', cover:'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=500&auto=format&fit=crop', streams: 250, isNew: true},
     {id: 'l2-2', title:'50s', artist:'Headie One (UK)', genre:'Hip-Hop', src:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3', cover:'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=500&auto=format&fit=crop', streams: 80, isNew: true},
@@ -498,22 +489,17 @@ const latestPools = [
   ]
 ];
 
-// Determine current tracks based on week
 const currentWeek = getWeeklyRotationIndex();
 const activeTrending = trendingPools[currentWeek % trendingPools.length];
 const activeLatest = latestPools[currentWeek % latestPools.length];
 const externalTracks = [...activeTrending, ...activeLatest];
 
-// Set the UI text for next update
 document.addEventListener("DOMContentLoaded", () => {
   const nextUpdateText = "Updates: " + getNextFridayDate();
   document.getElementById("trendingDate").textContent = nextUpdateText;
   document.getElementById("latestDate").textContent = nextUpdateText;
 });
 
-// ==========================================
-// CORE APP LOGIC
-// ==========================================
 let currentTrack = null; 
 let currentTrackIndex = 0;
 let saved = JSON.parse(localStorage.getItem('vyro_saved')) || []; 
@@ -526,7 +512,6 @@ let unsubAllTracks = null;
 
 const audio = document.getElementById("vyro-player");
 
-// Restore last played
 let lastPlayed = JSON.parse(localStorage.getItem('vyro_last_played'));
 if (lastPlayed) {
   document.getElementById('player').classList.add('show');
@@ -548,9 +533,6 @@ if (lastPlayed) {
   document.getElementById('fpPlayPauseBtn').textContent = "▶";
 }
 
-// ==========================================
-// 2. FIREBASE INITIALIZATION & REAL-TIME DATA
-// ==========================================
 window.addEventListener('firebaseReady', () => {
   const { auth, onAuthStateChanged, signOut } = window.firebaseAuth;
   const { db, doc, getDoc, setDoc } = window.firebaseDB;
@@ -625,9 +607,6 @@ window.addEventListener('firebaseReady', () => {
   loadTracksFromCloud();
 });
 
-// ==========================================
-// 3. AUTHENTICATION FUNCTIONS
-// ==========================================
 function showSignupPage() {
   document.getElementById('artistLoggedOut').style.display = 'none';
   document.getElementById('artistSignupPage').style.display = 'block';
@@ -782,9 +761,6 @@ async function upgradeToArtist() {
   }
 }
 
-// ==========================================
-// 4. LIVE DASHBOARD FUNCTIONS (REAL-TIME DATA)
-// ==========================================
 function loadArtistDashboard(userId) {
   const { db, collection, query, where, doc, onSnapshot } = window.firebaseDB;
   
@@ -903,9 +879,6 @@ async function requestWithdraw() {
   }
 }
 
-// ==========================================
-// 5. LIVE DATA & UPLOAD FUNCTIONS
-// ==========================================
 function loadTracksFromCloud() {
   if(!window.firebaseDB) return;
   const { db, collection, onSnapshot } = window.firebaseDB;
@@ -1054,9 +1027,6 @@ async function handleCloudUpload() {
   }
 }
 
-// ==========================================
-// 6. PLAYER FUNCTIONS & REAL STREAM TRACKING
-// ==========================================
 audio.addEventListener('ended', () => { nextTrack(); });
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
@@ -1197,9 +1167,6 @@ function toggleLike() {
   renderSaved();
 }
 
-// ==========================================
-// 7. RENDERING & VIEWS
-// ==========================================
 function showView(id, btn) {
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById(id).classList.add('active');
