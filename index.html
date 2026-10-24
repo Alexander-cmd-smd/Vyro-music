@@ -656,7 +656,6 @@ async function createAccount() {
       const imageData = new FormData();
       imageData.append('file', imageFile);
       imageData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-      // Removed resource_type here too just in case
       const imgRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
         method: 'POST', body: imageData
       });
@@ -978,7 +977,6 @@ async function handleCloudUpload() {
     const audioData = new FormData();
     audioData.append('file', audioFile);
     audioData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    // 🔥 FIX: Removed resource_type from FormData, it causes unsigned upload failures
     
     const audioUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
     
@@ -1009,7 +1007,7 @@ async function handleCloudUpload() {
       coverURL = defaultAIcovers[Math.floor(Math.random() * defaultAIcovers.length)];
     }
 
-    status.innerHTML = "⏳ Saving to Cloud...";
+    status.innerHTML = "⏳ Saving to Database...";
 
     const { db, collection, addDoc } = window.firebaseDB;
     
@@ -1024,7 +1022,15 @@ async function handleCloudUpload() {
       createdAt: new Date().toISOString()
     };
 
-    // 🔥 FIX: Update UI immediately so it doesn't hang on "Saving to Cloud..."
+    // 🔥 THE CRITICAL FIX: We put 'await' back so we KNOW it saved to Firestore before showing success.
+    try {
+      const docRef = await addDoc(collection(db, "tracks"), newTrack);
+      console.log("Document written with ID: ", docRef.id);
+    } catch (dbError) {
+      throw new Error("Database Error: " + dbError.message + ". Check your Firestore Rules!");
+    }
+
+    // Only clear the form IF the database actually accepted the song
     document.getElementById('uploadTitle').value = '';
     document.getElementById('audioUpload').value = '';
     document.getElementById('imageUpload').value = '';
@@ -1033,17 +1039,6 @@ async function handleCloudUpload() {
     
     status.style.color = "var(--green)";
     status.innerHTML = "✅ Success! Song is live!";
-
-    // Write to Firestore in the background
-    addDoc(collection(db, "tracks"), newTrack)
-      .then((docRef) => {
-        console.log("Document written with ID: ", docRef.id);
-      })
-      .catch((dbError) => {
-        console.error("Firebase Database Error: ", dbError);
-        status.style.color = "var(--pink)";
-        status.innerHTML = "❌ Database Error: " + dbError.message;
-      });
     
   } catch (error) {
     console.error("Upload Error:", error);
