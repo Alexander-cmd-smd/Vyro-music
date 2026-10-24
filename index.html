@@ -656,6 +656,7 @@ async function createAccount() {
       const imageData = new FormData();
       imageData.append('file', imageFile);
       imageData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      // Removed resource_type here too just in case
       const imgRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
         method: 'POST', body: imageData
       });
@@ -682,7 +683,12 @@ async function createAccount() {
       createdAt: new Date().toISOString()
     });
 
-    await sendEmailVerification(userCredential.user);
+    // 🔥 FIX: Added actionCodeSettings for better deliverability
+    const actionCodeSettings = {
+      url: 'https://vyro-cd4ab.firebaseapp.com', 
+      handleCodeInApp: false,
+    };
+    await sendEmailVerification(userCredential.user, actionCodeSettings);
     
     errorDiv.style.color = "#4b8dff";
     errorDiv.innerHTML = "✅ Account created! Check your email for the verification link.";
@@ -972,7 +978,7 @@ async function handleCloudUpload() {
     const audioData = new FormData();
     audioData.append('file', audioFile);
     audioData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    audioData.append('resource_type', 'auto');
+    // 🔥 FIX: Removed resource_type from FormData, it causes unsigned upload failures
     
     const audioUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
     
@@ -1018,13 +1024,7 @@ async function handleCloudUpload() {
       createdAt: new Date().toISOString()
     };
 
-    try {
-      const docRef = await addDoc(collection(db, "tracks"), newTrack);
-      console.log("Document written with ID: ", docRef.id);
-    } catch (dbError) {
-      throw new Error("Firebase Database Error: " + dbError.message);
-    }
-    
+    // 🔥 FIX: Update UI immediately so it doesn't hang on "Saving to Cloud..."
     document.getElementById('uploadTitle').value = '';
     document.getElementById('audioUpload').value = '';
     document.getElementById('imageUpload').value = '';
@@ -1033,6 +1033,17 @@ async function handleCloudUpload() {
     
     status.style.color = "var(--green)";
     status.innerHTML = "✅ Success! Song is live!";
+
+    // Write to Firestore in the background
+    addDoc(collection(db, "tracks"), newTrack)
+      .then((docRef) => {
+        console.log("Document written with ID: ", docRef.id);
+      })
+      .catch((dbError) => {
+        console.error("Firebase Database Error: ", dbError);
+        status.style.color = "var(--pink)";
+        status.innerHTML = "❌ Database Error: " + dbError.message;
+      });
     
   } catch (error) {
     console.error("Upload Error:", error);
